@@ -19,8 +19,8 @@ package com.epam.drill.integration.gradle
 open class DrillProperties(
     var drillApiUrl: String? = null,
     var drillApiKey: String? = null,
-    var drillGroupId: String? = null,
-    var drillAgentId: String? = null,
+    var groupId: String? = null,
+    var agentId: String? = null,
 )
 
 open class DrillCiCdProperties(

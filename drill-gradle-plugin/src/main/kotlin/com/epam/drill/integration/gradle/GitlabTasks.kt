@@ -33,8 +33,8 @@ fun Task.drillGitlabMergeRequestReportTask(ciCd: DrillCiCdProperties) {
             gitlabCiCdService.postMergeRequestReport(
                 gitlabProjectId = ciCd.gitlab.projectId!!,
                 gitlabMergeRequestId = ciCd.gitlab.mergeRequestId!!,
-                drillGroupId = ciCd.drillGroupId!!,
-                drillAgentId = ciCd.drillAgentId!!,
+                drillGroupId = ciCd.groupId!!,
+                drillAgentId = ciCd.agentId!!,
                 sourceBranch = ciCd.sourceBranch!!,
                 targetBranch = ciCd.targetBranch!!,
                 latestCommitSha = ciCd.latestCommitSha!!)

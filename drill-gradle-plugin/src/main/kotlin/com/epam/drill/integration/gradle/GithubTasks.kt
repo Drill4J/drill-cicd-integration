@@ -25,7 +25,7 @@ import org.gradle.api.Task
 fun Task.drillGithubPullRequestReport(ciCd: DrillCiCdProperties) {
     doFirst {
         val githubCiCdService = GithubCiCdService(
-            GithubApiClientImpl(ciCd.github.githubApiUrl!!, ciCd.github.githubToken!!),
+            GithubApiClientImpl(ciCd.github.githubApiUrl, ciCd.github.githubToken!!),
             DrillApiClientImpl(ciCd.drillApiUrl!!, ciCd.drillApiKey),
             TextReportGenerator()
         )
@@ -33,8 +33,8 @@ fun Task.drillGithubPullRequestReport(ciCd: DrillCiCdProperties) {
             githubCiCdService.postPullRequestReport(
                 githubRepository = ciCd.github.githubRepository!!,
                 githubPullRequestId = ciCd.github.pullRequestId!!,
-                drillGroupId = ciCd.drillGroupId!!,
-                drillAgentId = ciCd.drillAgentId!!,
+                drillGroupId = ciCd.groupId!!,
+                drillAgentId = ciCd.agentId!!,
                 sourceBranch = ciCd.sourceBranch!!,
                 targetBranch = ciCd.targetBranch!!,
                 latestCommitSha = ciCd.latestCommitSha!!)
