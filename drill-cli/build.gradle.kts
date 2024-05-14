@@ -19,6 +19,21 @@ repositories {
     mavenCentral()
 }
 
+tasks {
+    jar {
+        archiveBaseName.set("app")
+        archiveVersion.set("")
+        manifest {
+            attributes("Main-Class" to "com.epam.drill.integration.cli.CliAppKt")
+        }
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        from(sourceSets.main.get().output)
+        dependsOn(configurations.runtimeClasspath)
+        from({
+            configurations.runtimeClasspath.get().filter { it.name.endsWith("jar") }.map { zipTree(it) }
+        })
+    }
+}
 java {
     withSourcesJar()
     sourceCompatibility = JavaVersion.VERSION_1_8
