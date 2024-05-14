@@ -62,10 +62,10 @@ class DrillApiClientImpl(
     private suspend fun getMetricsSummary(
         groupId: String,
         agentId: String,
-        sourceCommitSha: String? = null,
-        sourceBranch: String? = null,
-        baseCommitSha: String? = null,
-        targetBranch: String? = null
+        sourceCommitSha: String? = "",
+        sourceBranch: String? = "",
+        baseCommitSha: String? = "",
+        targetBranch: String? = ""
     ): JsonObject {
 
         val url = "$drillUrl/api/metrics/summary"
