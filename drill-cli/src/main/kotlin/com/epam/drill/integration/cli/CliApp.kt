@@ -20,7 +20,8 @@ import com.github.ajalt.clikt.core.subcommands
 
 fun main(args: Array<String>) = Cli().subcommands(
     GitlabMergeRequestReportCommand(),
-    GithubPullRequestReportCommand()
+    GithubPullRequestReportCommand(),
+    GithubPullRequestReportByEventCommand()
 ).main(args)
 
 class Cli : CliktCommand() {
