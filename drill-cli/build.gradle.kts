@@ -32,7 +32,7 @@ tasks {
     withType<KotlinCompile> {
         kotlinOptions.jvmTarget = "1.8"
     }
-    jar {
+    val runtimeJar by registering(Jar::class) {
         group = "build"
         archiveBaseName.set("app")
         archiveVersion.set("")
@@ -45,6 +45,7 @@ tasks {
             configurations.runtimeClasspath.get().resolve().map(::zipTree)
         )
     }
+    assemble.get().dependsOn(runtimeJar)
 }
 
 
