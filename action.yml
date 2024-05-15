@@ -34,5 +34,5 @@ inputs:
 runs:
   using: 'docker'
   image: './Dockerfile'
-  args:
-    - ${{ inputs.mode }}
+  env:
+    MODE_PARAM: ${{ inputs.mode }}
