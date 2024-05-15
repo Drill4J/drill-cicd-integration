@@ -19,14 +19,11 @@ To use this action, follow these steps:
    - name: Drill4J Github Action
      uses: bodyangug/drill4j-report-github-action@v0.5
      with:
-        group-id: ${{ matrix.config.drill-group-id }}
-        agent-id: ${{ matrix.config.drill-api-agent-id }}
-        drill-address: ${{ matrix.config.drill-admin-address }}
-        repo-token: ${{ secrets.TOKEN }}
-        current-branch: ${{ github.event.pull_request.head.ref }}
-        current-vcs-ref: ${{ github.event.pull_request.head.sha }}
-        base-branch: ${{ github.event.pull_request.base.ref }}
-        base-vcs-ref: ${{ github.event.pull_request.base.sha }}
+        drill_api_url: ${{ matrix.config.drill-admin-address }}
+        drill_api_key: ${{ secrets.DRILL_API_KEY }}
+        group_id: ${{ matrix.config.drill-group-id }}
+        agent_id: ${{ matrix.config.drill-api-agent-id }}
+        github_token: ${{ secrets.TOKEN }}
 ```
 
 In the above code, `secrets.TOKEN` is the token you created in the previous steps.
