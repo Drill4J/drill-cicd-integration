@@ -33,6 +33,6 @@ inputs:
     required: true
 runs:
   using: 'docker'
-  image: '../DockerfileGithub'
+  image: '../Dockerfile'
   args:
     - ${{ inputs.mode }}
