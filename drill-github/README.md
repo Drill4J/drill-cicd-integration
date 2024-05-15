@@ -17,13 +17,13 @@ To use this action, follow these steps:
 
 ```yml 
    - name: Drill4J Github Action
-     uses: bodyangug/drill4j-report-github-action@v0.5
+     uses: Drill4J/drill-cicd-integration@v0.0.1
      with:
-        drill_api_url: ${{ matrix.config.drill-admin-address }}
-        drill_api_key: ${{ secrets.DRILL_API_KEY }}
-        group_id: ${{ matrix.config.drill-group-id }}
-        agent_id: ${{ matrix.config.drill-api-agent-id }}
-        github_token: ${{ secrets.TOKEN }}
+       drill_api_url: ${{ matrix.config.drill-admin-address }}
+       drill_api_key: ${{ secrets.DRILL_API_KEY }}
+       group_id: ${{ matrix.config.drill-group-id }}
+       agent_id: ${{ matrix.config.drill-api-agent-id }}
+       github_token: ${{ secrets.TOKEN }}
 ```
 
 In the above code, `secrets.TOKEN` is the token you created in the previous steps.
