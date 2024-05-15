@@ -4,9 +4,9 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.net.URI
 
 plugins {
+    application
     kotlin("jvm")
     id("com.github.hierynomus.license")
-    application
 }
 
 group = "com.epam.drill.integration"
@@ -33,17 +33,17 @@ tasks {
         kotlinOptions.jvmTarget = "1.8"
     }
     jar {
+        group = "build"
         archiveBaseName.set("app")
         archiveVersion.set("")
-        manifest {
-            attributes("Main-Class" to jarMainClassName)
-        }
+        manifest.attributes["Main-Class"] = jarMainClassName
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
         from(sourceSets.main.get().output)
         dependsOn(configurations.runtimeClasspath)
-        from({
-            configurations.runtimeClasspath.get().filter { it.name.endsWith("jar") }.map { zipTree(it) }
-        })
+        from(
+            sourceSets.main.get().output,
+            configurations.runtimeClasspath.get().resolve().map(::zipTree)
+        )
     }
 }
 
@@ -51,19 +51,16 @@ java {
     withSourcesJar()
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(8))
-    }
 }
 
 dependencies {
-    compileOnly((kotlin("stdlib-jdk8")))
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCoroutinesVersion")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:$kotlinxCoroutinesVersion")
     implementation("com.github.ajalt.clikt:clikt:3.5.4")
     implementation(project(":drill-common"))
     implementation(project(":drill-gitlab"))
     implementation(project(":drill-github"))
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCoroutinesVersion")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:$kotlinxCoroutinesVersion")
+    compileOnly((kotlin("stdlib-jdk8")))
 }
 
 @Suppress("UNUSED_VARIABLE")
