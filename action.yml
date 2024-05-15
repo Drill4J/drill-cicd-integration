@@ -21,7 +21,8 @@ inputs:
     required: true
   mode:
     description: "Mode of drill-integration. For github use: githubPullRequestReportByEvent"
-    required: true
+    required: false
+    default: "githubPullRequestReportByEvent"
 runs:
   using: 'docker'
   image: './Dockerfile'
