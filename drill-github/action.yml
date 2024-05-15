@@ -1,0 +1,38 @@
+name: 'drill4j-report-github-action'
+description: 'Report test-coverage by Drill4J'
+branding:
+  icon: info
+  color: blue
+inputs:
+  group-id:
+    description: "Group ID"
+    required: true
+  agent-id:
+    description: "Agent ID"
+    required: true
+  current-branch:
+    description: "Current branch"
+    required: true
+  current-vcs-ref:
+    description: "Current VCS reference"
+    required: true
+  base-branch:
+    description: "Base branch"
+    required: true
+  base-vcs-ref:
+    description: "Base VCS reference"
+    required: true
+  drill-address:
+    description: "Port of Drill address"
+    required: true
+  repo-token:
+    description: "Github Token"
+    required: true
+  mode:
+    description: "Mode of drill-integration. For github use: githubPullRequestReportByEvent"
+    required: true
+runs:
+  using: 'docker'
+  image: '../DockerfileGithub'
+  args:
+    - ${{ input.mode }}
