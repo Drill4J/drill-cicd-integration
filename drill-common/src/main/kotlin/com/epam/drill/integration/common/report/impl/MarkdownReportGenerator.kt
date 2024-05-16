@@ -13,12 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.epam.drill.integration.gitlab.client
+package com.epam.drill.integration.common.report.impl
 
-interface GitlabApiClient {
-    suspend fun postMergeRequestReport(
-        projectId: String,
-        mergeRequestId: String,
-        comment: String,
-        contentType: String)
+import com.epam.drill.integration.common.model.MediaType
+import com.epam.drill.integration.common.report.ReportGenerator
+import kotlinx.serialization.json.JsonObject
+
+class MarkdownReportGenerator(private val mediaType: MediaType) : ReportGenerator {
+    override fun getDiffSummaryReport(metrics: JsonObject) =
+        """
+           ## Drill4J CI/CD Report
+           
+            - **Coverage:** ${metrics["coverage"]}%
+            - **Risks:** ${metrics["risks"]}
+        """.trimIndent()
+
+    override fun contentType() = mediaType
 }

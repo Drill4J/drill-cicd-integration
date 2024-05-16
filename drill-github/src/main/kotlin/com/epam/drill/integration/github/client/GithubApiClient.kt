@@ -19,5 +19,6 @@ interface GithubApiClient {
     suspend fun postPullRequestReport(
         repository: String,
         pullRequestId: Int,
-        comment: String)
+        comment: String,
+        mediaType: String)
 }

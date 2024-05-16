@@ -51,7 +51,8 @@ class GithubCiCdService(
         githubApiClient.postPullRequestReport(
             githubRepository,
             githubPullRequestId,
-            comment
+            comment,
+            reportGenerator.contentType().name
         )
     }
 

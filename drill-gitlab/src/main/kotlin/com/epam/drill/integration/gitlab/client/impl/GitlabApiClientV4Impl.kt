@@ -31,7 +31,12 @@ class GitlabApiClientV4Impl(
         install(JsonFeature)
     }
 
-    override suspend fun postMergeRequestReport(projectId: String, mergeRequestId: String, comment: String) {
+    override suspend fun postMergeRequestReport(
+        projectId: String,
+        mergeRequestId: String,
+        comment: String,
+        contentType: String
+    ) {
         val url = "$gitlabApiUrl/v4/projects/$projectId/merge_requests/$mergeRequestId/notes"
         client.post<JsonObject>(url) {
             contentType(ContentType.Application.Json)

@@ -13,12 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.epam.drill.integration.gitlab.client
+package com.epam.drill.integration.common.model
 
-interface GitlabApiClient {
-    suspend fun postMergeRequestReport(
-        projectId: String,
-        mergeRequestId: String,
-        comment: String,
-        contentType: String)
+enum class MediaType(name: String) {
+    GITHUB_MARKDOWN("application/vnd.github.text+json"),
+    GITHUB_PLAINTEXT("application/vnd.github+json"),
+    GITLAB_JSON("application/json"),
 }

@@ -16,11 +16,11 @@
 package com.epam.drill.integration.cli
 
 import com.epam.drill.integration.common.client.impl.DrillApiClientImpl
-import com.epam.drill.integration.common.report.impl.TextReportGenerator
+import com.epam.drill.integration.common.model.MediaType.GITHUB_MARKDOWN
+import com.epam.drill.integration.common.report.impl.MarkdownReportGenerator
 import com.epam.drill.integration.github.client.impl.GithubApiClientImpl
 import com.epam.drill.integration.github.service.GithubCiCdService
 import com.github.ajalt.clikt.core.CliktCommand
-import com.github.ajalt.clikt.core.requireObject
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
@@ -45,7 +45,7 @@ class GithubPullRequestReportCommand: CliktCommand(name = "githubPullRequestRepo
         val githubCiCdService = GithubCiCdService(
             GithubApiClientImpl(githubApiUrl, githubToken),
             DrillApiClientImpl(drillApiUrl, drillApiKey),
-            TextReportGenerator()
+            MarkdownReportGenerator(GITHUB_MARKDOWN)
         )
         runBlocking {
             githubCiCdService.postPullRequestReport(
