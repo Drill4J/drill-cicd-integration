@@ -47,7 +47,7 @@ class GitlabCiCdService(
             gitlabProjectId,
             gitlabMergeRequestId,
             comment,
-            reportGenerator.contentType().name
+            reportGenerator.contentType().value
         )
     }
 

@@ -52,7 +52,7 @@ class GithubCiCdService(
             githubRepository,
             githubPullRequestId,
             comment,
-            reportGenerator.contentType().name
+            reportGenerator.contentType().value
         )
     }
 
