@@ -5,10 +5,10 @@ branding:
   color: blue
 inputs:
   drill_api_url:
-    description: "Port of Drill address"
+    description: "Drill4J API URL"
     required: true
   drill_api_key:
-    description: "API key for Drill admin"
+    description: "Drill4J API key"
     required: true
   group_id:
     description: "Group ID"
@@ -20,7 +20,7 @@ inputs:
     description: "Github Token"
     required: true
   mode:
-    description: "Mode of drill-integration. For github use: githubPullRequestReportByEvent"
+    description: "Mode of drill-integration"
     required: false
     default: "githubPullRequestReportByEvent"
 runs:
