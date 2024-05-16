@@ -27,18 +27,26 @@ open class DrillCiCdProperties(
     var latestCommitSha: String? = null,
     var sourceBranch: String? = null,
     var targetBranch: String? = null,
-    var gitlab: DrillGitlabProperties,
-    var github: DrillGithubProperties,
-): DrillProperties()
+    var gitlab: DrillGitlabProperties? = null,
+    var github: DrillGithubProperties? = null,
+) : DrillProperties() {
+    fun gitlab(configure: DrillGitlabProperties.() -> Unit) {
+        this.gitlab = DrillGitlabProperties().apply(configure)
+    }
 
-class DrillGitlabProperties(
+    fun github(configure: DrillGithubProperties.() -> Unit) {
+        this.github = DrillGithubProperties().apply(configure)
+    }
+}
+
+open class DrillGitlabProperties(
     var gitlabApiUrl: String? = null,
     var gitlabPrivateToken: String? = null,
     var projectId: String? = null,
     var mergeRequestId: String? = null,
 )
 
-class DrillGithubProperties(
+open class DrillGithubProperties(
     var githubApiUrl: String = "https://api.github.com",
     var githubToken: String? = null,
     var githubRepository: String? = null,
