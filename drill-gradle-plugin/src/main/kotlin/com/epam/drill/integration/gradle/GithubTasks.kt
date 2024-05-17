@@ -16,7 +16,6 @@
 package com.epam.drill.integration.gradle
 
 import com.epam.drill.integration.common.client.impl.DrillApiClientImpl
-import com.epam.drill.integration.common.model.MediaType.GITHUB_MARKDOWN
 import com.epam.drill.integration.common.report.impl.MarkdownReportGenerator
 import com.epam.drill.integration.github.client.impl.GithubApiClientImpl
 import com.epam.drill.integration.github.service.GithubCiCdService
@@ -28,7 +27,7 @@ fun Task.drillGithubPullRequestReport(ciCd: DrillCiCdProperties) {
         val githubCiCdService = GithubCiCdService(
             GithubApiClientImpl(ciCd.github.githubApiUrl, ciCd.github.githubToken!!),
             DrillApiClientImpl(ciCd.drillApiUrl!!, ciCd.drillApiKey),
-            MarkdownReportGenerator(GITHUB_MARKDOWN)
+            MarkdownReportGenerator()
         )
         runBlocking {
             githubCiCdService.postPullRequestReport(

@@ -16,7 +16,6 @@
 package com.epam.drill.integration.gradle
 
 import com.epam.drill.integration.common.client.impl.DrillApiClientImpl
-import com.epam.drill.integration.common.model.MediaType.GITLAB_JSON
 import com.epam.drill.integration.common.report.impl.TextReportGenerator
 import com.epam.drill.integration.gitlab.client.impl.GitlabApiClientV4Impl
 import com.epam.drill.integration.gitlab.service.GitlabCiCdService
@@ -28,7 +27,7 @@ fun Task.drillGitlabMergeRequestReportTask(ciCd: DrillCiCdProperties) {
         val gitlabCiCdService = GitlabCiCdService(
             GitlabApiClientV4Impl(ciCd.gitlab.gitlabApiUrl!!, ciCd.gitlab.gitlabPrivateToken),
             DrillApiClientImpl(ciCd.drillApiUrl!!, ciCd.drillApiKey),
-            TextReportGenerator(GITLAB_JSON)
+            TextReportGenerator()
         )
         runBlocking {
             gitlabCiCdService.postMergeRequestReport(

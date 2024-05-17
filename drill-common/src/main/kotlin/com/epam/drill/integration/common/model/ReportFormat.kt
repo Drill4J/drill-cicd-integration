@@ -15,8 +15,7 @@
  */
 package com.epam.drill.integration.common.model
 
-enum class MediaType(val value: String) {
-    GITHUB_MARKDOWN("application/vnd.github.text+json"),
-    GITHUB_PLAINTEXT("application/vnd.github+json"),
-    GITLAB_JSON("application/json"),
+enum class ReportFormat {
+    MARKDOWN,
+    PLAINTEXT
 }

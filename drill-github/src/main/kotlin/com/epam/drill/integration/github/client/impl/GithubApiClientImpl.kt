@@ -15,7 +15,6 @@
  */
 package com.epam.drill.integration.github.client.impl
 
-import com.epam.drill.integration.common.model.MediaType
 import com.epam.drill.integration.github.client.GithubApiClient
 import kotlinx.serialization.json.JsonObject
 import io.ktor.client.*

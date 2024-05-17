@@ -39,7 +39,7 @@ class GitlabApiClientV4Impl(
     ) {
         val url = "$gitlabApiUrl/v4/projects/$projectId/merge_requests/$mergeRequestId/notes"
         client.post<JsonObject>(url) {
-            contentType(ContentType.Application.Json)
+            contentType(ContentType.parse(contentType))
             gitlabPrivateToken?.let { token ->
                 headers {
                     append("Private-Token", token)

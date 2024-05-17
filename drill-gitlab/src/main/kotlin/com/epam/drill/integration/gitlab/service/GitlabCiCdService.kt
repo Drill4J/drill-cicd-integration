@@ -46,8 +46,7 @@ class GitlabCiCdService(
         gitlabApiClient.postMergeRequestReport(
             gitlabProjectId,
             gitlabMergeRequestId,
-            comment,
-            reportGenerator.contentType().value
+            comment
         )
     }
 

@@ -20,5 +20,6 @@ interface GitlabApiClient {
         projectId: String,
         mergeRequestId: String,
         comment: String,
-        contentType: String)
+        contentType: String = "application/json"
+    )
 }

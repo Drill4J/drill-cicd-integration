@@ -15,11 +15,12 @@
  */
 package com.epam.drill.integration.common.report.impl
 
-import com.epam.drill.integration.common.model.MediaType
+import com.epam.drill.integration.common.model.ReportFormat
+import com.epam.drill.integration.common.model.ReportFormat.MARKDOWN
 import com.epam.drill.integration.common.report.ReportGenerator
 import kotlinx.serialization.json.JsonObject
 
-class MarkdownReportGenerator(private val mediaType: MediaType) : ReportGenerator {
+class MarkdownReportGenerator : ReportGenerator {
     override fun getDiffSummaryReport(metrics: JsonObject) =
         """
            ## Drill4J CI/CD Report
@@ -28,5 +29,5 @@ class MarkdownReportGenerator(private val mediaType: MediaType) : ReportGenerato
             - **Risks:** ${metrics["risks"]}
         """.trimIndent()
 
-    override fun contentType() = mediaType
+    override fun getFormat() : ReportFormat= MARKDOWN
 }
