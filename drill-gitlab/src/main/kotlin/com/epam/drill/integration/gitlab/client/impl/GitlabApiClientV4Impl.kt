@@ -34,12 +34,11 @@ class GitlabApiClientV4Impl(
     override suspend fun postMergeRequestReport(
         projectId: String,
         mergeRequestId: String,
-        comment: String,
-        contentType: String
+        comment: String
     ) {
         val url = "$gitlabApiUrl/v4/projects/$projectId/merge_requests/$mergeRequestId/notes"
         client.post<JsonObject>(url) {
-            contentType(ContentType.parse(contentType))
+            contentType(ContentType.Application.Json)
             gitlabPrivateToken?.let { token ->
                 headers {
                     append("Private-Token", token)

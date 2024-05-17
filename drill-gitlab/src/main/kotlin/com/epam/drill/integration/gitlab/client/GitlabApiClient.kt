@@ -19,7 +19,5 @@ interface GitlabApiClient {
     suspend fun postMergeRequestReport(
         projectId: String,
         mergeRequestId: String,
-        comment: String,
-        contentType: String = "application/json"
-    )
+        comment: String)
 }
