@@ -1,56 +1,24 @@
-import java.net.URI
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import com.hierynomus.gradle.license.tasks.LicenseCheck
 import com.hierynomus.gradle.license.tasks.LicenseFormat
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.net.URI
 
 plugins {
+    application
     kotlin("jvm")
     id("com.github.hierynomus.license")
-    application
 }
 
 group = "com.epam.drill.integration"
 version = rootProject.version
 
 val kotlinxCoroutinesVersion: String by parent!!.extra
+val jarMainClassName = "com.epam.drill.integration.cli.CliAppKt"
 
 repositories {
     mavenLocal()
     mavenCentral()
 }
-
-tasks {
-    jar {
-        archiveBaseName.set("app")
-        archiveVersion.set("")
-        manifest {
-            attributes("Main-Class" to "com.epam.drill.integration.cli.CliAppKt")
-        }
-        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-        from(sourceSets.main.get().output)
-        dependsOn(configurations.runtimeClasspath)
-        from({
-            configurations.runtimeClasspath.get().filter { it.name.endsWith("jar") }.map { zipTree(it) }
-        })
-    }
-}
-java {
-    withSourcesJar()
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
-}
-
-dependencies {
-    compileOnly((kotlin("stdlib-jdk8")))
-    implementation("com.github.ajalt.clikt:clikt:3.5.4")
-    implementation(project(":drill-common"))
-    implementation(project(":drill-gitlab"))
-    implementation(project(":drill-github"))
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCoroutinesVersion")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:$kotlinxCoroutinesVersion")
-}
-
-val jarMainClassName = "com.epam.drill.integration.cli.CliAppKt"
 
 application {
     mainClass.set(jarMainClassName)
@@ -66,15 +34,29 @@ tasks {
     }
     val runtimeJar by registering(Jar::class) {
         group = "build"
-        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-        archiveBaseName.set("${project.name}-runtime")
+        archiveBaseName.set("app")
+        archiveVersion.set("")
         manifest.attributes["Main-Class"] = jarMainClassName
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        from(sourceSets.main.get().output)
+        dependsOn(configurations.runtimeClasspath)
         from(
             sourceSets.main.get().output,
             configurations.runtimeClasspath.get().resolve().map(::zipTree)
         )
     }
     assemble.get().dependsOn(runtimeJar)
+}
+
+
+dependencies {
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCoroutinesVersion")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:$kotlinxCoroutinesVersion")
+    implementation("com.github.ajalt.clikt:clikt:3.5.4")
+    implementation(project(":drill-common"))
+    implementation(project(":drill-gitlab"))
+    implementation(project(":drill-github"))
+    compileOnly((kotlin("stdlib-jdk8")))
 }
 
 @Suppress("UNUSED_VARIABLE")
