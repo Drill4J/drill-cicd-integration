@@ -15,8 +15,11 @@
  */
 package com.epam.drill.integration.common.report
 
+import com.epam.drill.integration.common.model.ReportFormat
 import kotlinx.serialization.json.JsonObject
 
 interface ReportGenerator {
     fun getDiffSummaryReport(metrics: JsonObject): String
+
+    fun getFormat() : ReportFormat
 }

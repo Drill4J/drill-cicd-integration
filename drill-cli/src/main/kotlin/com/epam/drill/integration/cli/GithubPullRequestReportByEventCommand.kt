@@ -16,7 +16,7 @@
 package com.epam.drill.integration.cli
 
 import com.epam.drill.integration.common.client.impl.DrillApiClientImpl
-import com.epam.drill.integration.common.report.impl.TextReportGenerator
+import com.epam.drill.integration.common.report.impl.MarkdownReportGenerator
 import com.epam.drill.integration.github.client.impl.GithubApiClientImpl
 import com.epam.drill.integration.github.service.GithubCiCdService
 import com.github.ajalt.clikt.core.CliktCommand
@@ -40,7 +40,7 @@ class GithubPullRequestReportByEventCommand: CliktCommand(name = "githubPullRequ
         val githubCiCdService = GithubCiCdService(
             GithubApiClientImpl(githubApiUrl, githubToken),
             DrillApiClientImpl(drillApiUrl, drillApiKey),
-            TextReportGenerator()
+            MarkdownReportGenerator()
         )
         runBlocking {
             githubCiCdService.postPullRequestReportByEvent(

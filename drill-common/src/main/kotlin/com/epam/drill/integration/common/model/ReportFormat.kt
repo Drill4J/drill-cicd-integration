@@ -13,19 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.epam.drill.integration.common.report.impl
+package com.epam.drill.integration.common.model
 
-import com.epam.drill.integration.common.model.ReportFormat.PLAINTEXT
-import com.epam.drill.integration.common.report.ReportGenerator
-import kotlinx.serialization.json.JsonObject
-
-class TextReportGenerator : ReportGenerator {
-    override fun getDiffSummaryReport(metrics: JsonObject) =
-        """
-            Drill4J CI/CD report:
-            - Coverage: ${metrics["coverage"]}%
-            - Risks: ${metrics["risks"]}
-        """.trimIndent()
-
-    override fun getFormat() = PLAINTEXT
+enum class ReportFormat {
+    MARKDOWN,
+    PLAINTEXT
 }
