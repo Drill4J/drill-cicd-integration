@@ -1,4 +1,4 @@
-# Drill CI/CD Integration 
+# Drill4J CI/CD Integration 
 
 ## Overview
 
@@ -16,23 +16,8 @@ Tools for integration with CI/CD systems such as Gitlab and GitHub.
 
 Build all modules:
 ```shell
-gradle build
-```
-
-Publish common libraries
-```shell
-cd common
-gradle publishToMavenLocal
-cd gitlab
-gradle publishToMavenLocal
-cd github
-gradle publishToMavenLocal
-```
-
-Publish Gradle plugin:
-```shell
-cd ../gradle-plugin
-gradle publish
+./gradlew build
+./gradlew publishToMavenLocal
 ```
 
 ## Usage
@@ -44,9 +29,12 @@ Add Gradle plugin to your Gradle configuration:
 plugins {
     id("com.epam.drill.integration.drill-gradle-plugin") version "0.0.1"
 }
+```
 
+Add Drill4J Gitlab integration properties to your Gradle configuration:
+
+```kotlin
 drillCiCd {
-    version = "0.0.1"
     //Drill4J group ID
     groupId = "realworld"
     //Drill4J agent ID
@@ -72,23 +60,12 @@ drillCiCd {
         //Gitlab merge request ID
         mergeRequestId = System.getenv("CI_MERGE_REQUEST_IID")
     }
-    //Only for GitHub integration
-    github {
-        //GitHub API url, https://api.github.com by default
-        githubApiUrl = "https://api.github.com"
-        //GitHub API Token
-        githubToken = "your-github-token-here"
-        //GitHub repository full name
-        githubRepository = System.getenv("CI_PROJECT_ID")
-        //GitHub pull request number
-        mergeRequestId = System.getenv("CI_MERGE_REQUEST_IID")
-    }
 }
 ```
 
-Run the Gradle command:
+Run the Gradle command after a test stage:
 ```shell
-./gradle drillGitlabMergeRequestReport
+./gradlew drillGitlabMergeRequestReport
 ```
 
 ### GitHub integration with Gradle plugin
@@ -99,9 +76,10 @@ Add Gradle plugin to your Gradle configuration:
 plugins {
     id("com.epam.drill.integration.drill-gradle-plugin") version "0.0.1"
 }
-
+```
+Add Drill4J GitHub integration properties to your Gradle configuration:
+```kotlon
 drillCiCd {
-    version = "0.0.1"
     //Drill4J group ID
     groupId = "realworld"
     //Drill4J agent ID
@@ -118,7 +96,7 @@ drillCiCd {
     latestCommitSha = System.getenv("GITHUB_SHA")
 
     github {
-        //GitHub API url, https://api.github.com by default
+        //GitHub API url, "https://api.github.com" by default
         githubApiUrl =  System.getenv("GITHUB_API_URL")
         //GitHub API Token
         githubToken = "your-github-token-here"
@@ -132,7 +110,7 @@ drillCiCd {
 }
 ```
 
-Run the Gradle command:
+Run the Gradle command after a test stage:
 ```shell
-./gradle drillGithubPullRequestReport
+./gradlew drillGithubPullRequestReport
 ```

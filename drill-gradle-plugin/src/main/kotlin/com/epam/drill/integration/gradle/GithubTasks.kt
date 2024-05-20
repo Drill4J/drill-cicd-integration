@@ -24,20 +24,29 @@ import org.gradle.api.Task
 
 fun Task.drillGithubPullRequestReport(ciCd: DrillCiCdProperties) {
     doFirst {
+        val github = ciCd.github.required("drillCiCd.github")
+
         val githubCiCdService = GithubCiCdService(
-            GithubApiClientImpl(ciCd.github.githubApiUrl, ciCd.github.githubToken!!),
-            DrillApiClientImpl(ciCd.drillApiUrl!!, ciCd.drillApiKey),
+            GithubApiClientImpl(
+                github.githubApiUrl,
+                github.githubToken.required("drillCiCd.github.githubToken"),
+            ),
+            DrillApiClientImpl(
+                ciCd.drillApiUrl.required("drillCiCd.drillApiUrl"),
+                ciCd.drillApiKey
+            ),
             MarkdownReportGenerator()
         )
         runBlocking {
             githubCiCdService.postPullRequestReport(
-                githubRepository = ciCd.github.githubRepository!!,
-                githubPullRequestId = ciCd.github.pullRequestId!!,
-                drillGroupId = ciCd.groupId!!,
-                drillAgentId = ciCd.agentId!!,
-                sourceBranch = ciCd.sourceBranch!!,
-                targetBranch = ciCd.targetBranch!!,
-                latestCommitSha = ciCd.latestCommitSha!!)
+                githubRepository = github.githubRepository.required("drillCiCd.github.githubRepository"),
+                githubPullRequestId = github.pullRequestId.required("drillCiCd.github.pullRequestId"),
+                drillGroupId = ciCd.groupId.required("drillCiCd.groupId"),
+                drillAgentId = ciCd.agentId.required("drillCiCd.agentId"),
+                sourceBranch = ciCd.sourceBranch.required("drillCiCd.sourceBranch"),
+                targetBranch = ciCd.targetBranch.required("drillCiCd.targetBranch"),
+                latestCommitSha = ciCd.latestCommitSha.required("drillCiCd.latestCommitSha")
+            )
         }
     }
 }
