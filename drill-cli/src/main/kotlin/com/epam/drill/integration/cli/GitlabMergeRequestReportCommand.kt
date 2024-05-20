@@ -20,7 +20,6 @@ import com.epam.drill.integration.common.report.impl.TextReportGenerator
 import com.epam.drill.integration.gitlab.client.impl.GitlabApiClientV4Impl
 import com.epam.drill.integration.gitlab.service.GitlabCiCdService
 import com.github.ajalt.clikt.core.CliktCommand
-import com.github.ajalt.clikt.core.requireObject
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import kotlinx.coroutines.runBlocking

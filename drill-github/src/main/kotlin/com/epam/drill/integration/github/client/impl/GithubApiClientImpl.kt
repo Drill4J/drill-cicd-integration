@@ -34,10 +34,12 @@ class GithubApiClientImpl(
     override suspend fun postPullRequestReport(
         repository: String,
         pullRequestId: Int,
-        comment: String) {
+        comment: String,
+        mediaType: String
+    ) {
         val url = "$githubApiUrl/repos/$repository/issues/$pullRequestId/comments"
         client.post<JsonObject>(url) {
-            contentType(ContentType.parse("application/vnd.github+json"))
+            contentType(ContentType.parse(mediaType))
             headers {
                 append("Authorization", "token $githubToken")
             }
