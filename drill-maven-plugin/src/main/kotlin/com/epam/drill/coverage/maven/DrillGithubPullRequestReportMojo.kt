@@ -15,12 +15,16 @@
  */
 package com.epam.drill.coverage.maven
 
+import com.epam.drill.integration.common.client.impl.DrillApiClientImpl
+import com.epam.drill.integration.common.report.impl.MarkdownReportGenerator
+import com.epam.drill.integration.github.client.impl.GithubApiClientImpl
+import com.epam.drill.integration.github.service.GithubCiCdService
+import kotlinx.coroutines.runBlocking
 import org.apache.maven.plugin.AbstractMojo
 import org.apache.maven.plugins.annotations.LifecyclePhase
 import org.apache.maven.plugins.annotations.Mojo
 import org.apache.maven.plugins.annotations.Parameter
 import org.apache.maven.plugins.annotations.ResolutionScope
-import org.apache.maven.project.MavenProject
 
 @Mojo(
     name = "drillGithubPullRequestReport",
@@ -34,6 +38,30 @@ class DrillGithubPullRequestReportMojo : AbstractMojo() {
     private lateinit var drillCiCd: DrillCiCdProperties
 
     override fun execute() {
-        println("Github logic")
+        val github = drillCiCd.github!!
+
+        val githubCiCdService = GithubCiCdService(
+            GithubApiClientImpl(
+                github.githubApiUrl,
+                github.githubToken!!,
+            ),
+            DrillApiClientImpl(
+                drillCiCd.drillApiUrl!!,
+                drillCiCd.drillApiKey
+            ),
+            MarkdownReportGenerator()
+        )
+
+        runBlocking {
+            githubCiCdService.postPullRequestReport(
+                githubRepository = github.githubRepository!!,
+                githubPullRequestId = github.pullRequestId!!,
+                drillGroupId = drillCiCd.groupId!!,
+                drillAgentId = drillCiCd.agentId!!,
+                sourceBranch = drillCiCd.sourceBranch!!,
+                targetBranch = drillCiCd.targetBranch!!,
+                latestCommitSha = drillCiCd.latestCommitSha!!
+            )
+        }
     }
 }
