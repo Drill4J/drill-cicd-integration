@@ -15,24 +15,24 @@
  */
 package com.epam.drill.coverage.maven
 
-import com.epam.drill.coverage.PluginLogger
-import org.slf4j.LoggerFactory
+import org.apache.maven.plugin.AbstractMojo
+import org.apache.maven.plugins.annotations.LifecyclePhase
+import org.apache.maven.plugins.annotations.Mojo
+import org.apache.maven.plugins.annotations.Parameter
+import org.apache.maven.plugins.annotations.ResolutionScope
 
-class MavenLogger : PluginLogger {
-    private val logger = LoggerFactory.getLogger(javaClass)
-    override fun error(msg: String) {
-        logger.error(msg)
-    }
+@Mojo(
+    name = "drillGitlabMergeRequestReport",
+    defaultPhase = LifecyclePhase.INSTALL,
+    requiresDependencyResolution = ResolutionScope.RUNTIME,
+    threadSafe = true
+)
+class DrillGitlabMergeRequestReportMojo : AbstractMojo() {
 
-    override fun warn(msg: String) {
-        logger.warn(msg)
-    }
+    @Parameter
+    private lateinit var drillCiCd: DrillCiCdProperties
 
-    override fun info(msg: String) {
-        logger.info(msg)
-    }
-
-    override fun debug(msg: String) {
-        logger.debug(msg)
+    override fun execute() {
+        println("Gitlab logic")
     }
 }
