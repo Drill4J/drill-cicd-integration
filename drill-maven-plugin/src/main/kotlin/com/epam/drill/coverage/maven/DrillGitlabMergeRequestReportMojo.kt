@@ -15,6 +15,11 @@
  */
 package com.epam.drill.coverage.maven
 
+import com.epam.drill.integration.common.client.impl.DrillApiClientImpl
+import com.epam.drill.integration.common.report.impl.TextReportGenerator
+import com.epam.drill.integration.gitlab.client.impl.GitlabApiClientV4Impl
+import com.epam.drill.integration.gitlab.service.GitlabCiCdService
+import kotlinx.coroutines.runBlocking
 import org.apache.maven.plugin.AbstractMojo
 import org.apache.maven.plugins.annotations.LifecyclePhase
 import org.apache.maven.plugins.annotations.Mojo
@@ -33,6 +38,29 @@ class DrillGitlabMergeRequestReportMojo : AbstractMojo() {
     private lateinit var drillCiCd: DrillCiCdProperties
 
     override fun execute() {
-        println("Gitlab logic")
+        val gitlab = drillCiCd.gitlab!!
+
+        val gitlabCiCdService = GitlabCiCdService(
+            GitlabApiClientV4Impl(
+                gitlab.gitlabApiUrl!!,
+                gitlab.gitlabPrivateToken
+            ),
+            DrillApiClientImpl(
+                drillCiCd.drillApiUrl!!,
+                drillCiCd.drillApiKey
+            ),
+            TextReportGenerator()
+        )
+        runBlocking {
+            gitlabCiCdService.postMergeRequestReport(
+                gitlabProjectId = gitlab.projectId!!,
+                gitlabMergeRequestId = gitlab.mergeRequestId!!,
+                drillGroupId = drillCiCd.groupId!!,
+                drillAgentId = drillCiCd.agentId!!,
+                sourceBranch = drillCiCd.sourceBranch!!,
+                targetBranch = drillCiCd.targetBranch!!,
+                latestCommitSha = drillCiCd.latestCommitSha!!
+            )
+        }
     }
 }
