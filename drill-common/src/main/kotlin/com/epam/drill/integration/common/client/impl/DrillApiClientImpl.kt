@@ -75,7 +75,6 @@ class DrillApiClientImpl(
             }
             body = payload
         }
-        TODO("Not yet implemented")
     }
 
     private suspend fun getMetricsSummary(
