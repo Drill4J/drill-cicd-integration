@@ -18,22 +18,22 @@ package com.epam.drill.coverage.maven
 import org.apache.maven.plugins.annotations.Parameter
 
 open class DrillProperties(
-    @Parameter(property = "drillApiUrl")
+    @Parameter(property = "drillApiUrl", required = true)
     var drillApiUrl: String? = null,
     @Parameter(property = "drillApiKey")
     var drillApiKey: String? = null,
-    @Parameter(property = "groupId")
+    @Parameter(property = "groupId", required = true)
     var groupId: String? = null,
-    @Parameter(property = "agentId")
+    @Parameter(property = "agentId", required = true)
     var agentId: String? = null
 )
 
 open class DrillCiCdProperties(
-    @Parameter(property = "latestCommitSha")
+    @Parameter(property = "latestCommitSha", required = true)
     var latestCommitSha: String? = null,
-    @Parameter(property = "sourceBranch")
+    @Parameter(property = "sourceBranch", required = true)
     var sourceBranch: String? = null,
-    @Parameter(property = "targetBranch")
+    @Parameter(property = "targetBranch", required = true)
     var targetBranch: String? = null,
     var gitlab: DrillGitlabProperties? = null,
     var github: DrillGithubProperties? = null
@@ -48,23 +48,23 @@ open class DrillCiCdProperties(
 }
 
 open class DrillGitlabProperties(
-    @Parameter(property = "gitlabApiUrl")
+    @Parameter(property = "gitlabApiUrl", required = true)
     var gitlabApiUrl: String? = null,
-    @Parameter(property = "gitlabPrivateToken")
+    @Parameter(property = "gitlabPrivateToken", required = true)
     var gitlabPrivateToken: String? = null,
-    @Parameter(property = "projectId")
+    @Parameter(property = "projectId", required = true)
     var projectId: String? = null,
-    @Parameter(property = "mergeRequestId")
+    @Parameter(property = "mergeRequestId", required = true)
     var mergeRequestId: String? = null
 )
 
 open class DrillGithubProperties(
     @Parameter(property = "githubApiUrl")
     var githubApiUrl: String = "https://api.github.com",
-    @Parameter(property = "githubToken")
+    @Parameter(property = "githubToken", required = true)
     var githubToken: String? = null,
-    @Parameter(property = "githubRepository")
+    @Parameter(property = "githubRepository", required = true)
     var githubRepository: String? = null,
-    @Parameter(property = "pullRequestId")
+    @Parameter(property = "pullRequestId", required = true)
     var pullRequestId: Int? = null
 )
