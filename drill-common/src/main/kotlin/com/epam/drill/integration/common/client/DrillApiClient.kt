@@ -15,6 +15,7 @@
  */
 package com.epam.drill.integration.common.client
 
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonObject
 
 interface DrillApiClient {
@@ -36,12 +37,13 @@ interface DrillApiClient {
     suspend fun postBuild(payload: BuildPayload)
 }
 
+@Serializable
 class BuildPayload(
     val groupId: String,
     val appId: String,
     val commitSha: String,
-    val buildVersion: String,
-    val branch: String,
+    val buildVersion: String? = null,
+    val branch: String? = null,
     val commitDate: String,
     val commitMessage: String,
     val commitAuthor: String
