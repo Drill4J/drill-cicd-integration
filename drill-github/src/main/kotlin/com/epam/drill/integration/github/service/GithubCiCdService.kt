@@ -34,18 +34,18 @@ class GithubCiCdService(
     suspend fun postPullRequestReport(
         githubRepository: String,
         githubPullRequestId: Int,
-        drillGroupId: String,
-        drillAgentId: String,
+        groupId: String,
+        appId: String,
         sourceBranch: String,
         targetBranch: String,
-        latestCommitSha: String
+        commitSha: String
     ) {
         val metrics = drillApiClient.getDiffMetricsByBranches(
-            drillGroupId,
-            drillAgentId,
+            groupId,
+            appId,
             sourceBranch,
             targetBranch,
-            latestCommitSha
+            commitSha
         )
         val comment = reportGenerator.getDiffSummaryReport(
             metrics
@@ -64,8 +64,8 @@ class GithubCiCdService(
 
     suspend fun postPullRequestReportByEvent(
         githubEventFile: File,
-        drillGroupId: String,
-        drillAgentId: String
+        groupId: String,
+        appId: String
     ) {
         val json = Json {
             ignoreUnknownKeys = true
@@ -75,11 +75,11 @@ class GithubCiCdService(
         postPullRequestReport(
             githubRepository = event.repository.fullName,
             githubPullRequestId = event.pullRequest.number,
-            drillGroupId = drillGroupId,
-            drillAgentId = drillAgentId,
+            groupId = groupId,
+            appId = appId,
             sourceBranch = event.pullRequest.head.ref,
             targetBranch = event.pullRequest.base.ref,
-            latestCommitSha = event.pullRequest.head.sha,
+            commitSha = event.pullRequest.head.sha,
         )
     }
 

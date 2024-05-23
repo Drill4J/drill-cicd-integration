@@ -29,37 +29,39 @@ private const val API_KEY_HEADER = "-X-Api-Key"
 class DrillApiClientImpl(
     private val drillUrl: String,
     private val drillApiKey: String? = null,
-): DrillApiClient {
+) : DrillApiClient {
     private val client = HttpClient(CIO) {
         install(JsonFeature)
     }
 
     override suspend fun getDiffMetricsByCommits(
         groupId: String,
-        agentId: String,
+        appId: String,
         sourceCommitSha: String,
         baseCommitSha: String
     ): JsonObject {
         return getMetricsSummary(
             groupId = groupId,
-            agentId = agentId,
+            appId = appId,
             sourceCommitSha = sourceCommitSha,
-            baseCommitSha = baseCommitSha)
+            baseCommitSha = baseCommitSha
+        )
     }
 
     override suspend fun getDiffMetricsByBranches(
         groupId: String,
-        agentId: String,
+        appId: String,
         sourceBranch: String,
         targetBranch: String,
-        latestCommitSha: String
+        commitSha: String
     ): JsonObject {
         return getMetricsSummary(
             groupId = groupId,
-            agentId = agentId,
+            appId = appId,
             sourceBranch = sourceBranch,
             targetBranch = targetBranch,
-            sourceCommitSha = latestCommitSha)
+            sourceCommitSha = commitSha
+        )
     }
 
     override suspend fun postBuild(payload: BuildPayload) {
@@ -78,7 +80,7 @@ class DrillApiClientImpl(
 
     private suspend fun getMetricsSummary(
         groupId: String,
-        agentId: String,
+        appId: String,
         sourceCommitSha: String? = "",
         sourceBranch: String? = "",
         baseCommitSha: String? = "",
@@ -88,7 +90,7 @@ class DrillApiClientImpl(
         val url = "$drillUrl/api/metrics/summary"
         val response = client.request<JsonObject>(url) {
             parameter("groupId", groupId)
-            parameter("agentId", agentId)
+            parameter("appId", appId)
             parameter("currentVcsRef", sourceCommitSha)
             parameter("currentBranch", sourceBranch)
             parameter("baseVcsRef", baseCommitSha)

@@ -27,8 +27,8 @@ import kotlinx.coroutines.runBlocking
 class PostBuildInfoCommand : CliktCommand(name = "postBuildInfo") {
     private val drillApiUrl by option("-drill-u", "--drillApiUrl", envvar = "DRILL_API_URL").required()
     private val drillApiKey by option("-drill-k", "--drillApiKey", envvar = "DRILL_API_KEY")
-    private val drillGroupId by option("-g", "--groupId", envvar = "DRILL_GROUP_ID").required()
-    private val drillAgentId by option("-a", "--appId", envvar = "DRILL_APP_ID").required()
+    private val groupId by option("-g", "--groupId", envvar = "DRILL_GROUP_ID").required()
+    private val appId by option("-a", "--appId", envvar = "DRILL_APP_ID").required()
     private val buildVersion by option("-v", "--buildVersion", envvar = "DRILL_BUILD_VERSION")
 
     override fun run() {
@@ -41,13 +41,13 @@ class PostBuildInfoCommand : CliktCommand(name = "postBuildInfo") {
         val branch = getGitBranch()
         val commitInfo = getGitCommitInfo()
         val payload = BuildPayload(
-            groupId = drillGroupId,
-            appId = drillAgentId,
+            groupId = groupId,
+            appId = appId,
             buildVersion = buildVersion,
-            commitSha = commitInfo.commitSha,
-            commitDate = commitInfo.commitDate,
-            commitAuthor = commitInfo.commitAuthor,
-            commitMessage = commitInfo.commitMessage,
+            commitSha = commitInfo.sha,
+            commitDate = commitInfo.date,
+            commitAuthor = commitInfo.author,
+            commitMessage = commitInfo.message,
             branch = branch
         )
 

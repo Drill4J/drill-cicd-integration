@@ -33,12 +33,12 @@ fun Task.drillPostBuildInfo(ciCd: DrillCiCdProperties) {
         val commitInfo = getGitCommitInfo()
         val payload = BuildPayload(
             groupId = ciCd.groupId.required("drillCiCd.groupId"),
-            appId = ciCd.agentId.required("drillCiCd.agentId"),
+            appId = ciCd.appId.required("drillCiCd.appId"),
             buildVersion = ciCd.buildVersion,
-            commitSha = commitInfo.commitSha,
-            commitDate = commitInfo.commitDate,
-            commitAuthor = commitInfo.commitAuthor,
-            commitMessage = commitInfo.commitMessage,
+            commitSha = commitInfo.sha,
+            commitDate = commitInfo.date,
+            commitAuthor = commitInfo.author,
+            commitMessage = commitInfo.message,
             branch = branch
         )
 

@@ -26,18 +26,18 @@ fun getGitCommitInfo(): GitCommitInfo {
     if (commitDetails.size < 4)
         throw IllegalStateException("Failed to get commit log details")
     return GitCommitInfo(
-        commitSha = commitDetails[0],
-        commitDate = commitDetails[1],
-        commitAuthor = commitDetails[2],
-        commitMessage = commitDetails.subList(3, commitDetails.size).joinToString("\n").trim(),
+        sha = commitDetails[0],
+        date = commitDetails[1],
+        author = commitDetails[2],
+        message = commitDetails.subList(3, commitDetails.size).joinToString("\n").trim(),
     )
 }
 
 data class GitCommitInfo(
-    val commitSha: String,
-    val commitDate: String,
-    val commitAuthor: String,
-    val commitMessage: String
+    val sha: String,
+    val date: String,
+    val author: String,
+    val message: String
 )
 
 fun executeGitCommand(command: String): String {

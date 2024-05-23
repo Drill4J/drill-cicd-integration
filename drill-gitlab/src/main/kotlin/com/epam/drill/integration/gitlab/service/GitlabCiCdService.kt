@@ -27,18 +27,18 @@ class GitlabCiCdService(
     suspend fun postMergeRequestReport(
         gitlabProjectId: String,
         gitlabMergeRequestId: String,
-        drillGroupId: String,
-        drillAgentId: String,
+        groupId: String,
+        appId: String,
         sourceBranch: String,
         targetBranch: String,
-        latestCommitSha: String
+        commitSha: String
     ) {
         val metrics = drillApiClient.getDiffMetricsByBranches(
-            drillGroupId,
-            drillAgentId,
+            groupId,
+            appId,
             sourceBranch,
             targetBranch,
-            latestCommitSha
+            commitSha
         )
         val comment = reportGenerator.getDiffSummaryReport(
             metrics

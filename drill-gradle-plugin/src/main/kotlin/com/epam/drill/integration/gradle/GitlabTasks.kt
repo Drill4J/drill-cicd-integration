@@ -41,11 +41,11 @@ fun Task.drillGitlabMergeRequestReportTask(ciCd: DrillCiCdProperties) {
             gitlabCiCdService.postMergeRequestReport(
                 gitlabProjectId = gitlab.projectId.required("drillCiCd.gitlab.projectId"),
                 gitlabMergeRequestId = gitlab.mergeRequestId.required("drillCiCd.gitlab.mergeRequestId"),
-                drillGroupId = ciCd.groupId.required("drillCiCd.groupId"),
-                drillAgentId = ciCd.agentId.required("drillCiCd.agentId"),
+                groupId = ciCd.groupId.required("drillCiCd.groupId"),
+                appId = ciCd.appId.required("drillCiCd.appId"),
                 sourceBranch = ciCd.sourceBranch.required("drillCiCd.sourceBranch"),
                 targetBranch = ciCd.targetBranch.required("drillCiCd.targetBranch"),
-                latestCommitSha = ciCd.latestCommitSha.required("drillCiCd.latestCommitSha")
+                commitSha = ciCd.latestCommitSha.required("drillCiCd.latestCommitSha")
             )
         }
     }

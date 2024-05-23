@@ -21,17 +21,17 @@ import kotlinx.serialization.json.JsonObject
 interface DrillApiClient {
     suspend fun getDiffMetricsByCommits(
         groupId: String,
-        agentId: String,
+        appId: String,
         sourceCommitSha: String,
         baseCommitSha: String
     ): JsonObject
 
     suspend fun getDiffMetricsByBranches(
         groupId: String,
-        agentId: String,
+        appId: String,
         sourceBranch: String,
         targetBranch: String,
-        latestCommitSha: String
+        commitSha: String
     ): JsonObject
 
     suspend fun postBuild(payload: BuildPayload)

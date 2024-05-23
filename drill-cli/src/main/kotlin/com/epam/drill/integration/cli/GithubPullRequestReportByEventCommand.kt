@@ -30,10 +30,10 @@ class GithubPullRequestReportByEventCommand: CliktCommand(name = "githubPullRequ
     private val drillApiUrl by option("-drill-u", "--drillApiUrl", envvar = "INPUT_DRILL_API_URL").required()
     private val drillApiKey by option("-drill-k", "--drillApiKey", envvar = "INPUT_DRILL_API_KEY")
     private val drillGroupId by option("-g", "--drillGroupId", envvar = "INPUT_GROUP_ID").required()
-    private val drillAgentId by option("-a", "--drillAgentId", envvar = "INPUT_AGENT_ID").required()
+    private val drillAppId by option("-a", "--drillAppId", envvar = "INPUT_APP_ID").required()
     private val githubApiUrl by option("-gh-u", "--githubApiUrl", envvar = "GITHUB_API_URL").default("https://api.github.com")
     private val githubToken by option("-gh-t", "--githubToken", envvar = "INPUT_GITHUB_TOKEN").required()
-    private val eventFilePath by option("-ef", "--eventFilePath", envvar = "GITHUB_EVENT_PATH").required()
+    private val eventFilePath by option("-ep", "--eventFilePath", envvar = "GITHUB_EVENT_PATH").required()
 
     override fun run() {
         echo("Posting Drill4J Pull Request Report to GitHub by GitHub Event...")
@@ -46,7 +46,7 @@ class GithubPullRequestReportByEventCommand: CliktCommand(name = "githubPullRequ
             githubCiCdService.postPullRequestReportByEvent(
                 File(eventFilePath),
                 drillGroupId,
-                drillAgentId
+                drillAppId
             )
         }
         echo("Done.")
