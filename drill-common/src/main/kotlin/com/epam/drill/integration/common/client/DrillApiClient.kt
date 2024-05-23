@@ -34,7 +34,7 @@ interface DrillApiClient {
         commitSha: String
     ): JsonObject
 
-    suspend fun postBuild(payload: BuildPayload)
+    suspend fun sendBuild(payload: BuildPayload)
 }
 
 @Serializable

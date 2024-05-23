@@ -52,7 +52,7 @@ class PostBuildInfoCommand : CliktCommand(name = "postBuildInfo") {
         )
 
         runBlocking {
-            drillApiClient.postBuild(payload)
+            drillApiClient.sendBuild(payload)
         }
         echo("Done.")
     }

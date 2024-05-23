@@ -64,9 +64,9 @@ class DrillApiClientImpl(
         )
     }
 
-    override suspend fun postBuild(payload: BuildPayload) {
+    override suspend fun sendBuild(payload: BuildPayload) {
         val url = "$drillUrl/api/builds"
-        client.post<JsonObject?>(url) {
+        client.put<JsonObject?>(url) {
             contentType(ContentType.Application.Json)
             drillApiKey?.let { apiKey ->
                 headers {
