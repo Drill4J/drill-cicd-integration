@@ -25,7 +25,7 @@ open class DrillProperties(
     @Parameter(property = "groupId")
     var groupId: String? = null,
     @Parameter(property = "agentId")
-    var agentId: String? = null,
+    var agentId: String? = null
 )
 
 open class DrillCiCdProperties(
@@ -36,7 +36,7 @@ open class DrillCiCdProperties(
     @Parameter(property = "targetBranch")
     var targetBranch: String? = null,
     var gitlab: DrillGitlabProperties? = null,
-    var github: DrillGithubProperties? = null,
+    var github: DrillGithubProperties? = null
 ) : DrillProperties() {
     fun gitlab(configure: DrillGitlabProperties.() -> Unit) {
         this.gitlab = DrillGitlabProperties().apply(configure)
@@ -55,7 +55,7 @@ open class DrillGitlabProperties(
     @Parameter(property = "projectId")
     var projectId: String? = null,
     @Parameter(property = "mergeRequestId")
-    var mergeRequestId: String? = null,
+    var mergeRequestId: String? = null
 )
 
 open class DrillGithubProperties(
