@@ -22,7 +22,7 @@ fun main(args: Array<String>) = Cli().subcommands(
     GitlabMergeRequestReportCommand(),
     GithubPullRequestReportCommand(),
     GithubPullRequestReportByEventCommand(),
-    PostBuildInfoCommand()
+    SendBuildInfoCommand()
 ).main(args)
 
 class Cli : CliktCommand() {

@@ -30,8 +30,8 @@ class DrillCiCdIntegrationGradlePlugin : Plugin<Project> {
             drillGithubPullRequestReport(ciCd)
         }
 
-        project.task("drillPostBuildInfo") {
-            drillPostBuildInfo(ciCd)
+        project.task("drillSendBuildInfo") {
+            drillSendBuildInfo(ciCd)
         }
     }
 }

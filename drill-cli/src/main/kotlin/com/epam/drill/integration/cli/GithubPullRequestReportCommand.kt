@@ -33,7 +33,7 @@ class GithubPullRequestReportCommand: CliktCommand(name = "githubPullRequestRepo
     private val drillAppId by option("-a", "--appId", envvar = "INPUT_APP_ID").required()
     private val sourceBranch by option("-sb", "--sourceBranch", envvar = "GITHUB_HEAD_REF").required()
     private val targetBranch by option("-tb", "--targetBranch", envvar = "GITHUB_BASE_REF").required()
-    private val latestCommitSha by option("-c", "--commitSha", envvar = "GITHUB_SHA").required()
+    private val commitSha by option("-c", "--commitSha", envvar = "GITHUB_SHA").required()
     private val githubApiUrl by option("-gh-u", "--githubApiUrl", envvar = "GITHUB_API_URL").default("https://api.github.com")
     private val githubToken by option("-gh-t", "--githubToken", envvar = "INPUT_GITHUB_TOKEN").required()
     private val githubRepository by option("-r", "--githubRepository", envvar = "GITHUB_REPOSITORY").required()
@@ -54,7 +54,7 @@ class GithubPullRequestReportCommand: CliktCommand(name = "githubPullRequestRepo
                 drillAppId,
                 sourceBranch,
                 targetBranch,
-                latestCommitSha
+                commitSha
             )
         }
         echo("Done.")
