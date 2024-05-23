@@ -34,7 +34,7 @@ class PostBuildInfoCommand : CliktCommand(name = "postBuildInfo") {
     override fun run() {
         echo("Posting Drill4J Build Info ...")
         val drillApiClient = DrillApiClientImpl(
-            drillUrl = drillApiUrl,
+            drillApiUrl = drillApiUrl,
             drillApiKey = drillApiKey
         )
 

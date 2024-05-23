@@ -25,7 +25,7 @@ import org.gradle.api.Task
 fun Task.drillPostBuildInfo(ciCd: DrillCiCdProperties) {
     doFirst {
         val drillApiClient = DrillApiClientImpl(
-            drillUrl = ciCd.drillApiUrl.required("drillCiCd.drillApiUrl"),
+            drillApiUrl = ciCd.drillApiUrl.required("drillCiCd.drillApiUrl"),
             drillApiKey = ciCd.drillApiKey
         )
 

@@ -27,7 +27,7 @@ import kotlinx.serialization.json.JsonObject
 private const val API_KEY_HEADER = "-X-Api-Key"
 
 class DrillApiClientImpl(
-    private val drillUrl: String,
+    private val drillApiUrl: String,
     private val drillApiKey: String? = null,
 ) : DrillApiClient {
     private val client = HttpClient(CIO) {
@@ -65,7 +65,7 @@ class DrillApiClientImpl(
     }
 
     override suspend fun sendBuild(payload: BuildPayload) {
-        val url = "$drillUrl/api/builds"
+        val url = "$drillApiUrl/builds"
         client.put<JsonObject?>(url) {
             contentType(ContentType.Application.Json)
             drillApiKey?.let { apiKey ->
@@ -86,7 +86,7 @@ class DrillApiClientImpl(
         targetBranch: String? = ""
     ): JsonObject {
 
-        val url = "$drillUrl/api/metrics/summary"
+        val url = "$drillApiUrl/metrics/summary"
         val response = client.request<JsonObject>(url) {
             parameter("groupId", groupId)
             parameter("appId", appId)
