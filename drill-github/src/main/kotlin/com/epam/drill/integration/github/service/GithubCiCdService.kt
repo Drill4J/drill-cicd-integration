@@ -16,8 +16,7 @@
 package com.epam.drill.integration.github.service
 
 import com.epam.drill.integration.common.client.DrillApiClient
-import com.epam.drill.integration.common.model.ReportFormat.MARKDOWN
-import com.epam.drill.integration.common.model.ReportFormat.PLAINTEXT
+import com.epam.drill.integration.common.report.ReportFormat
 import com.epam.drill.integration.common.report.ReportGenerator
 import com.epam.drill.integration.github.client.GithubApiClient
 import com.epam.drill.integration.github.model.GithubEvent
@@ -51,8 +50,8 @@ class GithubCiCdService(
             metrics
         )
         val mediaType: String = when (reportGenerator.getFormat()) {
-            MARKDOWN -> "application/vnd.github.text+json"
-            PLAINTEXT -> "application/json"
+            ReportFormat.MARKDOWN -> "application/vnd.github.text+json"
+            ReportFormat.PLAINTEXT -> "application/json"
         }
         githubApiClient.postPullRequestReport(
             githubRepository,

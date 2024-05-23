@@ -15,8 +15,7 @@
  */
 package com.epam.drill.integration.common.report.impl
 
-import com.epam.drill.integration.common.model.ReportFormat
-import com.epam.drill.integration.common.model.ReportFormat.MARKDOWN
+import com.epam.drill.integration.common.report.ReportFormat
 import com.epam.drill.integration.common.report.ReportGenerator
 import kotlinx.serialization.json.JsonObject
 
@@ -29,5 +28,5 @@ class MarkdownReportGenerator : ReportGenerator {
             - **Risks:** ${metrics["risks"]}
         """.trimIndent()
 
-    override fun getFormat() : ReportFormat= MARKDOWN
+    override fun getFormat(): ReportFormat = ReportFormat.MARKDOWN
 }

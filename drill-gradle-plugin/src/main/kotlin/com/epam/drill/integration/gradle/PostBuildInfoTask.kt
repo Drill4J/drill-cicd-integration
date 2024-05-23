@@ -43,7 +43,7 @@ fun Task.drillPostBuildInfo(ciCd: DrillCiCdProperties) {
         )
 
         runBlocking {
-            drillApiClient.postBuild(payload)
+            drillApiClient.sendBuild(payload)
         }
     }
 }
