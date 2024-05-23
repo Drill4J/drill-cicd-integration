@@ -32,4 +32,17 @@ interface DrillApiClient {
         targetBranch: String,
         latestCommitSha: String
     ): JsonObject
+
+    suspend fun postBuild(payload: BuildPayload)
 }
+
+class BuildPayload(
+    val groupId: String,
+    val appId: String,
+    val commitSha: String,
+    val buildVersion: String,
+    val branch: String,
+    val commitDate: String,
+    val commitMessage: String,
+    val commitAuthor: String
+)
