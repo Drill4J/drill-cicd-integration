@@ -28,7 +28,7 @@ import kotlinx.coroutines.runBlocking
 
 class GithubPullRequestReportCommand: CliktCommand(name = "githubPullRequestReport") {
     private val drillApiUrl by option("-drill-u", "--drillApiUrl", envvar = "INPUT_DRILL_API_URL").required()
-    private val drillApiKey by option("-drill-k", "--drillApiKey", envvar = "INPUT_DRILL_API_KEY").required()
+    private val drillApiKey by option("-drill-k", "--drillApiKey", envvar = "INPUT_DRILL_API_KEY")
     private val drillGroupId by option("-g", "--drillGroupId", envvar = "INPUT_GROUP_ID").required()
     private val drillAgentId by option("-a", "--drillAgentId", envvar = "INPUT_AGENT_ID").required()
     private val sourceBranch by option("-sb", "--sourceBranch", envvar = "GITHUB_HEAD_REF").required()

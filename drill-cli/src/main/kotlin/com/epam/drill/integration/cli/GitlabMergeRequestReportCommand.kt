@@ -26,7 +26,7 @@ import kotlinx.coroutines.runBlocking
 
 class GitlabMergeRequestReportCommand : CliktCommand(name = "gitlabMergeRequestReport") {
     private val drillApiUrl by option("-drill-u", "--drillApiUrl", envvar = "DRILL_API_URL").required()
-    private val drillApiKey by option("-drill-k", "--drillApiKey", envvar = "DRILL_API_KEY").required()
+    private val drillApiKey by option("-drill-k", "--drillApiKey", envvar = "DRILL_API_KEY")
     private val drillGroupId by option("-g", "--drillGroupId", envvar = "DRILL_GROUP_ID").required()
     private val drillAgentId by option("-a", "--drillAgentId", envvar = "DRILL_AGENT_ID").required()
     private val sourceBranch by option("-sb", "--sourceBranch", envvar = "CI_MERGE_REQUEST_SOURCE_BRANCH_NAME").required()
