@@ -24,7 +24,7 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import kotlinx.serialization.json.JsonObject
 
-private const val API_KEY_HEADER = "-X-Api-Key"
+private const val API_KEY_HEADER = "X-Api-Key"
 
 class DrillApiClientImpl(
     private val drillApiUrl: String,
