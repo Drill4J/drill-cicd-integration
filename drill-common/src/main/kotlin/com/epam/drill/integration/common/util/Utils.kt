@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.epam.drill.integration.gradle
+package com.epam.drill.integration.common.util
 
 fun <T> T?.required(name: String): T =
     this ?: throw IllegalArgumentException("Property '$name' is not set or null")

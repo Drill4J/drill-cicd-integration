@@ -17,6 +17,7 @@ package com.epam.drill.integration.gradle
 
 import com.epam.drill.integration.common.client.impl.DrillApiClientImpl
 import com.epam.drill.integration.common.report.impl.TextReportGenerator
+import com.epam.drill.integration.common.util.required
 import com.epam.drill.integration.gitlab.client.impl.GitlabApiClientV4Impl
 import com.epam.drill.integration.gitlab.service.GitlabCiCdService
 import kotlinx.coroutines.runBlocking

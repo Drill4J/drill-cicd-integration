@@ -17,10 +17,12 @@ package com.epam.drill.integration.gradle
 
 import com.epam.drill.integration.common.client.impl.DrillApiClientImpl
 import com.epam.drill.integration.common.report.impl.MarkdownReportGenerator
+import com.epam.drill.integration.common.util.required
 import com.epam.drill.integration.github.client.impl.GithubApiClientImpl
 import com.epam.drill.integration.github.service.GithubCiCdService
 import kotlinx.coroutines.runBlocking
 import org.gradle.api.Task
+
 
 fun Task.drillGithubPullRequestReport(ciCd: DrillCiCdProperties) {
     doFirst {
