@@ -78,7 +78,7 @@ plugins {
 }
 ```
 Add Drill4J GitHub integration properties to your Gradle configuration:
-```kotlon
+```kotlin
 drillCiCd {
     //Drill4J group ID
     groupId = "realworld"
@@ -110,7 +110,84 @@ drillCiCd {
 }
 ```
 
-Run the Gradle command after a test stage:
+### Gitlab integration with Maven plugin
+
+Add Drill4J Gitlab integration to your Maven configuration:
+
+```xml
+
+<plugin>
+    <groupId>com.epam.drill.integration</groupId>
+    <artifactId>drill-maven-plugin</artifactId>
+    <version>0.0.1</version>
+    <configuration>
+        <groupId>some-group-id</groupId>
+        <agentId>some-agent-id</agentId>
+        <sourceBranch>source</sourceBranch>
+        <targetBranch>target</targetBranch>
+        <latestCommitSha>foo</latestCommitSha>
+        <drillApiUrl>http://example.com/api</drillApiUrl>
+        <drillApiKey>secret-key</drillApiKey>
+        <gitlab>
+            <projectId>test</projectId>
+            <gitlabApiUrl>https://api.gitlab.com</gitlabApiUrl>
+            <gitlabPrivateToken>someToken</gitlabPrivateToken>
+            <mergeRequestId>1</mergeRequestId>
+        </gitlab>
+    </configuration>
+    <executions>
+        <execution>
+            <goals>
+                <goal>drillGitlabMergeRequestReport</goal>
+            </goals>
+        </execution>
+    </executions>
+</plugin>
+```
+
+Run the Maven command after a test stage:
+
 ```shell
-./gradlew drillGithubPullRequestReport
+./mvnw clean install
+```
+
+### GitHub integration with Maven plugin
+
+Add Drill4J GitHub integration to your Maven configuration:
+
+```xml
+
+<plugin>
+    <groupId>com.epam.drill.integration</groupId>
+    <artifactId>drill-maven-plugin</artifactId>
+    <version>0.0.1</version>
+    <configuration>
+        <groupId>some-group-id</groupId>
+        <agentId>some-agent-id</agentId>
+        <sourceBranch>source</sourceBranch>
+        <targetBranch>target</targetBranch>
+        <latestCommitSha>foo</latestCommitSha>
+        <drillApiUrl>http://example.com/api</drillApiUrl>
+        <drillApiKey>secret-key</drillApiKey>
+        <github>
+            <githubRepository>test</githubRepository>
+            <githubApiUrl>https://api.github.com</githubApiUrl>
+            <githubToken>someToken</githubToken>
+            <pullRequestId>1</pullRequestId>
+        </github>
+    </configuration>
+    <executions>
+        <execution>
+            <goals>
+                <goal>drillGithubPullRequestReport</goal>
+            </goals>
+        </execution>
+    </executions>
+</plugin>
+```
+
+Run the Maven command after a test stage:
+
+```shell
+./mvnw clean install
 ```
