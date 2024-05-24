@@ -35,32 +35,53 @@ import org.apache.maven.plugins.annotations.ResolutionScope
 )
 class DrillGithubPullRequestReportMojo : AbstractMojo() {
 
-    @Parameter
-    private lateinit var ciCd: DrillCiCdProperties
+    @Parameter(property = "drillApiUrl", required = true)
+    var drillApiUrl: String? = null
+
+    @Parameter(property = "drillApiKey")
+    var drillApiKey: String? = null
+
+    @Parameter(property = "groupId", required = true)
+    var groupId: String? = null
+
+    @Parameter(property = "agentId", required = true)
+    var agentId: String? = null
+
+    @Parameter(property = "latestCommitSha", required = true)
+    var latestCommitSha: String? = null
+
+    @Parameter(property = "sourceBranch", required = true)
+    var sourceBranch: String? = null
+
+    @Parameter(property = "targetBranch", required = true)
+    var targetBranch: String? = null
+
+    @Parameter(property = "github", required = true)
+    var github: DrillGithubProperties? = null
 
     override fun execute() {
-        val github = ciCd.github.required("drillCiCd.github")
+        val github = github.required("github")
 
         val githubCiCdService = GithubCiCdService(
             GithubApiClientImpl(
                 github.githubApiUrl,
-                github.githubToken.required("drillCiCd.github.githubToken"),
+                github.githubToken.required("github.githubToken"),
             ),
             DrillApiClientImpl(
-                ciCd.drillApiUrl.required("drillCiCd.drillApiUrl"),
-                ciCd.drillApiKey
+                drillApiUrl.required("drillApiUrl"),
+                drillApiKey
             ),
             MarkdownReportGenerator()
         )
         runBlocking {
             githubCiCdService.postPullRequestReport(
-                githubRepository = github.githubRepository.required("drillCiCd.github.githubRepository"),
-                githubPullRequestId = github.pullRequestId.required("drillCiCd.github.pullRequestId"),
-                drillGroupId = ciCd.groupId.required("drillCiCd.groupId"),
-                drillAgentId = ciCd.agentId.required("drillCiCd.agentId"),
-                sourceBranch = ciCd.sourceBranch.required("drillCiCd.sourceBranch"),
-                targetBranch = ciCd.targetBranch.required("drillCiCd.targetBranch"),
-                latestCommitSha = ciCd.latestCommitSha.required("drillCiCd.latestCommitSha")
+                githubRepository = github.githubRepository.required("github.githubRepository"),
+                githubPullRequestId = github.pullRequestId.required("github.pullRequestId"),
+                drillGroupId = groupId.required("groupId"),
+                drillAgentId = agentId.required("agentId"),
+                sourceBranch = sourceBranch.required("sourceBranch"),
+                targetBranch = targetBranch.required("targetBranch"),
+                latestCommitSha = latestCommitSha.required("latestCommitSha")
             )
         }
     }

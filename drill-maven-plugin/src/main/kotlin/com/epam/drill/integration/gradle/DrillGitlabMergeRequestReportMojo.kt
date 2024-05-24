@@ -35,32 +35,53 @@ import org.apache.maven.plugins.annotations.ResolutionScope
 )
 class DrillGitlabMergeRequestReportMojo : AbstractMojo() {
 
-    @Parameter
-    private lateinit var ciCd: DrillCiCdProperties
+    @Parameter(property = "drillApiUrl", required = true)
+    var drillApiUrl: String? = null
+
+    @Parameter(property = "drillApiKey")
+    var drillApiKey: String? = null
+
+    @Parameter(property = "groupId", required = true)
+    var groupId: String? = null
+
+    @Parameter(property = "agentId", required = true)
+    var agentId: String? = null
+
+    @Parameter(property = "latestCommitSha", required = true)
+    var latestCommitSha: String? = null
+
+    @Parameter(property = "sourceBranch", required = true)
+    var sourceBranch: String? = null
+
+    @Parameter(property = "targetBranch", required = true)
+    var targetBranch: String? = null
+
+    @Parameter(property = "gitlab", required = true)
+    var gitlab: DrillGitlabProperties? = null
 
     override fun execute() {
-        val gitlab = ciCd.gitlab.required("drillCiCd.gitlab")
+        val gitlab = gitlab.required("gitlab")
 
         val gitlabCiCdService = GitlabCiCdService(
             GitlabApiClientV4Impl(
-                gitlab.gitlabApiUrl.required("drillCiCd.gitlab.gitlabApiUrl"),
+                gitlab.gitlabApiUrl.required("gitlab.gitlabApiUrl"),
                 gitlab.gitlabPrivateToken
             ),
             DrillApiClientImpl(
-                ciCd.drillApiUrl.required("drillCiCd.drillApiUrl"),
-                ciCd.drillApiKey
+                drillApiUrl.required("drillApiUrl"),
+                drillApiKey
             ),
             TextReportGenerator()
         )
         runBlocking {
             gitlabCiCdService.postMergeRequestReport(
-                gitlabProjectId = gitlab.projectId.required("drillCiCd.gitlab.projectId"),
-                gitlabMergeRequestId = gitlab.mergeRequestId.required("drillCiCd.gitlab.mergeRequestId"),
-                drillGroupId = ciCd.groupId.required("drillCiCd.groupId"),
-                drillAgentId = ciCd.agentId.required("drillCiCd.agentId"),
-                sourceBranch = ciCd.sourceBranch.required("drillCiCd.sourceBranch"),
-                targetBranch = ciCd.targetBranch.required("drillCiCd.targetBranch"),
-                latestCommitSha = ciCd.latestCommitSha.required("drillCiCd.latestCommitSha")
+                gitlabProjectId = gitlab.projectId.required("gitlab.projectId"),
+                gitlabMergeRequestId = gitlab.mergeRequestId.required("gitlab.mergeRequestId"),
+                drillGroupId = groupId.required("groupId"),
+                drillAgentId = agentId.required("agentId"),
+                sourceBranch = sourceBranch.required("sourceBranch"),
+                targetBranch = targetBranch.required("targetBranch"),
+                latestCommitSha = latestCommitSha.required("latestCommitSha")
             )
         }
     }

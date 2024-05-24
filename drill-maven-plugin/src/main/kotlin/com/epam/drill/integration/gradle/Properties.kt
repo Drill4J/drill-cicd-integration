@@ -17,35 +17,6 @@ package com.epam.drill.integration.gradle
 
 import org.apache.maven.plugins.annotations.Parameter
 
-open class DrillProperties(
-    @Parameter(property = "drillApiUrl", required = true)
-    var drillApiUrl: String? = null,
-    @Parameter(property = "drillApiKey")
-    var drillApiKey: String? = null,
-    @Parameter(property = "groupId", required = true)
-    var groupId: String? = null,
-    @Parameter(property = "agentId", required = true)
-    var agentId: String? = null
-)
-
-open class DrillCiCdProperties(
-    @Parameter(property = "latestCommitSha", required = true)
-    var latestCommitSha: String? = null,
-    @Parameter(property = "sourceBranch", required = true)
-    var sourceBranch: String? = null,
-    @Parameter(property = "targetBranch", required = true)
-    var targetBranch: String? = null,
-    var gitlab: DrillGitlabProperties? = null,
-    var github: DrillGithubProperties? = null
-) : DrillProperties() {
-    fun gitlab(configure: DrillGitlabProperties.() -> Unit) {
-        this.gitlab = DrillGitlabProperties().apply(configure)
-    }
-
-    fun github(configure: DrillGithubProperties.() -> Unit) {
-        this.github = DrillGithubProperties().apply(configure)
-    }
-}
 
 open class DrillGitlabProperties(
     @Parameter(property = "gitlabApiUrl", required = true)
