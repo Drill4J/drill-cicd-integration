@@ -29,8 +29,8 @@ fun Task.drillGitlabMergeRequestReportTask(ciCd: DrillCiCdProperties) {
 
         val gitlabCiCdService = GitlabCiCdService(
             GitlabApiClientV4Impl(
-                gitlab.gitlabApiUrl.required("drillCiCd.gitlab.gitlabApiUrl"),
-                gitlab.gitlabPrivateToken
+                gitlab.apiUrl.required("drillCiCd.gitlab.apiUrl"),
+                gitlab.privateToken
             ),
             DrillApiClientImpl(
                 ciCd.drillApiUrl.required("drillCiCd.drillApiUrl"),
@@ -46,7 +46,7 @@ fun Task.drillGitlabMergeRequestReportTask(ciCd: DrillCiCdProperties) {
                 appId = ciCd.appId.required("drillCiCd.appId"),
                 sourceBranch = ciCd.sourceBranch.required("drillCiCd.sourceBranch"),
                 targetBranch = ciCd.targetBranch.required("drillCiCd.targetBranch"),
-                commitSha = ciCd.latestCommitSha.required("drillCiCd.latestCommitSha")
+                commitSha = ciCd.commitSha.required("drillCiCd.commitSha")
             )
         }
     }

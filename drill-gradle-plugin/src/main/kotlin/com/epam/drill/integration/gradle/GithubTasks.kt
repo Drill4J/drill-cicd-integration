@@ -30,8 +30,8 @@ fun Task.drillGithubPullRequestReport(ciCd: DrillCiCdProperties) {
 
         val githubCiCdService = GithubCiCdService(
             GithubApiClientImpl(
-                github.githubApiUrl,
-                github.githubToken.required("drillCiCd.github.githubToken"),
+                github.apiUrl,
+                github.token.required("drillCiCd.github.token"),
             ),
             DrillApiClientImpl(
                 ciCd.drillApiUrl.required("drillCiCd.drillApiUrl"),
@@ -41,13 +41,13 @@ fun Task.drillGithubPullRequestReport(ciCd: DrillCiCdProperties) {
         )
         runBlocking {
             githubCiCdService.postPullRequestReport(
-                githubRepository = github.githubRepository.required("drillCiCd.github.githubRepository"),
-                githubPullRequestId = github.pullRequestId.required("drillCiCd.github.pullRequestId"),
+                githubRepository = github.repository.required("drillCiCd.github.repository"),
+                githubPullRequestId = github.pullRequestNumber.required("drillCiCd.github.pullRequestNumber"),
                 groupId = ciCd.groupId.required("drillCiCd.groupId"),
                 appId = ciCd.appId.required("drillCiCd.appId"),
                 sourceBranch = ciCd.sourceBranch.required("drillCiCd.sourceBranch"),
                 targetBranch = ciCd.targetBranch.required("drillCiCd.targetBranch"),
-                commitSha = ciCd.latestCommitSha.required("drillCiCd.latestCommitSha")
+                commitSha = ciCd.commitSha.required("drillCiCd.commitSha")
             )
         }
     }

@@ -25,7 +25,7 @@ open class DrillProperties(
 )
 
 open class DrillCiCdProperties(
-    var latestCommitSha: String? = null,
+    var commitSha: String? = null,
     var sourceBranch: String? = null,
     var targetBranch: String? = null,
     var gitlab: DrillGitlabProperties? = null,
@@ -41,15 +41,15 @@ open class DrillCiCdProperties(
 }
 
 open class DrillGitlabProperties(
-    var gitlabApiUrl: String? = null,
-    var gitlabPrivateToken: String? = null,
+    var apiUrl: String? = null,
+    var privateToken: String? = null,
     var projectId: String? = null,
     var mergeRequestId: String? = null,
 )
 
 open class DrillGithubProperties(
-    var githubApiUrl: String = "https://api.github.com",
-    var githubToken: String? = null,
-    var githubRepository: String? = null,
-    var pullRequestId: Int? = null
+    var apiUrl: String = "https://api.github.com",
+    var token: String? = null,
+    var repository: String? = null,
+    var pullRequestNumber: Int? = null
 )
