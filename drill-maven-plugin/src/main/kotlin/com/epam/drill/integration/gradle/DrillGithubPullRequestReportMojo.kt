@@ -44,11 +44,11 @@ class DrillGithubPullRequestReportMojo : AbstractMojo() {
     @Parameter(property = "groupId", required = true)
     var groupId: String? = null
 
-    @Parameter(property = "agentId", required = true)
-    var agentId: String? = null
+    @Parameter(property = "appId", required = true)
+    var appId: String? = null
 
-    @Parameter(property = "latestCommitSha", required = true)
-    var latestCommitSha: String? = null
+    @Parameter(property = "commitSha", required = true)
+    var commitSha: String? = null
 
     @Parameter(property = "sourceBranch", required = true)
     var sourceBranch: String? = null
@@ -64,8 +64,8 @@ class DrillGithubPullRequestReportMojo : AbstractMojo() {
 
         val githubCiCdService = GithubCiCdService(
             GithubApiClientImpl(
-                github.githubApiUrl,
-                github.githubToken.required("github.githubToken"),
+                github.apiUrl,
+                github.token.required("github.token"),
             ),
             DrillApiClientImpl(
                 drillApiUrl.required("drillApiUrl"),
@@ -75,13 +75,13 @@ class DrillGithubPullRequestReportMojo : AbstractMojo() {
         )
         runBlocking {
             githubCiCdService.postPullRequestReport(
-                githubRepository = github.githubRepository.required("github.githubRepository"),
-                githubPullRequestId = github.pullRequestId.required("github.pullRequestId"),
-                drillGroupId = groupId.required("groupId"),
-                drillAgentId = agentId.required("agentId"),
+                githubRepository = github.repository.required("github.repository"),
+                githubPullRequestId = github.pullRequestNumber.required("github.pullRequestNumber"),
+                groupId = groupId.required("groupId"),
+                appId = appId.required("appId"),
                 sourceBranch = sourceBranch.required("sourceBranch"),
                 targetBranch = targetBranch.required("targetBranch"),
-                latestCommitSha = latestCommitSha.required("latestCommitSha")
+                commitSha = commitSha.required("commitSha")
             )
         }
     }

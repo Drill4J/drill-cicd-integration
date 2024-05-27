@@ -19,10 +19,10 @@ import org.apache.maven.plugins.annotations.Parameter
 
 
 open class DrillGitlabProperties(
-    @Parameter(property = "gitlabApiUrl", required = true)
-    var gitlabApiUrl: String? = null,
-    @Parameter(property = "gitlabPrivateToken", required = true)
-    var gitlabPrivateToken: String? = null,
+    @Parameter(property = "apiUrl", required = true)
+    var apiUrl: String? = null,
+    @Parameter(property = "privateToken", required = true)
+    var privateToken: String? = null,
     @Parameter(property = "projectId", required = true)
     var projectId: String? = null,
     @Parameter(property = "mergeRequestId", required = true)
@@ -30,12 +30,12 @@ open class DrillGitlabProperties(
 )
 
 open class DrillGithubProperties(
-    @Parameter(property = "githubApiUrl")
-    var githubApiUrl: String = "https://api.github.com",
-    @Parameter(property = "githubToken", required = true)
-    var githubToken: String? = null,
-    @Parameter(property = "githubRepository", required = true)
-    var githubRepository: String? = null,
-    @Parameter(property = "pullRequestId", required = true)
-    var pullRequestId: Int? = null
+    @Parameter(property = "apiUrl")
+    var apiUrl: String = "https://api.github.com",
+    @Parameter(property = "token", required = true)
+    var token: String? = null,
+    @Parameter(property = "repository", required = true)
+    var repository: String? = null,
+    @Parameter(property = "pullRequestNumber", required = true)
+    var pullRequestNumber: Int? = null
 )

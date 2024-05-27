@@ -44,11 +44,11 @@ class DrillGitlabMergeRequestReportMojo : AbstractMojo() {
     @Parameter(property = "groupId", required = true)
     var groupId: String? = null
 
-    @Parameter(property = "agentId", required = true)
-    var agentId: String? = null
+    @Parameter(property = "appId", required = true)
+    var appId: String? = null
 
-    @Parameter(property = "latestCommitSha", required = true)
-    var latestCommitSha: String? = null
+    @Parameter(property = "commitSha", required = true)
+    var commitSha: String? = null
 
     @Parameter(property = "sourceBranch", required = true)
     var sourceBranch: String? = null
@@ -64,8 +64,8 @@ class DrillGitlabMergeRequestReportMojo : AbstractMojo() {
 
         val gitlabCiCdService = GitlabCiCdService(
             GitlabApiClientV4Impl(
-                gitlab.gitlabApiUrl.required("gitlab.gitlabApiUrl"),
-                gitlab.gitlabPrivateToken
+                gitlab.apiUrl.required("gitlab.apiUrl"),
+                gitlab.privateToken
             ),
             DrillApiClientImpl(
                 drillApiUrl.required("drillApiUrl"),
@@ -77,11 +77,11 @@ class DrillGitlabMergeRequestReportMojo : AbstractMojo() {
             gitlabCiCdService.postMergeRequestReport(
                 gitlabProjectId = gitlab.projectId.required("gitlab.projectId"),
                 gitlabMergeRequestId = gitlab.mergeRequestId.required("gitlab.mergeRequestId"),
-                drillGroupId = groupId.required("groupId"),
-                drillAgentId = agentId.required("agentId"),
+                groupId = groupId.required("groupId"),
+                appId = appId.required("appId"),
                 sourceBranch = sourceBranch.required("sourceBranch"),
                 targetBranch = targetBranch.required("targetBranch"),
-                latestCommitSha = latestCommitSha.required("latestCommitSha")
+                commitSha = commitSha.required("commitSha")
             )
         }
     }
