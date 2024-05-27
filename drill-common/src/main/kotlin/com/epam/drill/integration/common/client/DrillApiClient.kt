@@ -15,21 +15,36 @@
  */
 package com.epam.drill.integration.common.client
 
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonObject
 
 interface DrillApiClient {
     suspend fun getDiffMetricsByCommits(
         groupId: String,
-        agentId: String,
+        appId: String,
         sourceCommitSha: String,
         baseCommitSha: String
     ): JsonObject
 
     suspend fun getDiffMetricsByBranches(
         groupId: String,
-        agentId: String,
+        appId: String,
         sourceBranch: String,
         targetBranch: String,
-        latestCommitSha: String
+        commitSha: String
     ): JsonObject
+
+    suspend fun sendBuild(payload: BuildPayload)
 }
+
+@Serializable
+class BuildPayload(
+    val groupId: String,
+    val appId: String,
+    val commitSha: String,
+    val buildVersion: String? = null,
+    val branch: String? = null,
+    val commitDate: String,
+    val commitMessage: String,
+    val commitAuthor: String
+)

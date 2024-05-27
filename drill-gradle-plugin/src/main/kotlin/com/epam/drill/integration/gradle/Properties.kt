@@ -20,7 +20,8 @@ open class DrillProperties(
     var drillApiUrl: String? = null,
     var drillApiKey: String? = null,
     var groupId: String? = null,
-    var agentId: String? = null,
+    var appId: String? = null,
+    var buildVersion: String? = null,
 )
 
 open class DrillCiCdProperties(

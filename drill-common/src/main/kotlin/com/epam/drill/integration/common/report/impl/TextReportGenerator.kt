@@ -15,7 +15,7 @@
  */
 package com.epam.drill.integration.common.report.impl
 
-import com.epam.drill.integration.common.model.ReportFormat.PLAINTEXT
+import com.epam.drill.integration.common.report.ReportFormat
 import com.epam.drill.integration.common.report.ReportGenerator
 import kotlinx.serialization.json.JsonObject
 
@@ -27,5 +27,5 @@ class TextReportGenerator : ReportGenerator {
             - Risks: ${metrics["risks"]}
         """.trimIndent()
 
-    override fun getFormat() = PLAINTEXT
+    override fun getFormat() = ReportFormat.PLAINTEXT
 }
