@@ -157,17 +157,17 @@ Add Drill4J Gitlab integration to your Maven configuration:
     <artifactId>drill-maven-plugin</artifactId>
     <version>0.0.1</version>
     <configuration>
-        <groupId>some-group-id</groupId>
-        <agentId>some-agent-id</agentId>
-        <sourceBranch>source</sourceBranch>
-        <targetBranch>target</targetBranch>
-        <latestCommitSha>foo</latestCommitSha>
         <drillApiUrl>http://example.com/api</drillApiUrl>
         <drillApiKey>secret-key</drillApiKey>
+        <groupId>some-group-id</groupId>
+        <appId>some-agent-id</appId>
+        <commitSha>foo</commitSha>
+        <sourceBranch>source</sourceBranch>
+        <targetBranch>target</targetBranch>
         <gitlab>
-            <projectId>test</projectId>
-            <gitlabApiUrl>https://api.gitlab.com</gitlabApiUrl>
-            <gitlabPrivateToken>someToken</gitlabPrivateToken>
+            <apiUrl>https://api.github.com</apiUrl>
+            <privateToken>someToken</privateToken>
+            <projectId>1</projectId>
             <mergeRequestId>1</mergeRequestId>
         </gitlab>
     </configuration>
@@ -198,18 +198,18 @@ Add Drill4J GitHub integration to your Maven configuration:
     <artifactId>drill-maven-plugin</artifactId>
     <version>0.0.1</version>
     <configuration>
-        <groupId>some-group-id</groupId>
-        <agentId>some-agent-id</agentId>
-        <sourceBranch>source</sourceBranch>
-        <targetBranch>target</targetBranch>
-        <latestCommitSha>foo</latestCommitSha>
         <drillApiUrl>http://example.com/api</drillApiUrl>
         <drillApiKey>secret-key</drillApiKey>
+        <groupId>some-group-id</groupId>
+        <appId>some-agent-id</appId>
+        <commitSha>foo</commitSha>
+        <sourceBranch>source</sourceBranch>
+        <targetBranch>target</targetBranch>
         <github>
-            <githubRepository>test</githubRepository>
-            <githubApiUrl>https://api.github.com</githubApiUrl>
-            <githubToken>someToken</githubToken>
-            <pullRequestId>1</pullRequestId>
+            <apiUrl>https://api.github.com</apiUrl>
+            <token>someToken</token>
+            <repository>test</repository>
+            <pullRequestNumber>1</pullRequestNumber>
         </github>
     </configuration>
     <executions>
@@ -223,6 +223,39 @@ Add Drill4J GitHub integration to your Maven configuration:
 ```
 
 Run the Maven command after a test stage:
+
+```shell
+./mvnw clean install
+```
+
+### Build stage integration
+
+Add Maven plugin to your Maven configuration:
+
+```xml
+
+<plugin>
+    <groupId>com.epam.drill.integration</groupId>
+    <artifactId>drill-maven-plugin</artifactId>
+    <version>0.0.1</version>
+    <configuration>
+        <drillApiUrl>http://example.com/api</drillApiUrl>
+        <drillApiKey>secret-key</drillApiKey>
+        <groupId>some-group-id</groupId>
+        <appId>some-agent-id</appId>
+        <buildVersion>foo</buildVersion>
+    </configuration>
+    <executions>
+        <execution>
+            <goals>
+                <goal>drillSendBuildInfo</goal>
+            </goals>
+        </execution>
+    </executions>
+</plugin>
+```
+
+Run the Gradle command at the build stage of your build pipeline:
 
 ```shell
 ./mvnw clean install
