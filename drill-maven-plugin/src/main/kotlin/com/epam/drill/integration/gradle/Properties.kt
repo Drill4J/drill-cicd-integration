@@ -15,41 +15,27 @@
  */
 package com.epam.drill.integration.gradle
 
+import org.apache.maven.plugins.annotations.Parameter
 
-open class DrillProperties(
-    var drillApiUrl: String? = null,
-    var drillApiKey: String? = null,
-    var groupId: String? = null,
-    var appId: String? = null,
-    var buildVersion: String? = null,
-)
-
-open class DrillCiCdProperties(
-    var commitSha: String? = null,
-    var sourceBranch: String? = null,
-    var targetBranch: String? = null,
-    var gitlab: DrillGitlabProperties? = null,
-    var github: DrillGithubProperties? = null,
-) : DrillProperties() {
-    fun gitlab(configure: DrillGitlabProperties.() -> Unit) {
-        this.gitlab = DrillGitlabProperties().apply(configure)
-    }
-
-    fun github(configure: DrillGithubProperties.() -> Unit) {
-        this.github = DrillGithubProperties().apply(configure)
-    }
-}
 
 open class DrillGitlabProperties(
+    @Parameter(property = "apiUrl", required = true)
     var apiUrl: String? = null,
+    @Parameter(property = "privateToken", required = true)
     var privateToken: String? = null,
+    @Parameter(property = "projectId", required = true)
     var projectId: String? = null,
-    var mergeRequestId: String? = null,
+    @Parameter(property = "mergeRequestId", required = true)
+    var mergeRequestId: String? = null
 )
 
 open class DrillGithubProperties(
+    @Parameter(property = "apiUrl")
     var apiUrl: String = "https://api.github.com",
+    @Parameter(property = "token", required = true)
     var token: String? = null,
+    @Parameter(property = "repository", required = true)
     var repository: String? = null,
+    @Parameter(property = "pullRequestNumber", required = true)
     var pullRequestNumber: Int? = null
 )

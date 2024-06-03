@@ -78,7 +78,7 @@ plugins {
 }
 ```
 Add Drill4J GitHub integration properties to your Gradle configuration:
-```kotlon
+```kotlin
 drillCiCd {
     //Drill4J group ID
     groupId = "realworld"
@@ -125,7 +125,7 @@ plugins {
 }
 ```
 Add Drill4J CI/CD integration properties to your Gradle configuration:
-```kotlon
+```kotlin
 drillCiCd {
     //Drill4J group ID
     groupId = "realworld"
@@ -143,4 +143,120 @@ drillCiCd {
 Run the Gradle command at the build stage of your build pipeline:
 ```shell
 ./gradlew drillSendBuildInfo
+```
+
+
+### Gitlab integration with Maven plugin
+
+Add Drill4J Gitlab integration to your Maven configuration:
+
+```xml
+
+<plugin>
+    <groupId>com.epam.drill.integration</groupId>
+    <artifactId>drill-maven-plugin</artifactId>
+    <version>0.0.1</version>
+    <configuration>
+        <drillApiUrl>http://example.com/api</drillApiUrl>
+        <drillApiKey>secret-key</drillApiKey>
+        <groupId>some-group-id</groupId>
+        <appId>some-agent-id</appId>
+        <commitSha>foo</commitSha>
+        <sourceBranch>source</sourceBranch>
+        <targetBranch>target</targetBranch>
+        <gitlab>
+            <apiUrl>https://api.github.com</apiUrl>
+            <privateToken>someToken</privateToken>
+            <projectId>1</projectId>
+            <mergeRequestId>1</mergeRequestId>
+        </gitlab>
+    </configuration>
+    <executions>
+        <execution>
+            <goals>
+                <goal>drillGitlabMergeRequestReport</goal>
+            </goals>
+        </execution>
+    </executions>
+</plugin>
+```
+
+Run the Maven command after a test stage:
+
+```shell
+./mvnw clean install
+```
+
+### GitHub integration with Maven plugin
+
+Add Drill4J GitHub integration to your Maven configuration:
+
+```xml
+
+<plugin>
+    <groupId>com.epam.drill.integration</groupId>
+    <artifactId>drill-maven-plugin</artifactId>
+    <version>0.0.1</version>
+    <configuration>
+        <drillApiUrl>http://example.com/api</drillApiUrl>
+        <drillApiKey>secret-key</drillApiKey>
+        <groupId>some-group-id</groupId>
+        <appId>some-agent-id</appId>
+        <commitSha>foo</commitSha>
+        <sourceBranch>source</sourceBranch>
+        <targetBranch>target</targetBranch>
+        <github>
+            <apiUrl>https://api.github.com</apiUrl>
+            <token>someToken</token>
+            <repository>test</repository>
+            <pullRequestNumber>1</pullRequestNumber>
+        </github>
+    </configuration>
+    <executions>
+        <execution>
+            <goals>
+                <goal>drillGithubPullRequestReport</goal>
+            </goals>
+        </execution>
+    </executions>
+</plugin>
+```
+
+Run the Maven command after a test stage:
+
+```shell
+./mvnw clean install
+```
+
+### Build stage integration
+
+Add Maven plugin to your Maven configuration:
+
+```xml
+
+<plugin>
+    <groupId>com.epam.drill.integration</groupId>
+    <artifactId>drill-maven-plugin</artifactId>
+    <version>0.0.1</version>
+    <configuration>
+        <drillApiUrl>http://example.com/api</drillApiUrl>
+        <drillApiKey>secret-key</drillApiKey>
+        <groupId>some-group-id</groupId>
+        <appId>some-agent-id</appId>
+        <buildVersion>foo</buildVersion>
+    </configuration>
+    <executions>
+        <execution>
+            <goals>
+                <goal>drillSendBuildInfo</goal>
+            </goals>
+        </execution>
+    </executions>
+</plugin>
+```
+
+Run the Gradle command at the build stage of your build pipeline:
+
+```shell
+./mvnw clean install
 ```

@@ -2,4 +2,4 @@ build/
 .gradle/
 .idea/
 *.iml
-/maven-plugin/target
+/drill-maven-plugin/target

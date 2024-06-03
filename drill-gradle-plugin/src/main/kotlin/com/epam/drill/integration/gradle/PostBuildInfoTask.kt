@@ -19,6 +19,7 @@ import com.epam.drill.integration.common.client.BuildPayload
 import com.epam.drill.integration.common.client.impl.DrillApiClientImpl
 import com.epam.drill.integration.common.git.getGitBranch
 import com.epam.drill.integration.common.git.getGitCommitInfo
+import com.epam.drill.integration.common.util.required
 import kotlinx.coroutines.runBlocking
 import org.gradle.api.Task
 
