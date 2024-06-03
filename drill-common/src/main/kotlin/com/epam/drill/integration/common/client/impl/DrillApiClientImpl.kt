@@ -15,6 +15,7 @@
  */
 package com.epam.drill.integration.common.client.impl
 
+import com.epam.drill.integration.common.client.BuildPayload
 import com.epam.drill.integration.common.client.DrillApiClient
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
@@ -23,55 +24,72 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import kotlinx.serialization.json.JsonObject
 
+private const val API_KEY_HEADER = "X-Api-Key"
+
 class DrillApiClientImpl(
-    private val drillUrl: String,
+    private val drillApiUrl: String,
     private val drillApiKey: String? = null,
-): DrillApiClient {
+) : DrillApiClient {
     private val client = HttpClient(CIO) {
         install(JsonFeature)
     }
 
     override suspend fun getDiffMetricsByCommits(
         groupId: String,
-        agentId: String,
+        appId: String,
         sourceCommitSha: String,
         baseCommitSha: String
     ): JsonObject {
         return getMetricsSummary(
             groupId = groupId,
-            agentId = agentId,
+            appId = appId,
             sourceCommitSha = sourceCommitSha,
-            baseCommitSha = baseCommitSha)
+            baseCommitSha = baseCommitSha
+        )
     }
 
     override suspend fun getDiffMetricsByBranches(
         groupId: String,
-        agentId: String,
+        appId: String,
         sourceBranch: String,
         targetBranch: String,
-        latestCommitSha: String
+        commitSha: String
     ): JsonObject {
         return getMetricsSummary(
             groupId = groupId,
-            agentId = agentId,
+            appId = appId,
             sourceBranch = sourceBranch,
             targetBranch = targetBranch,
-            sourceCommitSha = latestCommitSha)
+            sourceCommitSha = commitSha
+        )
+    }
+
+    override suspend fun sendBuild(payload: BuildPayload) {
+        val url = "$drillApiUrl/builds"
+        client.put<JsonObject?>(url) {
+            contentType(ContentType.Application.Json)
+            drillApiKey?.let { apiKey ->
+                headers {
+                    append(API_KEY_HEADER, apiKey)
+                }
+            }
+            body = payload
+        }
     }
 
     private suspend fun getMetricsSummary(
         groupId: String,
-        agentId: String,
+        appId: String,
         sourceCommitSha: String? = "",
         sourceBranch: String? = "",
         baseCommitSha: String? = "",
         targetBranch: String? = ""
     ): JsonObject {
 
-        val url = "$drillUrl/api/metrics/summary"
+        val url = "$drillApiUrl/metrics/summary"
         val response = client.request<JsonObject>(url) {
             parameter("groupId", groupId)
-            parameter("agentId", agentId)
+            parameter("appId", appId)
             parameter("currentVcsRef", sourceCommitSha)
             parameter("currentBranch", sourceBranch)
             parameter("baseVcsRef", baseCommitSha)
@@ -80,7 +98,7 @@ class DrillApiClientImpl(
             contentType(ContentType.Application.Json)
             drillApiKey?.let { apiKey ->
                 headers {
-                    append("-X-Api-Key", apiKey)
+                    append(API_KEY_HEADER, apiKey)
                 }
             }
         }

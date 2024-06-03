@@ -17,10 +17,12 @@ package com.epam.drill.integration.gradle
 
 import com.epam.drill.integration.common.client.impl.DrillApiClientImpl
 import com.epam.drill.integration.common.report.impl.MarkdownReportGenerator
+import com.epam.drill.integration.common.util.required
 import com.epam.drill.integration.github.client.impl.GithubApiClientImpl
 import com.epam.drill.integration.github.service.GithubCiCdService
 import kotlinx.coroutines.runBlocking
 import org.gradle.api.Task
+
 
 fun Task.drillGithubPullRequestReport(ciCd: DrillCiCdProperties) {
     doFirst {
@@ -28,8 +30,8 @@ fun Task.drillGithubPullRequestReport(ciCd: DrillCiCdProperties) {
 
         val githubCiCdService = GithubCiCdService(
             GithubApiClientImpl(
-                github.githubApiUrl,
-                github.githubToken.required("drillCiCd.github.githubToken"),
+                github.apiUrl,
+                github.token.required("drillCiCd.github.token"),
             ),
             DrillApiClientImpl(
                 ciCd.drillApiUrl.required("drillCiCd.drillApiUrl"),
@@ -39,13 +41,13 @@ fun Task.drillGithubPullRequestReport(ciCd: DrillCiCdProperties) {
         )
         runBlocking {
             githubCiCdService.postPullRequestReport(
-                githubRepository = github.githubRepository.required("drillCiCd.github.githubRepository"),
-                githubPullRequestId = github.pullRequestId.required("drillCiCd.github.pullRequestId"),
-                drillGroupId = ciCd.groupId.required("drillCiCd.groupId"),
-                drillAgentId = ciCd.agentId.required("drillCiCd.agentId"),
+                githubRepository = github.repository.required("drillCiCd.github.repository"),
+                githubPullRequestId = github.pullRequestNumber.required("drillCiCd.github.pullRequestNumber"),
+                groupId = ciCd.groupId.required("drillCiCd.groupId"),
+                appId = ciCd.appId.required("drillCiCd.appId"),
                 sourceBranch = ciCd.sourceBranch.required("drillCiCd.sourceBranch"),
                 targetBranch = ciCd.targetBranch.required("drillCiCd.targetBranch"),
-                latestCommitSha = ciCd.latestCommitSha.required("drillCiCd.latestCommitSha")
+                commitSha = ciCd.commitSha.required("drillCiCd.commitSha")
             )
         }
     }

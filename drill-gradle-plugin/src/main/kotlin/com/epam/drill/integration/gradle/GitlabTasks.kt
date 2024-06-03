@@ -17,6 +17,7 @@ package com.epam.drill.integration.gradle
 
 import com.epam.drill.integration.common.client.impl.DrillApiClientImpl
 import com.epam.drill.integration.common.report.impl.TextReportGenerator
+import com.epam.drill.integration.common.util.required
 import com.epam.drill.integration.gitlab.client.impl.GitlabApiClientV4Impl
 import com.epam.drill.integration.gitlab.service.GitlabCiCdService
 import kotlinx.coroutines.runBlocking
@@ -28,8 +29,8 @@ fun Task.drillGitlabMergeRequestReportTask(ciCd: DrillCiCdProperties) {
 
         val gitlabCiCdService = GitlabCiCdService(
             GitlabApiClientV4Impl(
-                gitlab.gitlabApiUrl.required("drillCiCd.gitlab.gitlabApiUrl"),
-                gitlab.gitlabPrivateToken
+                gitlab.apiUrl.required("drillCiCd.gitlab.apiUrl"),
+                gitlab.privateToken
             ),
             DrillApiClientImpl(
                 ciCd.drillApiUrl.required("drillCiCd.drillApiUrl"),
@@ -41,11 +42,11 @@ fun Task.drillGitlabMergeRequestReportTask(ciCd: DrillCiCdProperties) {
             gitlabCiCdService.postMergeRequestReport(
                 gitlabProjectId = gitlab.projectId.required("drillCiCd.gitlab.projectId"),
                 gitlabMergeRequestId = gitlab.mergeRequestId.required("drillCiCd.gitlab.mergeRequestId"),
-                drillGroupId = ciCd.groupId.required("drillCiCd.groupId"),
-                drillAgentId = ciCd.agentId.required("drillCiCd.agentId"),
+                groupId = ciCd.groupId.required("drillCiCd.groupId"),
+                appId = ciCd.appId.required("drillCiCd.appId"),
                 sourceBranch = ciCd.sourceBranch.required("drillCiCd.sourceBranch"),
                 targetBranch = ciCd.targetBranch.required("drillCiCd.targetBranch"),
-                latestCommitSha = ciCd.latestCommitSha.required("drillCiCd.latestCommitSha")
+                commitSha = ciCd.commitSha.required("drillCiCd.commitSha")
             )
         }
     }

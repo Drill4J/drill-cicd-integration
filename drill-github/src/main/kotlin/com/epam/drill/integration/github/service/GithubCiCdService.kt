@@ -16,8 +16,7 @@
 package com.epam.drill.integration.github.service
 
 import com.epam.drill.integration.common.client.DrillApiClient
-import com.epam.drill.integration.common.model.ReportFormat.MARKDOWN
-import com.epam.drill.integration.common.model.ReportFormat.PLAINTEXT
+import com.epam.drill.integration.common.report.ReportFormat
 import com.epam.drill.integration.common.report.ReportGenerator
 import com.epam.drill.integration.github.client.GithubApiClient
 import com.epam.drill.integration.github.model.GithubEvent
@@ -34,25 +33,25 @@ class GithubCiCdService(
     suspend fun postPullRequestReport(
         githubRepository: String,
         githubPullRequestId: Int,
-        drillGroupId: String,
-        drillAgentId: String,
+        groupId: String,
+        appId: String,
         sourceBranch: String,
         targetBranch: String,
-        latestCommitSha: String
+        commitSha: String
     ) {
         val metrics = drillApiClient.getDiffMetricsByBranches(
-            drillGroupId,
-            drillAgentId,
+            groupId,
+            appId,
             sourceBranch,
             targetBranch,
-            latestCommitSha
+            commitSha
         )
         val comment = reportGenerator.getDiffSummaryReport(
             metrics
         )
         val mediaType: String = when (reportGenerator.getFormat()) {
-            MARKDOWN -> "application/vnd.github.text+json"
-            PLAINTEXT -> "application/json"
+            ReportFormat.MARKDOWN -> "application/vnd.github.text+json"
+            ReportFormat.PLAINTEXT -> "application/json"
         }
         githubApiClient.postPullRequestReport(
             githubRepository,
@@ -64,8 +63,8 @@ class GithubCiCdService(
 
     suspend fun postPullRequestReportByEvent(
         githubEventFile: File,
-        drillGroupId: String,
-        drillAgentId: String
+        groupId: String,
+        appId: String
     ) {
         val json = Json {
             ignoreUnknownKeys = true
@@ -75,11 +74,11 @@ class GithubCiCdService(
         postPullRequestReport(
             githubRepository = event.repository.fullName,
             githubPullRequestId = event.pullRequest.number,
-            drillGroupId = drillGroupId,
-            drillAgentId = drillAgentId,
+            groupId = groupId,
+            appId = appId,
             sourceBranch = event.pullRequest.head.ref,
             targetBranch = event.pullRequest.base.ref,
-            latestCommitSha = event.pullRequest.head.sha,
+            commitSha = event.pullRequest.head.sha,
         )
     }
 
