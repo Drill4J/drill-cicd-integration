@@ -15,7 +15,7 @@
  */
 package com.epam.drill.integration.cli
 
-import com.epam.drill.integration.common.metrics.impl.MetricsClientImpl
+import com.epam.drill.integration.common.client.impl.MetricsClientImpl
 import com.epam.drill.integration.common.report.impl.MarkdownReportGenerator
 import com.epam.drill.integration.github.client.impl.GithubApiClientImpl
 import com.epam.drill.integration.github.service.GithubCiCdService

@@ -15,13 +15,13 @@
  */
 package com.epam.drill.integration.gitlab.service
 
-import com.epam.drill.integration.common.metrics.DrillApiClient
+import com.epam.drill.integration.common.client.MetricsClient
 import com.epam.drill.integration.common.report.ReportGenerator
 import com.epam.drill.integration.gitlab.client.GitlabApiClient
 
 class GitlabCiCdService(
     private val gitlabApiClient: GitlabApiClient,
-    private val drillApiClient: DrillApiClient,
+    private val metricsClient: MetricsClient,
     private val reportGenerator: ReportGenerator
 ) {
     suspend fun postMergeRequestReport(
@@ -34,7 +34,7 @@ class GitlabCiCdService(
         commitSha: String,
         mergeBaseCommitSha: String
     ) {
-        val metrics = drillApiClient.getBuildComparison(
+        val metrics = metricsClient.getBuildComparison(
             groupId,
             appId,
             sourceBranch,

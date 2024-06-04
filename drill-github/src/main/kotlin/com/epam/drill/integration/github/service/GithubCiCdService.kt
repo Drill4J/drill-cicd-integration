@@ -15,7 +15,7 @@
  */
 package com.epam.drill.integration.github.service
 
-import com.epam.drill.integration.common.metrics.DrillApiClient
+import com.epam.drill.integration.common.client.MetricsClient
 import com.epam.drill.integration.common.report.ReportFormat
 import com.epam.drill.integration.common.report.ReportGenerator
 import com.epam.drill.integration.github.client.GithubApiClient
@@ -27,7 +27,7 @@ import java.io.File
 
 class GithubCiCdService(
     private val githubApiClient: GithubApiClient,
-    private val drillApiClient: DrillApiClient,
+    private val metricsClient: MetricsClient,
     private val reportGenerator: ReportGenerator
 ) {
     suspend fun postPullRequestReport(
@@ -40,7 +40,7 @@ class GithubCiCdService(
         headCommitSha: String,
         mergeBaseCommitSha: String
     ) {
-        val metrics = drillApiClient.getBuildComparison(
+        val metrics = metricsClient.getBuildComparison(
             groupId = groupId,
             appId = appId,
             commitSha = headCommitSha,

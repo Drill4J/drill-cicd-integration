@@ -15,8 +15,8 @@
  */
 package com.epam.drill.integration.cli
 
-import com.epam.drill.integration.common.metrics.BuildPayload
-import com.epam.drill.integration.common.metrics.impl.MetricsClientImpl
+import com.epam.drill.integration.common.client.BuildPayload
+import com.epam.drill.integration.common.client.impl.DataIngestClientImpl
 import com.epam.drill.integration.common.git.getGitBranch
 import com.epam.drill.integration.common.git.getGitCommitInfo
 import com.github.ajalt.clikt.core.CliktCommand
@@ -24,7 +24,7 @@ import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import kotlinx.coroutines.runBlocking
 
-class SendBuildInfoCommand : CliktCommand(name = "sendzlBuildInfo") {
+class SendBuildInfoCommand : CliktCommand(name = "sendBuildInfo") {
     private val drillApiUrl by option("-drill-u", "--drillApiUrl", envvar = "DRILL_API_URL").required()
     private val drillApiKey by option("-drill-k", "--drillApiKey", envvar = "DRILL_API_KEY")
     private val groupId by option("-g", "--groupId", envvar = "DRILL_GROUP_ID").required()
@@ -33,7 +33,7 @@ class SendBuildInfoCommand : CliktCommand(name = "sendzlBuildInfo") {
 
     override fun run() {
         echo("Posting Drill4J Build Info ...")
-        val drillApiClient = MetricsClientImpl(
+        val drillApiClient = DataIngestClientImpl(
             drillApiUrl = drillApiUrl,
             drillApiKey = drillApiKey
         )
