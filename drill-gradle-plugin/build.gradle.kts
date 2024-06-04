@@ -55,10 +55,6 @@ tasks {
 publishing {
     repositories {
         mavenLocal()
-//        maven {
-//            name = "localPluginRepository"
-//            url = uri("../local-plugin-repository")
-//        }
     }
 }
 

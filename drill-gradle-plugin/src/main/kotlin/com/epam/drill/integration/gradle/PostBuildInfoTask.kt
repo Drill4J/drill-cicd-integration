@@ -15,8 +15,8 @@
  */
 package com.epam.drill.integration.gradle
 
-import com.epam.drill.integration.common.client.BuildPayload
-import com.epam.drill.integration.common.client.impl.DrillApiClientImpl
+import com.epam.drill.integration.common.metrics.BuildPayload
+import com.epam.drill.integration.common.metrics.impl.MetricsClientImpl
 import com.epam.drill.integration.common.git.getGitBranch
 import com.epam.drill.integration.common.git.getGitCommitInfo
 import com.epam.drill.integration.common.util.required
@@ -25,7 +25,7 @@ import org.gradle.api.Task
 
 fun Task.drillSendBuildInfo(ciCd: DrillCiCdProperties) {
     doFirst {
-        val drillApiClient = DrillApiClientImpl(
+        val drillApiClient = MetricsClientImpl(
             drillApiUrl = ciCd.drillApiUrl.required("drillCiCd.drillApiUrl"),
             drillApiKey = ciCd.drillApiKey
         )

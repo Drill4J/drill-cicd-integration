@@ -15,7 +15,7 @@
  */
 package com.epam.drill.integration.github.service
 
-import com.epam.drill.integration.common.client.DrillApiClient
+import com.epam.drill.integration.common.metrics.DrillApiClient
 import com.epam.drill.integration.common.report.ReportFormat
 import com.epam.drill.integration.common.report.ReportGenerator
 import com.epam.drill.integration.github.client.GithubApiClient
@@ -37,18 +37,16 @@ class GithubCiCdService(
         appId: String,
         sourceBranch: String,
         targetBranch: String,
-        commitSha: String
+        headCommitSha: String,
+        mergeBaseCommitSha: String
     ) {
-        val metrics = drillApiClient.getDiffMetricsByBranches(
-            groupId,
-            appId,
-            sourceBranch,
-            targetBranch,
-            commitSha
+        val metrics = drillApiClient.getBuildComparison(
+            groupId = groupId,
+            appId = appId,
+            commitSha = headCommitSha,
+            baselineCommitSha = mergeBaseCommitSha
         )
-        val comment = reportGenerator.getDiffSummaryReport(
-            metrics
-        )
+        val comment = reportGenerator.getDiffSummaryReport(metrics)
         val mediaType: String = when (reportGenerator.getFormat()) {
             ReportFormat.MARKDOWN -> "application/vnd.github.text+json"
             ReportFormat.PLAINTEXT -> "application/json"
@@ -78,7 +76,8 @@ class GithubCiCdService(
             appId = appId,
             sourceBranch = event.pullRequest.head.ref,
             targetBranch = event.pullRequest.base.ref,
-            commitSha = event.pullRequest.head.sha,
+            headCommitSha = event.pullRequest.head.sha,
+            mergeBaseCommitSha = event.pullRequest.mergeCommitSha
         )
     }
 

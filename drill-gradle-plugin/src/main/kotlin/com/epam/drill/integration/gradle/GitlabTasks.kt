@@ -15,7 +15,7 @@
  */
 package com.epam.drill.integration.gradle
 
-import com.epam.drill.integration.common.client.impl.DrillApiClientImpl
+import com.epam.drill.integration.common.metrics.impl.MetricsClientImpl
 import com.epam.drill.integration.common.report.impl.TextReportGenerator
 import com.epam.drill.integration.common.util.required
 import com.epam.drill.integration.gitlab.client.impl.GitlabApiClientV4Impl
@@ -32,7 +32,7 @@ fun Task.drillGitlabMergeRequestReportTask(ciCd: DrillCiCdProperties) {
                 gitlab.apiUrl.required("drillCiCd.gitlab.apiUrl"),
                 gitlab.privateToken
             ),
-            DrillApiClientImpl(
+            MetricsClientImpl(
                 ciCd.drillApiUrl.required("drillCiCd.drillApiUrl"),
                 ciCd.drillApiKey
             ),
@@ -46,7 +46,8 @@ fun Task.drillGitlabMergeRequestReportTask(ciCd: DrillCiCdProperties) {
                 appId = ciCd.appId.required("drillCiCd.appId"),
                 sourceBranch = ciCd.sourceBranch.required("drillCiCd.sourceBranch"),
                 targetBranch = ciCd.targetBranch.required("drillCiCd.targetBranch"),
-                commitSha = ciCd.commitSha.required("drillCiCd.commitSha")
+                commitSha = ciCd.commitSha.required("drillCiCd.commitSha"),
+                mergeBaseCommitSha = ciCd.mergeBaseCommitSha.required("drillCiCd.mergeBaseCommitSha"),
             )
         }
     }

@@ -39,7 +39,8 @@ data class GithubPullRequest(
     val number: Int,
     val user: GithubUser,
     val head: GithubPullRequestBranch,
-    val base: GithubPullRequestBranch
+    val base: GithubPullRequestBranch,
+    val mergeCommitSha: String
 )
 
 @Serializable

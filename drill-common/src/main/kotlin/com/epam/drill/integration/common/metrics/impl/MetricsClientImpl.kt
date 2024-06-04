@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.epam.drill.integration.common.client.impl
+package com.epam.drill.integration.common.metrics.impl
 
-import com.epam.drill.integration.common.client.BuildPayload
-import com.epam.drill.integration.common.client.DrillApiClient
+import com.epam.drill.integration.common.metrics.BuildPayload
+import com.epam.drill.integration.common.metrics.DrillApiClient
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.features.json.*
@@ -26,7 +26,7 @@ import kotlinx.serialization.json.JsonObject
 
 private const val API_KEY_HEADER = "X-Api-Key"
 
-class DrillApiClientImpl(
+class MetricsClientImpl(
     private val drillApiUrl: String,
     private val drillApiKey: String? = null,
 ) : DrillApiClient {
@@ -86,7 +86,7 @@ class DrillApiClientImpl(
         targetBranch: String? = ""
     ): JsonObject {
 
-        val url = "$drillApiUrl/metrics/summary"
+        val url = "$drillApiUrl/metrics/build-diff-report"
         val response = client.request<JsonObject>(url) {
             parameter("groupId", groupId)
             parameter("appId", appId)
@@ -94,6 +94,38 @@ class DrillApiClientImpl(
             parameter("currentBranch", sourceBranch)
             parameter("baseVcsRef", baseCommitSha)
             parameter("baseBranch", targetBranch)
+
+            contentType(ContentType.Application.Json)
+            drillApiKey?.let { apiKey ->
+                headers {
+                    append(API_KEY_HEADER, apiKey)
+                }
+            }
+        }
+        return response
+    }
+
+    override suspend fun getBuildComparison(
+        groupId: String,
+        appId: String,
+        instanceId: String?,
+        commitSha: String?,
+        buildVersion: String?,
+        baselineInstanceId: String?,
+        baselineCommitSha: String?,
+        baselineBuildVersion: String?,
+    ): JsonObject {
+
+        val url = "$drillApiUrl/metrics/build-diff-report"
+        val response = client.request<JsonObject>(url) {
+            parameter("groupId", groupId)
+            parameter("appId", appId)
+            parameter("instanceId", instanceId)
+            parameter("commitSha", commitSha)
+            parameter("buildVersion", buildVersion)
+            parameter("baselineInstanceId", baselineInstanceId)
+            parameter("baselineCommitSha", baselineCommitSha)
+            parameter("baselineBuildVersion", baselineBuildVersion)
 
             contentType(ContentType.Application.Json)
             drillApiKey?.let { apiKey ->

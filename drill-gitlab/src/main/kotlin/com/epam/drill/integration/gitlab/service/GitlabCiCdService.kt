@@ -15,7 +15,7 @@
  */
 package com.epam.drill.integration.gitlab.service
 
-import com.epam.drill.integration.common.client.DrillApiClient
+import com.epam.drill.integration.common.metrics.DrillApiClient
 import com.epam.drill.integration.common.report.ReportGenerator
 import com.epam.drill.integration.gitlab.client.GitlabApiClient
 
@@ -31,14 +31,16 @@ class GitlabCiCdService(
         appId: String,
         sourceBranch: String,
         targetBranch: String,
-        commitSha: String
+        commitSha: String,
+        mergeBaseCommitSha: String
     ) {
-        val metrics = drillApiClient.getDiffMetricsByBranches(
+        val metrics = drillApiClient.getBuildComparison(
             groupId,
             appId,
             sourceBranch,
             targetBranch,
-            commitSha
+            commitSha,
+            mergeBaseCommitSha
         )
         val comment = reportGenerator.getDiffSummaryReport(
             metrics

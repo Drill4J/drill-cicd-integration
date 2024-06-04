@@ -15,7 +15,7 @@
  */
 package com.epam.drill.integration.cli
 
-import com.epam.drill.integration.common.client.impl.DrillApiClientImpl
+import com.epam.drill.integration.common.metrics.impl.MetricsClientImpl
 import com.epam.drill.integration.common.report.impl.MarkdownReportGenerator
 import com.epam.drill.integration.github.client.impl.GithubApiClientImpl
 import com.epam.drill.integration.github.service.GithubCiCdService
@@ -29,24 +29,24 @@ import java.io.File
 class GithubPullRequestReportByEventCommand: CliktCommand(name = "githubPullRequestReportByEvent") {
     private val drillApiUrl by option("-drill-u", "--drillApiUrl", envvar = "INPUT_DRILL_API_URL").required()
     private val drillApiKey by option("-drill-k", "--drillApiKey", envvar = "INPUT_DRILL_API_KEY")
-    private val drillGroupId by option("-g", "--drillGroupId", envvar = "INPUT_GROUP_ID").required()
-    private val drillAppId by option("-a", "--drillAppId", envvar = "INPUT_APP_ID").required()
+    private val groupId by option("-g", "--drillGroupId", envvar = "INPUT_GROUP_ID").required()
+    private val appId by option("-a", "--drillAppId", envvar = "INPUT_APP_ID").required()
     private val githubApiUrl by option("-gh-u", "--githubApiUrl", envvar = "GITHUB_API_URL").default("https://api.github.com")
     private val githubToken by option("-gh-t", "--githubToken", envvar = "INPUT_GITHUB_TOKEN").required()
-    private val eventFilePath by option("-ep", "--eventFilePath", envvar = "GITHUB_EVENT_PATH").required()
+    private val eventFilePath by option("-ef", "--eventFilePath", envvar = "GITHUB_EVENT_PATH").required()
 
     override fun run() {
         echo("Posting Drill4J Pull Request Report to GitHub by GitHub Event...")
         val githubCiCdService = GithubCiCdService(
             GithubApiClientImpl(githubApiUrl, githubToken),
-            DrillApiClientImpl(drillApiUrl, drillApiKey),
+            MetricsClientImpl(drillApiUrl, drillApiKey),
             MarkdownReportGenerator()
         )
         runBlocking {
             githubCiCdService.postPullRequestReportByEvent(
                 File(eventFilePath),
-                drillGroupId,
-                drillAppId
+                groupId,
+                appId
             )
         }
         echo("Done.")

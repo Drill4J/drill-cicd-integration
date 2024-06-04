@@ -13,12 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.epam.drill.integration.common.client
+package com.epam.drill.integration.common.metrics
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonObject
 
 interface DrillApiClient {
+
+    suspend fun getBuildComparison(
+        groupId: String,
+        appId: String,
+        instanceId: String? = null,
+        commitSha: String? = null,
+        buildVersion: String? = null,
+        baselineInstanceId: String? = null,
+        baselineCommitSha: String? = null,
+        baselineBuildVersion: String? = null,
+    ): JsonObject
+
     suspend fun getDiffMetricsByCommits(
         groupId: String,
         appId: String,

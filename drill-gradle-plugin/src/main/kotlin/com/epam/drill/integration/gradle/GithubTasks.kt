@@ -15,13 +15,14 @@
  */
 package com.epam.drill.integration.gradle
 
-import com.epam.drill.integration.common.client.impl.DrillApiClientImpl
+import com.epam.drill.integration.common.metrics.impl.MetricsClientImpl
 import com.epam.drill.integration.common.report.impl.MarkdownReportGenerator
 import com.epam.drill.integration.common.util.required
 import com.epam.drill.integration.github.client.impl.GithubApiClientImpl
 import com.epam.drill.integration.github.service.GithubCiCdService
 import kotlinx.coroutines.runBlocking
 import org.gradle.api.Task
+import java.io.File
 
 
 fun Task.drillGithubPullRequestReport(ciCd: DrillCiCdProperties) {
@@ -33,21 +34,17 @@ fun Task.drillGithubPullRequestReport(ciCd: DrillCiCdProperties) {
                 github.apiUrl,
                 github.token.required("drillCiCd.github.token"),
             ),
-            DrillApiClientImpl(
+            MetricsClientImpl(
                 ciCd.drillApiUrl.required("drillCiCd.drillApiUrl"),
                 ciCd.drillApiKey
             ),
             MarkdownReportGenerator()
         )
         runBlocking {
-            githubCiCdService.postPullRequestReport(
-                githubRepository = github.repository.required("drillCiCd.github.repository"),
-                githubPullRequestId = github.pullRequestNumber.required("drillCiCd.github.pullRequestNumber"),
+            githubCiCdService.postPullRequestReportByEvent(
                 groupId = ciCd.groupId.required("drillCiCd.groupId"),
                 appId = ciCd.appId.required("drillCiCd.appId"),
-                sourceBranch = ciCd.sourceBranch.required("drillCiCd.sourceBranch"),
-                targetBranch = ciCd.targetBranch.required("drillCiCd.targetBranch"),
-                commitSha = ciCd.commitSha.required("drillCiCd.commitSha")
+                githubEventFile = File(github.eventFilePath.required("drillCiCd.github.eventFilePath")),
             )
         }
     }
