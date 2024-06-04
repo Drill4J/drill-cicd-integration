@@ -15,8 +15,9 @@
  */
 package com.epam.drill.integration.gradle
 
-import com.epam.drill.integration.common.metrics.impl.MetricsClientImpl
+import com.epam.drill.integration.common.client.impl.MetricsClientImpl
 import com.epam.drill.integration.common.report.impl.TextReportGenerator
+import com.epam.drill.integration.common.util.fromEnv
 import com.epam.drill.integration.common.util.required
 import com.epam.drill.integration.gitlab.client.impl.GitlabApiClientV4Impl
 import com.epam.drill.integration.gitlab.service.GitlabCiCdService
@@ -26,28 +27,48 @@ import org.gradle.api.Task
 fun Task.drillGitlabMergeRequestReportTask(ciCd: DrillCiCdProperties) {
     doFirst {
         val gitlab = ciCd.gitlab.required("gitlab")
+        val gitlabApiUrl = gitlab.apiUrl.required("gitlab.apiUrl")
+        val gitlabPrivateToken = gitlab.privateToken
+        val drillApiUrl = ciCd.drillApiUrl.required("drillApiUrl")
+        val drillApiKey = ciCd.drillApiKey
+        val gitlabProjectId = gitlab.projectId.required("gitlab.projectId")
+        val gitlabMergeRequestId = gitlab.mergeRequestId.required("gitlab.mergeRequestId")
+        val groupId = ciCd.groupId.required("groupId")
+        val appId = ciCd.appId.required("appId")
+        val sourceBranch = gitlab.mergeRequest.sourceBranch
+            .fromEnv("CI_MERGE_REQUEST_SOURCE_BRANCH_NAME")
+            .required("gitlab.mergeRequest.sourceBranch")
+        val targetBranch = gitlab.mergeRequest.targetBranch
+            .fromEnv("CI_MERGE_REQUEST_TARGET_BRANCH_NAME")
+            .required("gitlab.mergeRequest.sourceBranch")
+        val commitSha = gitlab.mergeRequest.commitSha
+            .fromEnv("CI_COMMIT_SHA")
+            .required("gitlab.mergeRequest.commitSha")
+        val mergeBaseCommitSha = gitlab.mergeRequest.mergeBaseCommitSha
+            .fromEnv("CI_MERGE_REQUEST_DIFF_BASE_SHA")
+            .required("gitlab.mergeRequest.mergeBaseCommitSha")
 
         val gitlabCiCdService = GitlabCiCdService(
             GitlabApiClientV4Impl(
-                gitlab.apiUrl.required("gitlab.apiUrl"),
-                gitlab.privateToken
+                gitlabApiUrl,
+                gitlabPrivateToken
             ),
             MetricsClientImpl(
-                ciCd.drillApiUrl.required("drillApiUrl"),
-                ciCd.drillApiKey
+                drillApiUrl,
+                drillApiKey
             ),
             TextReportGenerator()
         )
         runBlocking {
             gitlabCiCdService.postMergeRequestReport(
-                gitlabProjectId = gitlab.projectId.required("gitlab.projectId"),
-                gitlabMergeRequestId = gitlab.mergeRequestId.required("gitlab.mergeRequestId"),
-                groupId = ciCd.groupId.required("groupId"),
-                appId = ciCd.appId.required("appId"),
-                sourceBranch = ciCd.sourceBranch.required("sourceBranch"),
-                targetBranch = ciCd.targetBranch.required("targetBranch"),
-                commitSha = ciCd.commitSha.required("commitSha"),
-                mergeBaseCommitSha = ciCd.mergeBaseCommitSha.required("mergeBaseCommitSha"),
+                gitlabProjectId = gitlabProjectId,
+                gitlabMergeRequestId = gitlabMergeRequestId,
+                groupId = groupId,
+                appId = appId,
+                sourceBranch = sourceBranch,
+                targetBranch = targetBranch,
+                commitSha = commitSha,
+                mergeBaseCommitSha = mergeBaseCommitSha,
             )
         }
     }

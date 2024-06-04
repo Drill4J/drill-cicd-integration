@@ -23,10 +23,23 @@ open class DrillGitlabProperties(
     var apiUrl: String? = null,
     @Parameter(property = "privateToken", required = true)
     var privateToken: String? = null,
-    @Parameter(property = "projectId", required = true)
+    @Parameter(property = "projectId")
     var projectId: String? = null,
-    @Parameter(property = "mergeRequestId", required = true)
-    var mergeRequestId: String? = null
+    @Parameter(property = "commitSha")
+    var commitSha: String? = null,
+    @Parameter(property = "mergeRequest")
+    var mergeRequest: MergeRequestProperties = MergeRequestProperties(),
+)
+
+open class MergeRequestProperties(
+    @Parameter(property = "mergeRequestIid")
+    var mergeRequestIid: String? = null,
+    @Parameter(property = "mergeBaseCommitSha")
+    var mergeBaseCommitSha: String? = null,
+    @Parameter(property = "sourceBranch")
+    var sourceBranch: String? = null,
+    @Parameter(property = "targetBranch")
+    var targetBranch: String? = null,
 )
 
 open class DrillGithubProperties(
@@ -34,8 +47,6 @@ open class DrillGithubProperties(
     var apiUrl: String = "https://api.github.com",
     @Parameter(property = "token", required = true)
     var token: String? = null,
-    @Parameter(property = "repository", required = true)
-    var repository: String? = null,
-    @Parameter(property = "pullRequestNumber", required = true)
-    var pullRequestNumber: Int? = null
+    @Parameter(property = "eventFilePath")
+    var eventFilePath: String? = null,
 )

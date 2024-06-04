@@ -25,10 +25,6 @@ open class DrillProperties(
 )
 
 open class DrillCiCdProperties(
-    var commitSha: String? = null,
-    var mergeBaseCommitSha: String? = null,
-    var sourceBranch: String? = null,
-    var targetBranch: String? = null,
     var gitlab: DrillGitlabProperties? = null,
     var github: DrillGithubProperties? = null,
 ) : DrillProperties() {
@@ -46,12 +42,22 @@ open class DrillGitlabProperties(
     var privateToken: String? = null,
     var projectId: String? = null,
     var mergeRequestId: String? = null,
+    var mergeRequest: MergeRequest = MergeRequest()
+) {
+    fun mergeRequest(configure: MergeRequest.() -> Unit) {
+        this.mergeRequest = MergeRequest().apply(configure)
+    }
+}
+
+open class MergeRequest(
+    var sourceBranch: String? = null,
+    var targetBranch: String? = null,
+    var commitSha: String? = null,
+    var mergeBaseCommitSha: String? = null,
 )
 
 open class DrillGithubProperties(
     var apiUrl: String = "https://api.github.com",
     var token: String? = null,
-    var repository: String? = null,
-    var pullRequestNumber: Int? = null,
     var eventFilePath: String? = null
 )

@@ -15,8 +15,9 @@
  */
 package com.epam.drill.integration.gradle
 
-import com.epam.drill.integration.common.metrics.impl.MetricsClientImpl
+import com.epam.drill.integration.common.client.impl.MetricsClientImpl
 import com.epam.drill.integration.common.report.impl.MarkdownReportGenerator
+import com.epam.drill.integration.common.util.fromEnv
 import com.epam.drill.integration.common.util.required
 import com.epam.drill.integration.github.client.impl.GithubApiClientImpl
 import com.epam.drill.integration.github.service.GithubCiCdService
@@ -28,23 +29,32 @@ import java.io.File
 fun Task.drillGithubPullRequestReport(ciCd: DrillCiCdProperties) {
     doFirst {
         val github = ciCd.github.required("github")
+        val githubApiUrl = github.apiUrl.required("github.apiUrl")
+        val githubToken = github.token.required("github.token")
+        val drillApiUrl = ciCd.drillApiUrl.required("drillApiUrl")
+        val drillApiKey = ciCd.drillApiKey
+        val groupId = ciCd.groupId.required("groupId")
+        val appId = ciCd.appId.required("appId")
+        val eventFilePath = github.eventFilePath
+            .fromEnv("GITHUB_EVENT_PATH")
+            .required("github.eventFilePath")
 
         val githubCiCdService = GithubCiCdService(
             GithubApiClientImpl(
-                github.apiUrl,
-                github.token.required("github.token"),
+                githubApiUrl,
+                githubToken,
             ),
             MetricsClientImpl(
-                ciCd.drillApiUrl.required("drillApiUrl"),
-                ciCd.drillApiKey
+                drillApiUrl,
+                drillApiKey
             ),
             MarkdownReportGenerator()
         )
         runBlocking {
             githubCiCdService.postPullRequestReportByEvent(
-                groupId = ciCd.groupId.required("groupId"),
-                appId = ciCd.appId.required("appId"),
-                githubEventFile = File(github.eventFilePath.required("github.eventFilePath")),
+                groupId = groupId,
+                appId = appId,
+                githubEventFile = File(eventFilePath),
             )
         }
     }

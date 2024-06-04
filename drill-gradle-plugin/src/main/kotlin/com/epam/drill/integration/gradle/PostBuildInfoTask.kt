@@ -15,8 +15,9 @@
  */
 package com.epam.drill.integration.gradle
 
-import com.epam.drill.integration.common.metrics.BuildPayload
-import com.epam.drill.integration.common.metrics.impl.MetricsClientImpl
+import com.epam.drill.integration.common.client.BuildPayload
+import com.epam.drill.integration.common.client.impl.DataIngestClientImpl
+import com.epam.drill.integration.common.client.impl.MetricsClientImpl
 import com.epam.drill.integration.common.git.getGitBranch
 import com.epam.drill.integration.common.git.getGitCommitInfo
 import com.epam.drill.integration.common.util.required
@@ -25,17 +26,23 @@ import org.gradle.api.Task
 
 fun Task.drillSendBuildInfo(ciCd: DrillCiCdProperties) {
     doFirst {
-        val drillApiClient = MetricsClientImpl(
-            drillApiUrl = ciCd.drillApiUrl.required("drillApiUrl"),
-            drillApiKey = ciCd.drillApiKey
+        val drillApiUrl = ciCd.drillApiUrl.required("drillApiUrl")
+        val drillApiKey = ciCd.drillApiKey
+        val groupId = ciCd.groupId.required("groupId")
+        val appId = ciCd.appId.required("appId")
+        val buildVersion = ciCd.buildVersion
+
+        val dataIngestClient = DataIngestClientImpl(
+            drillApiUrl = drillApiUrl,
+            drillApiKey = drillApiKey
         )
 
         val branch = getGitBranch()
         val commitInfo = getGitCommitInfo()
         val payload = BuildPayload(
-            groupId = ciCd.groupId.required("groupId"),
-            appId = ciCd.appId.required("appId"),
-            buildVersion = ciCd.buildVersion,
+            groupId = groupId,
+            appId = appId,
+            buildVersion = buildVersion,
             commitSha = commitInfo.sha,
             commitDate = commitInfo.date,
             commitAuthor = commitInfo.author,
@@ -44,7 +51,7 @@ fun Task.drillSendBuildInfo(ciCd: DrillCiCdProperties) {
         )
 
         runBlocking {
-            drillApiClient.sendBuild(payload)
+            dataIngestClient.sendBuild(payload)
         }
     }
 }

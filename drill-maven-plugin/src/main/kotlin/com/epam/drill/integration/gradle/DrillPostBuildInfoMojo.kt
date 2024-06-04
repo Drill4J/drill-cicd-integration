@@ -1,7 +1,7 @@
 package com.epam.drill.integration.gradle
 
 import com.epam.drill.integration.common.client.BuildPayload
-import com.epam.drill.integration.common.client.impl.DrillApiClientImpl
+import com.epam.drill.integration.common.client.impl.DataIngestClientImpl
 import com.epam.drill.integration.common.git.getGitBranch
 import com.epam.drill.integration.common.git.getGitCommitInfo
 import com.epam.drill.integration.common.util.required
@@ -36,16 +36,20 @@ class DrillPostBuildInfoMojo : AbstractMojo() {
     var buildVersion: String? = null
 
     override fun execute() {
-        val drillApiClient = DrillApiClientImpl(
-            drillApiUrl = drillApiUrl.required("drillApiUrl"),
+        val drillApiUrl = drillApiUrl.required("drillApiUrl")
+        val groupId = groupId.required("groupId")
+        val appId = appId.required("appId")
+
+        val drillApiClient = DataIngestClientImpl(
+            drillApiUrl = drillApiUrl,
             drillApiKey = drillApiKey
         )
 
         val branch = getGitBranch()
         val commitInfo = getGitCommitInfo()
         val payload = BuildPayload(
-            groupId = groupId.required("groupId"),
-            appId = appId.required("appId"),
+            groupId = groupId,
+            appId = appId,
             buildVersion = buildVersion,
             commitSha = commitInfo.sha,
             commitDate = commitInfo.date,

@@ -15,8 +15,9 @@
  */
 package com.epam.drill.integration.gradle
 
-import com.epam.drill.integration.common.client.impl.DrillApiClientImpl
+import com.epam.drill.integration.common.client.impl.MetricsClientImpl
 import com.epam.drill.integration.common.report.impl.MarkdownReportGenerator
+import com.epam.drill.integration.common.util.fromEnv
 import com.epam.drill.integration.common.util.required
 import com.epam.drill.integration.github.client.impl.GithubApiClientImpl
 import com.epam.drill.integration.github.service.GithubCiCdService
@@ -26,6 +27,7 @@ import org.apache.maven.plugins.annotations.LifecyclePhase
 import org.apache.maven.plugins.annotations.Mojo
 import org.apache.maven.plugins.annotations.Parameter
 import org.apache.maven.plugins.annotations.ResolutionScope
+import java.io.File
 
 @Mojo(
     name = "drillGithubPullRequestReport",
@@ -47,41 +49,36 @@ class DrillGithubPullRequestReportMojo : AbstractMojo() {
     @Parameter(property = "appId", required = true)
     var appId: String? = null
 
-    @Parameter(property = "commitSha", required = true)
-    var commitSha: String? = null
-
-    @Parameter(property = "sourceBranch", required = true)
-    var sourceBranch: String? = null
-
-    @Parameter(property = "targetBranch", required = true)
-    var targetBranch: String? = null
-
     @Parameter(property = "github", required = true)
     var github: DrillGithubProperties? = null
 
     override fun execute() {
         val github = github.required("github")
+        val githubApiUrl = github.apiUrl.required("github.apiUrl")
+        val githubToken = github.token.required("github.token")
+        val drillApiUrl = drillApiUrl.required("drillApiUrl")
+        val groupId = groupId.required("groupId")
+        val appId = appId.required("appId")
+        val eventFilePath = github.eventFilePath
+            .fromEnv("GITHUB_EVENT_PATH")
+            .required("github.eventFilePath")
 
         val githubCiCdService = GithubCiCdService(
             GithubApiClientImpl(
-                github.apiUrl,
-                github.token.required("github.token"),
+                githubApiUrl,
+                githubToken,
             ),
-            DrillApiClientImpl(
-                drillApiUrl.required("drillApiUrl"),
+            MetricsClientImpl(
+                drillApiUrl,
                 drillApiKey
             ),
             MarkdownReportGenerator()
         )
         runBlocking {
-            githubCiCdService.postPullRequestReport(
-                githubRepository = github.repository.required("github.repository"),
-                githubPullRequestId = github.pullRequestNumber.required("github.pullRequestNumber"),
+            githubCiCdService.postPullRequestReportByEvent(
+                githubEventFile = File(eventFilePath),
                 groupId = groupId.required("groupId"),
                 appId = appId.required("appId"),
-                sourceBranch = sourceBranch.required("sourceBranch"),
-                targetBranch = targetBranch.required("targetBranch"),
-                commitSha = commitSha.required("commitSha")
             )
         }
     }

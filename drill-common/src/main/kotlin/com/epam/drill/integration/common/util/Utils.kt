@@ -17,3 +17,6 @@ package com.epam.drill.integration.common.util
 
 fun <T> T?.required(name: String): T =
     this ?: throw IllegalArgumentException("Property '$name' is not set or null")
+
+fun <T> T?.fromEnv(envVar: String): String? =
+    this?.toString() ?: System.getenv(envVar)
