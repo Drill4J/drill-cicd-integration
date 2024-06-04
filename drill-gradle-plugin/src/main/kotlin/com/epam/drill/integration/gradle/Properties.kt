@@ -41,7 +41,7 @@ open class DrillGitlabProperties(
     var apiUrl: String? = null,
     var privateToken: String? = null,
     var projectId: String? = null,
-    var mergeRequestId: String? = null,
+    var commitSha: String? = null,
     var mergeRequest: MergeRequest = MergeRequest()
 ) {
     fun mergeRequest(configure: MergeRequest.() -> Unit) {
@@ -50,9 +50,9 @@ open class DrillGitlabProperties(
 }
 
 open class MergeRequest(
+    var mergeRequestIid: String? = null,
     var sourceBranch: String? = null,
     var targetBranch: String? = null,
-    var commitSha: String? = null,
     var mergeBaseCommitSha: String? = null,
 )
 
