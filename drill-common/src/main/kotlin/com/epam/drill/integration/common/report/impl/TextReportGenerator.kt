@@ -16,16 +16,18 @@
 package com.epam.drill.integration.common.report.impl
 
 import com.epam.drill.integration.common.report.ReportFormat
+import com.epam.drill.integration.common.report.Report
 import com.epam.drill.integration.common.report.ReportGenerator
 import kotlinx.serialization.json.JsonObject
 
 class TextReportGenerator : ReportGenerator {
-    override fun getDiffSummaryReport(metrics: JsonObject) =
+    override fun getBuildComparisonReport(metrics: JsonObject) = Report(
+        content =
         """
             Drill4J CI/CD report:
             - Coverage: ${metrics["coverage"]}%
             - Risks: ${metrics["risks"]}
-        """.trimIndent()
-
-    override fun getFormat() = ReportFormat.PLAINTEXT
+        """.trimIndent(),
+        format = ReportFormat.PLAINTEXT
+    )
 }

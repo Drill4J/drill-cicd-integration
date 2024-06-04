@@ -31,7 +31,7 @@ class GithubApiClientImpl(
         install(JsonFeature)
     }
 
-    override suspend fun postPullRequestReport(
+    override suspend fun postPullRequestComment(
         repository: String,
         pullRequestId: Int,
         comment: String,

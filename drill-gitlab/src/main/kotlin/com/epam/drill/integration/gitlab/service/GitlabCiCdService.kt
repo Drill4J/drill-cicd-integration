@@ -42,13 +42,13 @@ class GitlabCiCdService(
             commitSha,
             mergeBaseCommitSha
         )
-        val comment = reportGenerator.getDiffSummaryReport(
+        val report = reportGenerator.getBuildComparisonReport(
             metrics
         )
         gitlabApiClient.postMergeRequestReport(
             gitlabProjectId,
             gitlabMergeRequestId,
-            comment
+            report.content
         )
     }
 

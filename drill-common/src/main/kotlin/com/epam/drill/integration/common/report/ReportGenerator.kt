@@ -18,9 +18,13 @@ package com.epam.drill.integration.common.report
 import kotlinx.serialization.json.JsonObject
 
 interface ReportGenerator {
-    fun getDiffSummaryReport(metrics: JsonObject): String
-    fun getFormat() : ReportFormat
+    fun getBuildComparisonReport(metrics: JsonObject): Report
 }
+
+class Report(
+    val content: String,
+    val format: ReportFormat
+)
 
 enum class ReportFormat {
     MARKDOWN,

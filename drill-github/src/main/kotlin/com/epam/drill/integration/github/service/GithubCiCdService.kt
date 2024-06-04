@@ -46,15 +46,15 @@ class GithubCiCdService(
             commitSha = headCommitSha,
             baselineCommitSha = mergeBaseCommitSha
         )
-        val comment = reportGenerator.getDiffSummaryReport(metrics)
-        val mediaType: String = when (reportGenerator.getFormat()) {
+        val report = reportGenerator.getBuildComparisonReport(metrics)
+        val mediaType: String = when (report.format) {
             ReportFormat.MARKDOWN -> "application/vnd.github.text+json"
             ReportFormat.PLAINTEXT -> "application/json"
         }
-        githubApiClient.postPullRequestReport(
+        githubApiClient.postPullRequestComment(
             githubRepository,
             githubPullRequestId,
-            comment,
+            report.content,
             mediaType
         )
     }
