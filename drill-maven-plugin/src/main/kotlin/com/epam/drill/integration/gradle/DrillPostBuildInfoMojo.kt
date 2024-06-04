@@ -37,15 +37,15 @@ class DrillPostBuildInfoMojo : AbstractMojo() {
 
     override fun execute() {
         val drillApiClient = DrillApiClientImpl(
-            drillApiUrl = drillApiUrl.required("drillCiCd.drillApiUrl"),
+            drillApiUrl = drillApiUrl.required("drillApiUrl"),
             drillApiKey = drillApiKey
         )
 
         val branch = getGitBranch()
         val commitInfo = getGitCommitInfo()
         val payload = BuildPayload(
-            groupId = groupId.required("drillCiCd.groupId"),
-            appId = appId.required("drillCiCd.appId"),
+            groupId = groupId.required("groupId"),
+            appId = appId.required("appId"),
             buildVersion = buildVersion,
             commitSha = commitInfo.sha,
             commitDate = commitInfo.date,

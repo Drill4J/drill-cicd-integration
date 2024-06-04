@@ -25,29 +25,29 @@ import org.gradle.api.Task
 
 fun Task.drillGitlabMergeRequestReportTask(ciCd: DrillCiCdProperties) {
     doFirst {
-        val gitlab = ciCd.gitlab.required("drillCiCd.gitlab")
+        val gitlab = ciCd.gitlab.required("gitlab")
 
         val gitlabCiCdService = GitlabCiCdService(
             GitlabApiClientV4Impl(
-                gitlab.apiUrl.required("drillCiCd.gitlab.apiUrl"),
+                gitlab.apiUrl.required("gitlab.apiUrl"),
                 gitlab.privateToken
             ),
             MetricsClientImpl(
-                ciCd.drillApiUrl.required("drillCiCd.drillApiUrl"),
+                ciCd.drillApiUrl.required("drillApiUrl"),
                 ciCd.drillApiKey
             ),
             TextReportGenerator()
         )
         runBlocking {
             gitlabCiCdService.postMergeRequestReport(
-                gitlabProjectId = gitlab.projectId.required("drillCiCd.gitlab.projectId"),
-                gitlabMergeRequestId = gitlab.mergeRequestId.required("drillCiCd.gitlab.mergeRequestId"),
-                groupId = ciCd.groupId.required("drillCiCd.groupId"),
-                appId = ciCd.appId.required("drillCiCd.appId"),
-                sourceBranch = ciCd.sourceBranch.required("drillCiCd.sourceBranch"),
-                targetBranch = ciCd.targetBranch.required("drillCiCd.targetBranch"),
-                commitSha = ciCd.commitSha.required("drillCiCd.commitSha"),
-                mergeBaseCommitSha = ciCd.mergeBaseCommitSha.required("drillCiCd.mergeBaseCommitSha"),
+                gitlabProjectId = gitlab.projectId.required("gitlab.projectId"),
+                gitlabMergeRequestId = gitlab.mergeRequestId.required("gitlab.mergeRequestId"),
+                groupId = ciCd.groupId.required("groupId"),
+                appId = ciCd.appId.required("appId"),
+                sourceBranch = ciCd.sourceBranch.required("sourceBranch"),
+                targetBranch = ciCd.targetBranch.required("targetBranch"),
+                commitSha = ciCd.commitSha.required("commitSha"),
+                mergeBaseCommitSha = ciCd.mergeBaseCommitSha.required("mergeBaseCommitSha"),
             )
         }
     }

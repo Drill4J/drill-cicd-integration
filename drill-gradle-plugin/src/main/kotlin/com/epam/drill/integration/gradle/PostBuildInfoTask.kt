@@ -26,15 +26,15 @@ import org.gradle.api.Task
 fun Task.drillSendBuildInfo(ciCd: DrillCiCdProperties) {
     doFirst {
         val drillApiClient = MetricsClientImpl(
-            drillApiUrl = ciCd.drillApiUrl.required("drillCiCd.drillApiUrl"),
+            drillApiUrl = ciCd.drillApiUrl.required("drillApiUrl"),
             drillApiKey = ciCd.drillApiKey
         )
 
         val branch = getGitBranch()
         val commitInfo = getGitCommitInfo()
         val payload = BuildPayload(
-            groupId = ciCd.groupId.required("drillCiCd.groupId"),
-            appId = ciCd.appId.required("drillCiCd.appId"),
+            groupId = ciCd.groupId.required("groupId"),
+            appId = ciCd.appId.required("appId"),
             buildVersion = ciCd.buildVersion,
             commitSha = commitInfo.sha,
             commitDate = commitInfo.date,

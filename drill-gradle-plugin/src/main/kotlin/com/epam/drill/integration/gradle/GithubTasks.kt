@@ -27,24 +27,24 @@ import java.io.File
 
 fun Task.drillGithubPullRequestReport(ciCd: DrillCiCdProperties) {
     doFirst {
-        val github = ciCd.github.required("drillCiCd.github")
+        val github = ciCd.github.required("github")
 
         val githubCiCdService = GithubCiCdService(
             GithubApiClientImpl(
                 github.apiUrl,
-                github.token.required("drillCiCd.github.token"),
+                github.token.required("github.token"),
             ),
             MetricsClientImpl(
-                ciCd.drillApiUrl.required("drillCiCd.drillApiUrl"),
+                ciCd.drillApiUrl.required("drillApiUrl"),
                 ciCd.drillApiKey
             ),
             MarkdownReportGenerator()
         )
         runBlocking {
             githubCiCdService.postPullRequestReportByEvent(
-                groupId = ciCd.groupId.required("drillCiCd.groupId"),
-                appId = ciCd.appId.required("drillCiCd.appId"),
-                githubEventFile = File(github.eventFilePath.required("drillCiCd.github.eventFilePath")),
+                groupId = ciCd.groupId.required("groupId"),
+                appId = ciCd.appId.required("appId"),
+                githubEventFile = File(github.eventFilePath.required("github.eventFilePath")),
             )
         }
     }
