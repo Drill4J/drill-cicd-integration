@@ -15,7 +15,6 @@
  */
 package com.epam.drill.integration.common.client
 
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonObject
 
 interface MetricsClient {
@@ -29,20 +28,6 @@ interface MetricsClient {
         baselineInstanceId: String? = null,
         baselineCommitSha: String? = null,
         baselineBuildVersion: String? = null,
-    ): JsonObject
-
-    suspend fun getDiffMetricsByCommits(
-        groupId: String,
-        appId: String,
-        sourceCommitSha: String,
-        baseCommitSha: String
-    ): JsonObject
-
-    suspend fun getDiffMetricsByBranches(
-        groupId: String,
-        appId: String,
-        sourceBranch: String,
-        targetBranch: String,
-        commitSha: String
+        coverageThreshold: Double? = null,
     ): JsonObject
 }

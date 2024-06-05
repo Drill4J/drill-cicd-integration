@@ -35,36 +35,6 @@ class MetricsClientImpl(
         install(JsonFeature)
     }
 
-    override suspend fun getDiffMetricsByCommits(
-        groupId: String,
-        appId: String,
-        sourceCommitSha: String,
-        baseCommitSha: String
-    ): JsonObject {
-        return getMetricsSummary(
-            groupId = groupId,
-            appId = appId,
-            sourceCommitSha = sourceCommitSha,
-            baseCommitSha = baseCommitSha
-        )
-    }
-
-    override suspend fun getDiffMetricsByBranches(
-        groupId: String,
-        appId: String,
-        sourceBranch: String,
-        targetBranch: String,
-        commitSha: String
-    ): JsonObject {
-        return getMetricsSummary(
-            groupId = groupId,
-            appId = appId,
-            sourceBranch = sourceBranch,
-            targetBranch = targetBranch,
-            sourceCommitSha = commitSha
-        )
-    }
-
     override suspend fun getBuildComparison(
         groupId: String,
         appId: String,
@@ -74,6 +44,7 @@ class MetricsClientImpl(
         baselineInstanceId: String?,
         baselineCommitSha: String?,
         baselineBuildVersion: String?,
+        coverageThreshold: Double?,
     ): JsonObject {
 
         val url = "$metricsUrl/build-diff-report"
@@ -86,34 +57,7 @@ class MetricsClientImpl(
             parameter("baselineInstanceId", baselineInstanceId)
             parameter("baselineCommitSha", baselineCommitSha)
             parameter("baselineBuildVersion", baselineBuildVersion)
-
-            contentType(ContentType.Application.Json)
-            drillApiKey?.let { apiKey ->
-                headers {
-                    append(API_KEY_HEADER, apiKey)
-                }
-            }
-        }
-        return response
-    }
-
-    private suspend fun getMetricsSummary(
-        groupId: String,
-        appId: String,
-        sourceCommitSha: String? = "",
-        sourceBranch: String? = "",
-        baseCommitSha: String? = "",
-        targetBranch: String? = ""
-    ): JsonObject {
-
-        val url = "$metricsUrl/build-diff-report"
-        val response = client.request<JsonObject>(url) {
-            parameter("groupId", groupId)
-            parameter("appId", appId)
-            parameter("currentVcsRef", sourceCommitSha)
-            parameter("currentBranch", sourceBranch)
-            parameter("baseVcsRef", baseCommitSha)
-            parameter("baseBranch", targetBranch)
+            parameter("coverageThreshold", coverageThreshold)
 
             contentType(ContentType.Application.Json)
             drillApiKey?.let { apiKey ->
