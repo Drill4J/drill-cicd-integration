@@ -1,4 +1,4 @@
-rootProject.name = "drill-integration"
+rootProject.name = "drill-cicd-integration"
 
 pluginManagement {
     val kotlinVersion: String by extra
