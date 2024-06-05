@@ -1,7 +1,7 @@
-import java.net.URI
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import com.hierynomus.gradle.license.tasks.LicenseCheck
 import com.hierynomus.gradle.license.tasks.LicenseFormat
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.net.URI
 
 plugins {
     `maven-publish`
@@ -50,10 +50,15 @@ tasks {
 }
 
 publishing {
-    publications.create<MavenPublication>("jvm") {
+    publications.create<MavenPublication>("drill-cicd-common") {
         from(components["java"])
+        pom {
+            name.set("Drill CICD integration common library")
+            description.set("Drill CICD integration common library")
+        }
     }
 }
+
 
 @Suppress("UNUSED_VARIABLE")
 license {

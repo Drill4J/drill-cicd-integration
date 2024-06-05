@@ -51,8 +51,12 @@ tasks {
 }
 
 publishing {
-    publications.create<MavenPublication>("jvm") {
+    publications.create<MavenPublication>("drill-cicd-github") {
         from(components["java"])
+        pom {
+            name.set("Drill CICD integration common gitlab library")
+            description.set("Drill CICD integration common gitlab library")
+        }
     }
 }
 
