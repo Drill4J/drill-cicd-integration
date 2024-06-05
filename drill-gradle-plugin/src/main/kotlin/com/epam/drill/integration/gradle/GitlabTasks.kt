@@ -16,7 +16,7 @@
 package com.epam.drill.integration.gradle
 
 import com.epam.drill.integration.common.client.impl.MetricsClientImpl
-import com.epam.drill.integration.common.report.impl.TextReportGenerator
+import com.epam.drill.integration.common.report.impl.MarkdownReportGenerator
 import com.epam.drill.integration.common.util.fromEnv
 import com.epam.drill.integration.common.util.required
 import com.epam.drill.integration.gitlab.client.impl.GitlabApiClientV4Impl
@@ -59,7 +59,7 @@ fun Task.drillGitlabMergeRequestReportTask(ciCd: DrillCiCdProperties) {
                 drillApiUrl,
                 drillApiKey
             ),
-            TextReportGenerator()
+            MarkdownReportGenerator()
         )
         runBlocking {
             gitlabCiCdService.postMergeRequestReport(

@@ -33,9 +33,6 @@ tasks {
         kotlinOptions.jvmTarget = "1.8"
     }
     val runtimeJar by registering(Jar::class) {
-        group = "build"
-        archiveBaseName.set("app")
-        archiveVersion.set("")
         manifest.attributes["Main-Class"] = jarMainClassName
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
         from(sourceSets.main.get().output)

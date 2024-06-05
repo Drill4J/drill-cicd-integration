@@ -29,8 +29,8 @@ import java.io.File
 class GithubPullRequestReportByEventCommand: CliktCommand(name = "githubPullRequestReportByEvent") {
     private val drillApiUrl by option("-drill-u", "--drillApiUrl", envvar = "INPUT_DRILL_API_URL").required()
     private val drillApiKey by option("-drill-k", "--drillApiKey", envvar = "INPUT_DRILL_API_KEY")
-    private val groupId by option("-g", "--drillGroupId", envvar = "INPUT_GROUP_ID").required()
-    private val appId by option("-a", "--drillAppId", envvar = "INPUT_APP_ID").required()
+    private val groupId by option("-g", "--groupId", envvar = "INPUT_GROUP_ID").required()
+    private val appId by option("-a", "--appId", envvar = "INPUT_APP_ID").required()
     private val githubApiUrl by option("-gh-u", "--githubApiUrl", envvar = "GITHUB_API_URL").default("https://api.github.com")
     private val githubToken by option("-gh-t", "--githubToken", envvar = "INPUT_GITHUB_TOKEN").required()
     private val eventFilePath by option("-ef", "--eventFilePath", envvar = "GITHUB_EVENT_PATH").required()

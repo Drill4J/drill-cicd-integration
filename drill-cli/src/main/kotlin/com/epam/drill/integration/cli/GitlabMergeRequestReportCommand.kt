@@ -16,7 +16,7 @@
 package com.epam.drill.integration.cli
 
 import com.epam.drill.integration.common.client.impl.MetricsClientImpl
-import com.epam.drill.integration.common.report.impl.TextReportGenerator
+import com.epam.drill.integration.common.report.impl.MarkdownReportGenerator
 import com.epam.drill.integration.gitlab.client.impl.GitlabApiClientV4Impl
 import com.epam.drill.integration.gitlab.service.GitlabCiCdService
 import com.github.ajalt.clikt.core.CliktCommand
@@ -43,7 +43,7 @@ class GitlabMergeRequestReportCommand : CliktCommand(name = "gitlabMergeRequestR
         val gitlabCiCdService = GitlabCiCdService(
             GitlabApiClientV4Impl(gitlabApiUrl, gitlabPrivateToken),
             MetricsClientImpl(drillApiUrl, drillApiKey),
-            TextReportGenerator()
+            MarkdownReportGenerator()
         )
         runBlocking {
             gitlabCiCdService.postMergeRequestReport(
