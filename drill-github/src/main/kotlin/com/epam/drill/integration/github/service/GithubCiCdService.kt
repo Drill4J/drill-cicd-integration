@@ -68,7 +68,7 @@ class GithubCiCdService(
             ignoreUnknownKeys = true
             namingStrategy = JsonNamingStrategy.SnakeCase
         }
-        val event = json.decodeFromStream<GithubEvent>(githubEventFile.inputStream())
+        val event = json.decodeFromString<GithubEvent>(githubEventFile.readText())
         postPullRequestReport(
             githubRepository = event.repository.fullName,
             githubPullRequestId = event.pullRequest.number,
