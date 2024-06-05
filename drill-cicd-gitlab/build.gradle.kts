@@ -34,7 +34,7 @@ dependencies {
     implementation("io.ktor:ktor-client-core:$ktorVersion")
     implementation("io.ktor:ktor-client-cio:$ktorVersion")
     implementation("io.ktor:ktor-client-serialization:$ktorVersion")
-    implementation(project(":drill-common"))
+    implementation(project(":drill-cicd-common"))
 }
 
 kotlin.sourceSets.all {
