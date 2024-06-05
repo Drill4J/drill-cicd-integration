@@ -30,10 +30,10 @@ class MarkdownReportGenerator : ReportGenerator {
         val testedChanges = data["tested_changes"]?.jsonPrimitive?.contentOrNull ?: "0"
         val coverage = data["coverage"]?.jsonPrimitive?.contentOrNull ?: "0"
         val recommendedTests = data["recommended_tests"]?.jsonPrimitive?.contentOrNull ?: "0"
-        val changesLink = "https://drill4j.com"
-        val risksLink = "https://drill4j.com"
-        val recommendedTestsLink = "https://drill4j.com"
-        val fullReportLink = "https://drill4j.com"
+        val changesLink = "https://drill4j.github.io/"
+        val risksLink = "https://drill4j.github.io/"
+        val recommendedTestsLink = "https://drill4j.github.io/"
+        val fullReportLink = "https://drill4j.github.io/"
         return Report(
             content = """
 ### Drill4J Bot - Change Testing Report            
