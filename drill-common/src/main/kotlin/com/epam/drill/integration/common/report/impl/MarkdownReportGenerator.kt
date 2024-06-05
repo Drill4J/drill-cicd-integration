@@ -20,8 +20,6 @@ import com.epam.drill.integration.common.report.ReportFormat
 import com.epam.drill.integration.common.report.ReportGenerator
 import kotlinx.serialization.json.*
 
-private const val DRILL_HOMEPAGE_URL = "https://drill4j.github.io/"
-
 class MarkdownReportGenerator : ReportGenerator {
     override fun getBuildComparisonReport(data: JsonObject): Report {
         val metrics = data["data"]?.jsonObject?.get("metrics")?.jsonObject
@@ -34,10 +32,10 @@ class MarkdownReportGenerator : ReportGenerator {
         val recommendedTests = metrics?.get("recommended_tests")?.jsonPrimitive?.contentOrNull ?: "0"
 
         val links = data["data"]?.jsonObject?.get("links")?.jsonObject
-        val changesLink = links?.get("changes")?.jsonPrimitive?.contentOrNull ?: DRILL_HOMEPAGE_URL
-        val risksLink = links?.get("risks")?.jsonPrimitive?.contentOrNull ?: DRILL_HOMEPAGE_URL
-        val recommendedTestsLink = links?.get("recommended_tests")?.jsonPrimitive?.contentOrNull ?: DRILL_HOMEPAGE_URL
-        val fullReportLink = links?.get("full_report")?.jsonPrimitive?.contentOrNull ?: DRILL_HOMEPAGE_URL
+        val changesLink = links?.get("changes")?.jsonPrimitive?.contentOrNull ?: ""
+        val risksLink = links?.get("risks")?.jsonPrimitive?.contentOrNull ?: ""
+        val recommendedTestsLink = links?.get("recommended_tests")?.jsonPrimitive?.contentOrNull ?: ""
+        val fullReportLink = links?.get("full_report")?.jsonPrimitive?.contentOrNull ?: ""
         return Report(
             content = """
 ### Drill4J Bot - Change Testing Report            
