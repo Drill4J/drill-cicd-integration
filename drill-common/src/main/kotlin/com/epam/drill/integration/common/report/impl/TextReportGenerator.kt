@@ -21,12 +21,12 @@ import com.epam.drill.integration.common.report.ReportGenerator
 import kotlinx.serialization.json.JsonObject
 
 class TextReportGenerator : ReportGenerator {
-    override fun getBuildComparisonReport(metrics: JsonObject) = Report(
+    override fun getBuildComparisonReport(data: JsonObject) = Report(
         content =
         """
             Drill4J CI/CD report:
-            - Coverage: ${metrics["coverage"]}%
-            - Risks: ${metrics["risks"]}
+            - Coverage: ${data["coverage"]}%
+            - Risks: ${data["risks"]}
         """.trimIndent(),
         format = ReportFormat.PLAINTEXT
     )

@@ -20,20 +20,24 @@ import com.epam.drill.integration.common.report.ReportFormat
 import com.epam.drill.integration.common.report.ReportGenerator
 import kotlinx.serialization.json.*
 
-class MarkdownReportGenerator : ReportGenerator {
-    override fun getBuildComparisonReport(metrics: JsonObject): Report {
-        val data = metrics["data"]?.jsonObject?.get("metrics")!!.jsonObject
+private const val DRILL_HOMEPAGE_URL = "https://drill4j.github.io/"
 
-        val newMethods = data["changes_new_methods"]?.jsonPrimitive?.contentOrNull ?: "0"
-        val modifiedMethods = data["changes_modified_methods"]?.jsonPrimitive?.contentOrNull ?: "0"
-        val totalChanges = data["total_changes"]?.jsonPrimitive?.contentOrNull ?: "0"
-        val testedChanges = data["tested_changes"]?.jsonPrimitive?.contentOrNull ?: "0"
-        val coverage = data["coverage"]?.jsonPrimitive?.contentOrNull ?: "0"
-        val recommendedTests = data["recommended_tests"]?.jsonPrimitive?.contentOrNull ?: "0"
-        val changesLink = "https://drill4j.github.io/"
-        val risksLink = "https://drill4j.github.io/"
-        val recommendedTestsLink = "https://drill4j.github.io/"
-        val fullReportLink = "https://drill4j.github.io/"
+class MarkdownReportGenerator : ReportGenerator {
+    override fun getBuildComparisonReport(data: JsonObject): Report {
+        val metrics = data["data"]?.jsonObject?.get("metrics")?.jsonObject
+
+        val newMethods = metrics?.get("changes_new_methods")?.jsonPrimitive?.contentOrNull ?: "0"
+        val modifiedMethods = metrics?.get("changes_modified_methods")?.jsonPrimitive?.contentOrNull ?: "0"
+        val totalChanges = metrics?.get("total_changes")?.jsonPrimitive?.contentOrNull ?: "0"
+        val testedChanges = metrics?.get("tested_changes")?.jsonPrimitive?.contentOrNull ?: "0"
+        val coverage = metrics?.get("coverage")?.jsonPrimitive?.contentOrNull ?: "0"
+        val recommendedTests = metrics?.get("recommended_tests")?.jsonPrimitive?.contentOrNull ?: "0"
+
+        val links = data["data"]?.jsonObject?.get("links")?.jsonObject
+        val changesLink = links?.get("changes")?.jsonPrimitive?.contentOrNull ?: DRILL_HOMEPAGE_URL
+        val risksLink = links?.get("risks")?.jsonPrimitive?.contentOrNull ?: DRILL_HOMEPAGE_URL
+        val recommendedTestsLink = links?.get("recommended_tests")?.jsonPrimitive?.contentOrNull ?: DRILL_HOMEPAGE_URL
+        val fullReportLink = links?.get("full_report")?.jsonPrimitive?.contentOrNull ?: DRILL_HOMEPAGE_URL
         return Report(
             content = """
 ### Drill4J Bot - Change Testing Report            

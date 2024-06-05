@@ -18,7 +18,7 @@ package com.epam.drill.integration.common.report
 import kotlinx.serialization.json.JsonObject
 
 interface ReportGenerator {
-    fun getBuildComparisonReport(metrics: JsonObject): Report
+    fun getBuildComparisonReport(data: JsonObject): Report
 }
 
 class Report(
