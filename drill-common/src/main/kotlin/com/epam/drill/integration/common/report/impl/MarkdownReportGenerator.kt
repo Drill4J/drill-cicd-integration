@@ -18,17 +18,34 @@ package com.epam.drill.integration.common.report.impl
 import com.epam.drill.integration.common.report.Report
 import com.epam.drill.integration.common.report.ReportFormat
 import com.epam.drill.integration.common.report.ReportGenerator
-import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.*
 
 class MarkdownReportGenerator : ReportGenerator {
-    override fun getBuildComparisonReport(metrics: JsonObject) = Report(
-        content =
-        """
-           ## Drill4J CI/CD Report
-           
-            - **Coverage:** ${metrics["coverage"]}%
-            - **Risks:** ${metrics["risks"]}
+    override fun getBuildComparisonReport(metrics: JsonObject): Report {
+        val data = metrics["data"]?.jsonObject?.get("metrics")!!.jsonObject
+
+        val newMethods = data["changes_new_methods"]?.jsonPrimitive?.contentOrNull ?: "0"
+        val modifiedMethods = data["changes_modified_methods"]?.jsonPrimitive?.contentOrNull ?: "0"
+        val totalChanges = data["total_changes"]?.jsonPrimitive?.contentOrNull ?: "0"
+        val testedChanges = data["tested_changes"]?.jsonPrimitive?.contentOrNull ?: "0"
+        val coverage = data["coverage"]?.jsonPrimitive?.contentOrNull ?: "0"
+        val recommendedTests = data["recommended_tests"]?.jsonPrimitive?.contentOrNull ?: "0"
+        val recommendedTestsLink = "https://drill4j.com"
+        val fullReportLink = "https://drill4j.com"
+        return Report(
+            content = """
+            Drill4J Bot - Change Testing Report            
+            Changes: $totalChanges methods ($newMethods new, $modifiedMethods modified)
+            
+            Tested changes: 
+              $testedChanges/$totalChanges methods (link, click opens risks list)
+			  $coverage% coverage
+
+            Recommended tests: [$recommendedTests]($recommendedTestsLink)
+            
+            [Open full report]($fullReportLink)
         """.trimIndent(),
-        format = ReportFormat.MARKDOWN
-    )
+            format = ReportFormat.MARKDOWN
+        )
+    }
 }
