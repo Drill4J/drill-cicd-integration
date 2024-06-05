@@ -154,7 +154,7 @@ Add Drill4J Gitlab integration to your Maven configuration:
 
 <plugin>
     <groupId>com.epam.drill.integration</groupId>
-    <artifactId>drill-maven-plugin</artifactId>
+    <artifactId>drill-cicd-maven-plugin</artifactId>
     <version>0.0.1</version>
     <configuration>
         <drillApiUrl>http://example.com/api</drillApiUrl>
@@ -195,7 +195,7 @@ Add Drill4J GitHub integration to your Maven configuration:
 
 <plugin>
     <groupId>com.epam.drill.integration</groupId>
-    <artifactId>drill-maven-plugin</artifactId>
+    <artifactId>drill-cicd-maven-plugin</artifactId>
     <version>0.0.1</version>
     <configuration>
         <drillApiUrl>http://example.com/api</drillApiUrl>
@@ -236,7 +236,7 @@ Add Maven plugin to your Maven configuration:
 
 <plugin>
     <groupId>com.epam.drill.integration</groupId>
-    <artifactId>drill-maven-plugin</artifactId>
+    <artifactId>drill-cicd-maven-plugin</artifactId>
     <version>0.0.1</version>
     <configuration>
         <drillApiUrl>http://example.com/api</drillApiUrl>

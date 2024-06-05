@@ -53,9 +53,9 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCoroutinesVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:$kotlinxCoroutinesVersion")
     implementation("com.github.ajalt.clikt:clikt:3.5.4")
-    implementation(project(":drill-common"))
-    implementation(project(":drill-gitlab"))
-    implementation(project(":drill-github"))
+    implementation(project(":drill-cicd-common"))
+    implementation(project(":drill-cicd-gitlab"))
+    implementation(project(":drill-cicd-github"))
     compileOnly((kotlin("stdlib-jdk8")))
 }
 
