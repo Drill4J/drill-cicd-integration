@@ -34,7 +34,7 @@ dependencies {
     implementation("io.ktor:ktor-client-core:$ktorVersion")
     implementation("io.ktor:ktor-client-cio:$ktorVersion")
     implementation("io.ktor:ktor-client-serialization:$ktorVersion")
-    implementation(project(":drill-common"))
+    implementation(project(":drill-cicd-common"))
 }
 
 kotlin.sourceSets.all {
@@ -51,8 +51,12 @@ tasks {
 }
 
 publishing {
-    publications.create<MavenPublication>("jvm") {
+    publications.create<MavenPublication>("drill-cicd-github") {
         from(components["java"])
+        pom {
+            name.set("Drill CICD integration common gitlab library")
+            description.set("Drill CICD integration common gitlab library")
+        }
     }
 }
 

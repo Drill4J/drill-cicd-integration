@@ -6,6 +6,7 @@ plugins {
     kotlin("jvm").apply(false)
     id("org.ajoberstar.grgit")
     id("com.github.hierynomus.license").apply(false)
+    id("io.github.gradle-nexus.publish-plugin")
 }
 
 group = "com.epam.drill.integration"
@@ -26,7 +27,7 @@ buildscript {
     dependencies.classpath("commons-beanutils:commons-beanutils:1.9.4")
 }
 
-if(version == Project.DEFAULT_VERSION) {
+if (version == Project.DEFAULT_VERSION) {
     val fromEnv: () -> String? = {
         System.getenv("GITHUB_REF")?.let { Regex("refs/tags/v(.*)").matchEntire(it)?.groupValues?.get(1) }
     }
@@ -66,5 +67,54 @@ subprojects {
     )
     configurations.all {
         dependencyConstraints += constraints
+    }
+    afterEvaluate {
+        extensions.findByType(PublishingExtension::class)?.publications?.withType<MavenPublication> {
+            pom {
+                url.set("https://github.com/Drill4J/${rootProject.name}")
+                scm {
+                    connection.set("scm:git:https://github.com/Drill4J/${rootProject.name}.git")
+                    developerConnection.set("scm:git:git@github.com:Drill4J/${rootProject.name}.git")
+                    url.set("https://github.com/Drill4J/${rootProject.name}")
+                }
+                licenses {
+                    license {
+                        name.set("Apache 2.0")
+                        url.set("https://opensource.org/licenses/Apache-2.0")
+                    }
+                }
+                developers {
+                    developer {
+                        id.set("Drill4J")
+                        name.set("Drill4J")
+                        email.set("drill4j@gmail.com")
+                        url.set("https://drill4j.github.io/")
+                    }
+                }
+            }
+            extensions.findByType(SigningExtension::class)?.apply {
+                val propertyOrEnv: (String, String) -> String? = { property, env ->
+                    findProperty(property)?.toString() ?: System.getenv(env)
+                }
+                val signingKey = propertyOrEnv("gpgSigningKey", "GPG_SIGNING_KEY")
+                val passphrase = propertyOrEnv("gpgPassphrase", "GPG_PASSPHRASE")
+                if (signingKey != null && passphrase != null) {
+                    useInMemoryPgpKeys(signingKey, passphrase)
+                    sign(this@withType)
+                }
+            }
+        }
+    }
+}
+
+nexusPublishing {
+    repositories {
+        sonatype {
+            val propertyOrEnv: (String, String) -> String? = { property, env ->
+                findProperty(property)?.toString() ?: System.getenv(env)
+            }
+            username.set(propertyOrEnv("ossrhUserName", "OSSRH_USERNAME"))
+            password.set(propertyOrEnv("ossrhToken", "OSSRH_TOKEN"))
+        }
     }
 }

@@ -5,17 +5,15 @@ import com.hierynomus.gradle.license.tasks.LicenseFormat
 
 plugins {
     `maven-publish`
-    kotlin("jvm")
-    kotlin("plugin.serialization")
+    `kotlin-dsl`
+    `java-gradle-plugin`
     id("com.github.hierynomus.license")
 }
 
 group = "com.epam.drill.integration"
 version = rootProject.version
 
-val kotlinxSerializationVersion: String by extra
-val ktorVersion: String by parent!!.extra
-
+val kotlinxCoroutinesVersion: String by parent!!.extra
 
 repositories {
     mavenLocal()
@@ -28,30 +26,35 @@ java {
     targetCompatibility = JavaVersion.VERSION_1_8
 }
 
-dependencies {
-    compileOnly(kotlin("stdlib-jdk8"))
-
-    implementation("io.ktor:ktor-client-core:$ktorVersion")
-    implementation("io.ktor:ktor-client-cio:$ktorVersion")
-    implementation("io.ktor:ktor-client-serialization:$ktorVersion")
+gradlePlugin {
+    plugins {
+        create("drill-integration-gradle-plugin") {
+            id = "${group}.drill-gradle-plugin"
+            implementationClass = "com.epam.drill.integration.gradle.DrillCiCdIntegrationGradlePlugin"
+        }
+    }
 }
 
-kotlin.sourceSets.all {
-    languageSettings.optIn("kotlinx.serialization.ExperimentalSerializationApi")
+dependencies {
+    compileOnly(gradleApi())
+    compileOnly((kotlin("stdlib-jdk8")))
+    compileOnly((kotlin("gradle-plugin")))
+    implementation(project(":drill-cicd-common"))
+    implementation(project(":drill-cicd-gitlab"))
+    implementation(project(":drill-cicd-github"))
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCoroutinesVersion")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:$kotlinxCoroutinesVersion")
 }
 
 tasks {
-    test {
-        useJUnitPlatform()
-    }
     withType<KotlinCompile> {
         kotlinOptions.jvmTarget = "1.8"
     }
 }
 
 publishing {
-    publications.create<MavenPublication>("jvm") {
-        from(components["java"])
+    repositories {
+        mavenLocal()
     }
 }
 

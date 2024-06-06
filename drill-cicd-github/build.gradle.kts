@@ -5,15 +5,17 @@ import com.hierynomus.gradle.license.tasks.LicenseFormat
 
 plugins {
     `maven-publish`
-    `kotlin-dsl`
-    `java-gradle-plugin`
+    kotlin("jvm")
+    kotlin("plugin.serialization")
     id("com.github.hierynomus.license")
 }
 
 group = "com.epam.drill.integration"
 version = rootProject.version
 
-val kotlinxCoroutinesVersion: String by parent!!.extra
+val kotlinxSerializationVersion: String by extra
+val ktorVersion: String by parent!!.extra
+
 
 repositories {
     mavenLocal()
@@ -26,35 +28,35 @@ java {
     targetCompatibility = JavaVersion.VERSION_1_8
 }
 
-gradlePlugin {
-    plugins {
-        create("drill-integration-gradle-plugin") {
-            id = "${group}.drill-gradle-plugin"
-            implementationClass = "com.epam.drill.integration.gradle.DrillCiCdIntegrationGradlePlugin"
-        }
-    }
+dependencies {
+    compileOnly(kotlin("stdlib-jdk8"))
+
+    implementation("io.ktor:ktor-client-core:$ktorVersion")
+    implementation("io.ktor:ktor-client-cio:$ktorVersion")
+    implementation("io.ktor:ktor-client-serialization:$ktorVersion")
+    implementation(project(":drill-cicd-common"))
 }
 
-dependencies {
-    compileOnly(gradleApi())
-    compileOnly((kotlin("stdlib-jdk8")))
-    compileOnly((kotlin("gradle-plugin")))
-    implementation(project(":drill-common"))
-    implementation(project(":drill-gitlab"))
-    implementation(project(":drill-github"))
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCoroutinesVersion")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:$kotlinxCoroutinesVersion")
+kotlin.sourceSets.all {
+    languageSettings.optIn("kotlinx.serialization.ExperimentalSerializationApi")
 }
 
 tasks {
+    test {
+        useJUnitPlatform()
+    }
     withType<KotlinCompile> {
         kotlinOptions.jvmTarget = "1.8"
     }
 }
 
 publishing {
-    repositories {
-        mavenLocal()
+    publications.create<MavenPublication>("drill-cicd-github") {
+        from(components["java"])
+        pom {
+            name.set("Drill CICD integration common github library")
+            description.set("Drill CICD integration common github library")
+        }
     }
 }
 
