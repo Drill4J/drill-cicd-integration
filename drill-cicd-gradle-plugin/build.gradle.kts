@@ -1,7 +1,7 @@
-import java.net.URI
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import com.hierynomus.gradle.license.tasks.LicenseCheck
 import com.hierynomus.gradle.license.tasks.LicenseFormat
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.net.URI
 
 plugins {
     `maven-publish`
@@ -32,6 +32,8 @@ gradlePlugin {
         create("drill-integration-gradle-plugin") {
             id = "${group}.drill-gradle-plugin"
             implementationClass = "com.epam.drill.integration.gradle.DrillCiCdIntegrationGradlePlugin"
+            displayName = "Gradle plugin for CI/CD integration"
+            description = "Gradle plugin for CI/CD integration"
         }
     }
 }
