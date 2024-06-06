@@ -42,6 +42,25 @@ tasks {
     publishToMavenLocal.get().dependsOn(install)
 }
 
+publishing {
+    publications.create<MavenPublication>("drill-cicd-maven-plugin") {
+        artifact(tasks["sourcesJar"])
+        artifact(tasks["javadocJar"])
+        artifact(tasks["mvnInstall"].outputs.files.singleFile).builtBy(tasks["mvnInstall"])
+        pom {
+            name.set("Maven plugin for CI/CD integration")
+            description.set("Maven plugin for CI/CD integration")
+            withXml {
+                asNode().appendNode("dependencies").appendNode("dependency").apply {
+                    appendNode("groupId", "org.jetbrains.kotlin")
+                    appendNode("artifactId", "kotlin-stdlib")
+                    appendNode("version", kotlinVersion)
+                }
+            }
+        }
+    }
+}
+
 @Suppress("UNUSED_VARIABLE")
 license {
     headerURI = URI("https://raw.githubusercontent.com/Drill4J/drill4j/develop/COPYRIGHT")

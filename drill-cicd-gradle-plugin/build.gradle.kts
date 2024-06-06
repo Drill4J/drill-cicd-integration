@@ -21,9 +21,10 @@ repositories {
 }
 
 java {
-    withSourcesJar()
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
+    withSourcesJar()
+    withJavadocJar()
 }
 
 gradlePlugin {
@@ -53,10 +54,15 @@ tasks {
 }
 
 publishing {
-    repositories {
-        mavenLocal()
+    publications.create<MavenPublication>("drill-cicd-gradle-plugin") {
+        from(components["java"])
+        pom {
+            name.set("Gradle plugin for CI/CD integration")
+            description.set("Gradle plugin for CI/CD integration")
+        }
     }
 }
+
 
 @Suppress("UNUSED_VARIABLE")
 license {
