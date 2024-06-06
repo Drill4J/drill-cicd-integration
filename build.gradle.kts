@@ -7,6 +7,7 @@ plugins {
     id("org.ajoberstar.grgit")
     id("com.github.hierynomus.license").apply(false)
     id("io.github.gradle-nexus.publish-plugin")
+    id("io.freefair.maven-central.validate-poms") version "8.6"
 }
 
 group = "com.epam.drill.integration"
