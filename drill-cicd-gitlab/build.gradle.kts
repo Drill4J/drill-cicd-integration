@@ -4,6 +4,7 @@ import com.hierynomus.gradle.license.tasks.LicenseCheck
 import com.hierynomus.gradle.license.tasks.LicenseFormat
 
 plugins {
+    `signing`
     `maven-publish`
     kotlin("jvm")
     kotlin("plugin.serialization")
