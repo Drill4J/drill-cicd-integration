@@ -21,30 +21,35 @@ import com.epam.drill.integration.common.report.ReportGenerator
 import kotlinx.serialization.json.*
 
 class MarkdownReportGenerator : ReportGenerator {
-    override fun getBuildComparisonReport(metrics: JsonObject): Report {
-        val data = metrics["data"]?.jsonObject?.get("metrics")!!.jsonObject
+    override fun getBuildComparisonReport(data: JsonObject): Report {
+        val metrics = data["data"]?.jsonObject?.get("metrics")?.jsonObject
 
-        val newMethods = data["changes_new_methods"]?.jsonPrimitive?.contentOrNull ?: "0"
-        val modifiedMethods = data["changes_modified_methods"]?.jsonPrimitive?.contentOrNull ?: "0"
-        val totalChanges = data["total_changes"]?.jsonPrimitive?.contentOrNull ?: "0"
-        val testedChanges = data["tested_changes"]?.jsonPrimitive?.contentOrNull ?: "0"
-        val coverage = data["coverage"]?.jsonPrimitive?.contentOrNull ?: "0"
-        val recommendedTests = data["recommended_tests"]?.jsonPrimitive?.contentOrNull ?: "0"
-        val recommendedTestsLink = "https://drill4j.com"
-        val fullReportLink = "https://drill4j.com"
+        val newMethods = metrics?.get("changes_new_methods")?.jsonPrimitive?.intOrNull ?: 0
+        val modifiedMethods = metrics?.get("changes_modified_methods")?.jsonPrimitive?.intOrNull ?: 0
+        val totalChanges = metrics?.get("total_changes")?.jsonPrimitive?.intOrNull ?: 0
+        val testedChanges = metrics?.get("tested_changes")?.jsonPrimitive?.intOrNull ?: 0
+        val coverage = metrics?.get("coverage")?.jsonPrimitive?.doubleOrNull ?: 0.0
+        val recommendedTests = metrics?.get("recommended_tests")?.jsonPrimitive?.intOrNull ?: 0
+
+        val links = data["data"]?.jsonObject?.get("links")?.jsonObject
+        val changesLink = links?.get("changes")?.jsonPrimitive?.contentOrNull ?: ""
+        val recommendedTestsLink = links?.get("recommended_tests")?.jsonPrimitive?.contentOrNull ?: ""
+        val fullReportLink = links?.get("full_report")?.jsonPrimitive?.contentOrNull ?: ""
         return Report(
             content = """
-            Drill4J Bot - Change Testing Report            
-            Changes: $totalChanges methods ($newMethods new, $modifiedMethods modified)
-            
-            Tested changes: 
-              $testedChanges/$totalChanges methods (link, click opens risks list)
-			  $coverage% coverage
+### Drill4J Bot - Change Testing Report            
+Changes
+[$totalChanges methods ($newMethods new, $modifiedMethods modified)]($changesLink)
 
-            Recommended tests: [$recommendedTests]($recommendedTestsLink)
-            
-            [Open full report]($fullReportLink)
-        """.trimIndent(),
+Risks
+[${totalChanges - testedChanges}/$totalChanges methods not tested]($changesLink)
+[$coverage% coverage]($changesLink)
+
+Recommended tests
+[$recommendedTests tests]($recommendedTestsLink)            
+
+[See details in Drill4J]($fullReportLink)             
+            """.trimIndent(),
             format = ReportFormat.MARKDOWN
         )
     }
