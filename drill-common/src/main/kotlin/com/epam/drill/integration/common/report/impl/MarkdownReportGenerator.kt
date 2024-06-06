@@ -24,16 +24,15 @@ class MarkdownReportGenerator : ReportGenerator {
     override fun getBuildComparisonReport(data: JsonObject): Report {
         val metrics = data["data"]?.jsonObject?.get("metrics")?.jsonObject
 
-        val newMethods = metrics?.get("changes_new_methods")?.jsonPrimitive?.contentOrNull ?: "0"
-        val modifiedMethods = metrics?.get("changes_modified_methods")?.jsonPrimitive?.contentOrNull ?: "0"
-        val totalChanges = metrics?.get("total_changes")?.jsonPrimitive?.contentOrNull ?: "0"
-        val testedChanges = metrics?.get("tested_changes")?.jsonPrimitive?.contentOrNull ?: "0"
-        val coverage = metrics?.get("coverage")?.jsonPrimitive?.contentOrNull ?: "0"
-        val recommendedTests = metrics?.get("recommended_tests")?.jsonPrimitive?.contentOrNull ?: "0"
+        val newMethods = metrics?.get("changes_new_methods")?.jsonPrimitive?.intOrNull ?: 0
+        val modifiedMethods = metrics?.get("changes_modified_methods")?.jsonPrimitive?.intOrNull ?: 0
+        val totalChanges = metrics?.get("total_changes")?.jsonPrimitive?.intOrNull ?: 0
+        val testedChanges = metrics?.get("tested_changes")?.jsonPrimitive?.intOrNull ?: 0
+        val coverage = metrics?.get("coverage")?.jsonPrimitive?.doubleOrNull ?: 0.0
+        val recommendedTests = metrics?.get("recommended_tests")?.jsonPrimitive?.intOrNull ?: 0
 
         val links = data["data"]?.jsonObject?.get("links")?.jsonObject
         val changesLink = links?.get("changes")?.jsonPrimitive?.contentOrNull ?: ""
-        val risksLink = links?.get("risks")?.jsonPrimitive?.contentOrNull ?: ""
         val recommendedTestsLink = links?.get("recommended_tests")?.jsonPrimitive?.contentOrNull ?: ""
         val fullReportLink = links?.get("full_report")?.jsonPrimitive?.contentOrNull ?: ""
         return Report(
@@ -42,14 +41,14 @@ class MarkdownReportGenerator : ReportGenerator {
 Changes
 [$totalChanges methods ($newMethods new, $modifiedMethods modified)]($changesLink)
 
-Tested changes
-[$testedChanges$/$totalChanges methods tested]($risksLink)
-[$coverage% coverage]($risksLink)
+Risks
+[${totalChanges - testedChanges}/$totalChanges methods not tested]($changesLink)
+[$coverage% coverage]($changesLink)
 
 Recommended tests
 [$recommendedTests tests]($recommendedTestsLink)            
 
-[See details on Drill4J]($fullReportLink)             
+[See details in Drill4J]($fullReportLink)             
             """.trimIndent(),
             format = ReportFormat.MARKDOWN
         )
