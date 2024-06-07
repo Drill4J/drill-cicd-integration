@@ -4,6 +4,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.net.URI
 
 plugins {
+    `signing`
     `maven-publish`
     kotlin("jvm")
     kotlin("plugin.serialization")
@@ -42,9 +43,6 @@ kotlin.sourceSets.all {
 }
 
 tasks {
-    test {
-        useJUnitPlatform()
-    }
     withType<KotlinCompile> {
         kotlinOptions.jvmTarget = "1.8"
     }

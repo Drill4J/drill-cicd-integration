@@ -4,6 +4,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.net.URI
 
 plugins {
+    signing
     `maven-publish`
     `kotlin-dsl`
     `java-gradle-plugin`
@@ -29,8 +30,8 @@ java {
 
 gradlePlugin {
     plugins {
-        create("drill-integration-gradle-plugin") {
-            id = "${group}.drill-gradle-plugin"
+        create("drill-cicd-gradle-plugin") {
+            id = "${group}.drill-cicd-gradle-plugin"
             implementationClass = "com.epam.drill.integration.gradle.DrillCiCdIntegrationGradlePlugin"
             displayName = "Gradle plugin for CI/CD integration"
             description = "Gradle plugin for CI/CD integration"
@@ -56,8 +57,7 @@ tasks {
 }
 
 publishing {
-    publications.create<MavenPublication>("drill-cicd-gradle-plugin") {
-        from(components["java"])
+    publications.withType<MavenPublication> {
         pom {
             name.set("Gradle plugin for CI/CD integration")
             description.set("Gradle plugin for CI/CD integration")
