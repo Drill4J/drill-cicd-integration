@@ -40,11 +40,10 @@ data class GithubPullRequest(
     val user: GithubUser,
     val head: GithubPullRequestBranch,
     val base: GithubPullRequestBranch,
-    val mergeCommitSha: String
 )
 
 @Serializable
 data class GithubEvent(
-    val pullRequest: GithubPullRequest,
+    val pullRequest: GithubPullRequest?,
     val repository: GithubRepository
 )
