@@ -40,6 +40,10 @@ data class GitCommitInfo(
     val message: String
 )
 
+fun getMergeBaseCommitSha(sourceRef: String = "HEAD", targetRef: String): String {
+    return executeGitCommand("git merge-base $sourceRef $targetRef").trim()
+}
+
 fun executeGitCommand(command: String): String {
     val process = ProcessBuilder(*command.split(" ").toTypedArray())
         .redirectErrorStream(true)

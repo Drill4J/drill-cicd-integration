@@ -16,13 +16,14 @@
 package com.epam.drill.integration.github.service
 
 import com.epam.drill.integration.common.client.MetricsClient
+import com.epam.drill.integration.common.git.getMergeBaseCommitSha
 import com.epam.drill.integration.common.report.ReportFormat
 import com.epam.drill.integration.common.report.ReportGenerator
+import com.epam.drill.integration.common.util.required
 import com.epam.drill.integration.github.client.GithubApiClient
 import com.epam.drill.integration.github.model.GithubEvent
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonNamingStrategy
-import kotlinx.serialization.json.decodeFromStream
 import java.io.File
 
 class GithubCiCdService(
@@ -69,15 +70,16 @@ class GithubCiCdService(
             namingStrategy = JsonNamingStrategy.SnakeCase
         }
         val event = json.decodeFromString<GithubEvent>(githubEventFile.readText())
+        val pullRequest = event.pullRequest.required("pullRequest")
         postPullRequestReport(
             githubRepository = event.repository.fullName,
-            githubPullRequestId = event.pullRequest.number,
+            githubPullRequestId = pullRequest.number,
             groupId = groupId,
             appId = appId,
-            sourceBranch = event.pullRequest.head.ref,
-            targetBranch = event.pullRequest.base.ref,
-            headCommitSha = event.pullRequest.head.sha,
-            mergeBaseCommitSha = event.pullRequest.mergeCommitSha
+            sourceBranch = pullRequest.head.ref,
+            targetBranch = pullRequest.base.ref,
+            headCommitSha = pullRequest.head.sha,
+            mergeBaseCommitSha = getMergeBaseCommitSha(targetRef = pullRequest.base.ref)
         )
     }
 
