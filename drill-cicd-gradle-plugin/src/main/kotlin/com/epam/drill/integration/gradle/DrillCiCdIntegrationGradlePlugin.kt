@@ -18,20 +18,28 @@ package com.epam.drill.integration.gradle
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
+private const val TASK_GROUP = "Drill4J"
+
 class DrillCiCdIntegrationGradlePlugin : Plugin<Project> {
     override fun apply(project: Project) {
         val ciCd = project.extensions.create("drillCiCd", DrillCiCdProperties::class.java)
 
         project.task("drillGitlabMergeRequestReport") {
             drillGitlabMergeRequestReportTask(ciCd)
+        }.also {
+            it.group = TASK_GROUP
         }
 
         project.task("drillGithubPullRequestReport") {
             drillGithubPullRequestReport(ciCd)
+        }.also {
+            it.group = TASK_GROUP
         }
 
         project.task("drillSendBuildInfo") {
             drillSendBuildInfo(ciCd)
+        }.also {
+            it.group = TASK_GROUP
         }
     }
 }

@@ -30,8 +30,8 @@ java {
 
 gradlePlugin {
     plugins {
-        create("drill-cicd-gradle-plugin") {
-            id = "${group}.drill-cicd-gradle-plugin"
+        create("cicd") {
+            id = "${group}.cicd"
             implementationClass = "com.epam.drill.integration.gradle.DrillCiCdIntegrationGradlePlugin"
             displayName = "Gradle plugin for CI/CD integration"
             description = "Gradle plugin for CI/CD integration"

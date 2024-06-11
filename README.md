@@ -28,11 +28,11 @@ Build all modules:
 Add Gradle plugin to your Gradle configuration:
 ```kotlin
 plugins {
-    id("com.epam.drill.integration.drill-gradle-plugin") version "0.0.1"
+    id("com.epam.drill.integration.cicd") version "0.0.1"
 }
 ```
 
-Add Drill4J Gitlab integration properties to your Gradle configuration:
+Add Drill4J Gitlab integration properties to your Kotlin Gradle configuration:
 
 ```kotlin
 drillCiCd {
@@ -65,10 +65,10 @@ Add Gradle plugin to your Gradle configuration:
 
 ```kotlin
 plugins {
-    id("com.epam.drill.integration.drill-gradle-plugin") version "0.0.1"
+    id("com.epam.drill.integration.cicd") version "0.0.1"
 }
 ```
-Add Drill4J GitHub integration properties to your Gradle configuration:
+Add Drill4J GitHub integration properties to your Kotlin Gradle configuration:
 ```kotlin
 drillCiCd {
     //Drill4J group ID
@@ -98,10 +98,10 @@ Add Gradle plugin to your Gradle configuration:
 
 ```kotlin
 plugins {
-    id("com.epam.drill.integration.drill-gradle-plugin") version "0.0.1"
+    id("com.epam.drill.integration.cicd") version "0.0.1"
 }
 ```
-Add Drill4J CI/CD integration properties to your Gradle configuration:
+Add Drill4J CI/CD integration properties to your Kotlin Gradle configuration:
 ```kotlin
 drillCiCd {
     //Drill4J group ID
@@ -113,7 +113,7 @@ drillCiCd {
     //Drill4J Api Key
     drillApiKey = "your-drill-api-key-here"
     //Version of this build (optional)
-    buildVersion = "1.2.3-rc1"   
+    buildVersion = "1.2.3-rc.1"   
 }
 ```
 
@@ -227,7 +227,7 @@ Add Maven plugin to your Maven configuration:
         <!-- Drill4J Api Key -->
         <drillApiKey>secret-key</drillApiKey>
         <!-- Version of this build (optional) -->
-        <buildVersion>1.2.3-rc1</buildVersion>
+        <buildVersion>1.2.3-rc.1</buildVersion>
     </configuration>
     <executions>
         <execution>
