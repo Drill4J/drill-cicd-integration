@@ -83,6 +83,8 @@ drillCiCd {
     github {
         //GitHub API Token
         token = "your-github-token-here"
+        //Limit on number of git commits to download (optional, unlimited by default)
+        fetchDepth = 1000
     }
 }
 ```

@@ -59,5 +59,6 @@ open class MergeRequest(
 open class DrillGithubProperties(
     var apiUrl: String = "https://api.github.com",
     var token: String? = null,
-    var eventFilePath: String? = null
+    var eventFilePath: String? = null,
+    var fetchDepth: Int? = null,
 )

@@ -23,6 +23,7 @@ import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
+import com.github.ajalt.clikt.parameters.types.int
 import kotlinx.coroutines.runBlocking
 import java.io.File
 
@@ -34,6 +35,7 @@ class GithubPullRequestReportByEventCommand: CliktCommand(name = "githubPullRequ
     private val githubApiUrl by option("-gh-u", "--githubApiUrl", envvar = "GITHUB_API_URL").default("https://api.github.com")
     private val githubToken by option("-gh-t", "--githubToken", envvar = "INPUT_GITHUB_TOKEN").required()
     private val eventFilePath by option("-ef", "--eventFilePath", envvar = "GITHUB_EVENT_PATH").required()
+    private val fetchDepth by option("-fd", "--fetchDepth", envvar = "INPUT_FETCH_DEPTH").int()
 
     override fun run() {
         echo("Posting Drill4J Pull Request Report to GitHub by GitHub Event...")
@@ -46,7 +48,8 @@ class GithubPullRequestReportByEventCommand: CliktCommand(name = "githubPullRequ
             githubCiCdService.postPullRequestReportByEvent(
                 File(eventFilePath),
                 groupId,
-                appId
+                appId,
+                fetchDepth
             )
         }
         echo("Done.")

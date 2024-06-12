@@ -38,6 +38,7 @@ fun Task.drillGithubPullRequestReport(ciCd: DrillCiCdProperties) {
         val eventFilePath = github.eventFilePath
             .fromEnv("GITHUB_EVENT_PATH")
             .required("github.eventFilePath")
+        val fetchDepth = github.fetchDepth
 
         val githubCiCdService = GithubCiCdService(
             GithubApiClientImpl(
@@ -55,6 +56,7 @@ fun Task.drillGithubPullRequestReport(ciCd: DrillCiCdProperties) {
                 groupId = groupId,
                 appId = appId,
                 githubEventFile = File(eventFilePath),
+                fetchDepth = fetchDepth
             )
         }
     }
