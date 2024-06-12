@@ -46,15 +46,20 @@ fun getMergeBaseCommitSha(targetRef: String): String {
     return executeGitCommand("git merge-base HEAD $targetRef")
 }
 
-fun fetch() {
-    executeGitCommand("git fetch --prune --unshallow")
+fun fetch(depth: Int? = null) {
+    val depthParam = " --depth=$depth"
+        .takeIf { depth != null && depth > 0 }
+        ?: ""
+    executeGitCommand("git fetch$depthParam")
 }
 
 fun executeGitCommand(command: String): String {
     val process = ProcessBuilder(*command.split(" ").toTypedArray()).start()
     if (process.waitFor() != 0) {
-        throw IllegalStateException("Git command `$command` failed " +
-                "with error code ${process.exitValue()}: ${process.errorStream.readText()}")
+        throw IllegalStateException(
+            "Git command `$command` failed " +
+                    "with error code ${process.exitValue()}: ${process.errorStream.readText()}"
+        )
     }
     return process.inputStream.readText()
 }
