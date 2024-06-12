@@ -32,24 +32,65 @@ class MarkdownReportGenerator : ReportGenerator {
         val recommendedTests = metrics?.get("recommended_tests")?.jsonPrimitive?.intOrNull ?: 0
 
         val links = data["data"]?.jsonObject?.get("links")?.jsonObject
-        val changesLink = links?.get("changes")?.jsonPrimitive?.contentOrNull ?: ""
-        val recommendedTestsLink = links?.get("recommended_tests")?.jsonPrimitive?.contentOrNull ?: ""
-        val fullReportLink = links?.get("full_report")?.jsonPrimitive?.contentOrNull ?: ""
+        val changesLink = links?.get("changes")?.jsonPrimitive?.contentOrNull
+        val recommendedTestsLink = links?.get("recommended_tests")?.jsonPrimitive?.contentOrNull
+        val fullReportLink = links?.get("full_report")?.jsonPrimitive?.contentOrNull
+
+        val changesText = "$totalChanges method${totalChanges.pluralEnding("s")} ($newMethods new, $modifiedMethods modified)"
+            .takeIf { totalChanges > 0 }
+            ?.wrapToLink(changesLink)
+            ?: "No changes detected"
+        val testedMethodsText = "${totalChanges - testedChanges}/$totalChanges methods not tested"
+            .takeIf { totalChanges - testedChanges > 0 }
+            ?.wrapToLink(changesLink)
+            ?: "All changes tested".wrapToLink(changesLink)
+        val coverageText = "${coverage.percent()}% coverage"
+            .wrapToLink(changesLink)
+        val recommendedTestsText = "$recommendedTests test${recommendedTests.pluralEnding("s")}"
+            .takeIf { recommendedTests > 0 }
+            ?.wrapToLink(recommendedTestsLink)
+            ?: "None"
+        val seeDetailsText = "See details in Drill4J"
+            .takeIf { fullReportLink != null }
+            ?.wrapToLink(fullReportLink)
+            ?: ""
+
+        val reportHeader = """
+### Drill4J Bot - Change Testing Report
+
+
+        """.trimIndent()
+        val changesParagraph = """
+**Changes**
+$changesText   
+
+
+""".trimIndent()
+        val risksParagraph = """
+**Risks**
+$testedMethodsText
+$coverageText
+
+
+""".trimIndent()
+            .takeIf { totalChanges > 0 }
+            ?: ""
+        val recommendedTestsParagraph = """
+**Recommended tests**
+$recommendedTestsText
+
+
+""".trimIndent()
+        val seeDetailsParagraph = """
+$seeDetailsText            
+""".trimIndent()
+
         return Report(
-            content = """
-### Drill4J Bot - Change Testing Report            
-Changes
-[$totalChanges methods ($newMethods new, $modifiedMethods modified)]($changesLink)
-
-Risks
-[${totalChanges - testedChanges}/$totalChanges methods not tested]($changesLink)
-[$coverage% coverage]($changesLink)
-
-Recommended tests
-[$recommendedTests tests]($recommendedTestsLink)            
-
-[See details in Drill4J]($fullReportLink)             
-            """.trimIndent(),
+            content = reportHeader
+                    + changesParagraph
+                    + risksParagraph
+                    + recommendedTestsParagraph
+                    + seeDetailsParagraph,
             format = ReportFormat.MARKDOWN
         )
     }
