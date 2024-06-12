@@ -3,6 +3,7 @@ import com.hierynomus.gradle.license.tasks.LicenseFormat
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.net.URI
 
+@Suppress("RemoveRedundantBackticks")
 plugins {
     `signing`
     `maven-publish`
@@ -14,9 +15,7 @@ plugins {
 group = "com.epam.drill.integration"
 version = rootProject.version
 
-val kotlinxSerializationVersion: String by extra
 val ktorVersion: String by parent!!.extra
-
 
 repositories {
     mavenLocal()
