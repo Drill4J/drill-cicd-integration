@@ -16,6 +16,7 @@
 package com.epam.drill.integration.github.service
 
 import com.epam.drill.integration.common.client.MetricsClient
+import com.epam.drill.integration.common.git.fetch
 import com.epam.drill.integration.common.git.getMergeBaseCommitSha
 import com.epam.drill.integration.common.report.ReportFormat
 import com.epam.drill.integration.common.report.ReportGenerator
@@ -71,6 +72,7 @@ class GithubCiCdService(
         }
         val event = json.decodeFromString<GithubEvent>(githubEventFile.readText())
         val pullRequest = event.pullRequest.required("pullRequest")
+        fetch()
         postPullRequestReport(
             githubRepository = event.repository.fullName,
             githubPullRequestId = pullRequest.number,
@@ -79,7 +81,7 @@ class GithubCiCdService(
             sourceBranch = pullRequest.head.ref,
             targetBranch = pullRequest.base.ref,
             headCommitSha = pullRequest.head.sha,
-            mergeBaseCommitSha = getMergeBaseCommitSha(targetRef = pullRequest.base.ref)
+            mergeBaseCommitSha = getMergeBaseCommitSha(targetRef = "origin/${pullRequest.base.ref}")
         )
     }
 
