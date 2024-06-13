@@ -154,7 +154,7 @@ Add Drill4J Gitlab integration to your Maven configuration:
         <plugin>
             <groupId>com.epam.drill.integration</groupId>
             <artifactId>drill-cicd-maven-plugin</artifactId>
-            <version>0.0.1-beta.6</version>
+            <version>0.0.1</version>
             <configuration>
                 <groupId>some-group-id</groupId>
                 <appId>some-agent-id</appId>
@@ -184,7 +184,7 @@ And configure profile to run as command:
                 <plugin>
                     <groupId>com.epam.drill.integration</groupId>
                     <artifactId>drill-cicd-maven-plugin</artifactId>
-                    <version>0.0.1-beta.6</version>
+                    <version>0.0.1</version>
                     <executions>
                         <execution>
                             <id>drillGitlabMergeRequestReport</id>
@@ -217,7 +217,7 @@ Add Drill4J GitHub integration to your Maven configuration:
         <plugin>
             <groupId>com.epam.drill.integration</groupId>
             <artifactId>drill-cicd-maven-plugin</artifactId>
-            <version>0.0.1-beta.6</version>
+            <version>0.0.1</version>
             <configuration>
                 <groupId>some-group-id</groupId>
                 <appId>some-agent-id</appId>
@@ -245,7 +245,7 @@ And configure profile to run as command:
                 <plugin>
                     <groupId>com.epam.drill.integration</groupId>
                     <artifactId>drill-cicd-maven-plugin</artifactId>
-                    <version>0.0.1-beta.6</version>
+                    <version>0.0.1</version>
                     <executions>
                         <execution>
                             <id>drillGithubPullRequestReport</id>
@@ -278,7 +278,7 @@ Add Maven plugin to your Maven configuration:
         <plugin>
             <groupId>com.epam.drill.integration</groupId>
             <artifactId>drill-cicd-maven-plugin</artifactId>
-            <version>0.0.1-beta.6</version>
+            <version>0.0.1</version>
             <configuration>
                 <groupId>some-group-id</groupId>
                 <appId>some-agent-id</appId>
@@ -303,7 +303,7 @@ And configure profile to run as command:
                 <plugin>
                     <groupId>com.epam.drill.integration</groupId>
                     <artifactId>drill-cicd-maven-plugin</artifactId>
-                    <version>0.0.1-beta.6</version>
+                    <version>0.0.1</version>
                     <executions>
                         <execution>
                             <id>drillSendBuildInfo</id>
