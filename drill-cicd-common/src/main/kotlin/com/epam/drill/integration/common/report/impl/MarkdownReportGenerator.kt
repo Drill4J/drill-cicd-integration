@@ -44,7 +44,7 @@ class MarkdownReportGenerator : ReportGenerator {
         val fullReportLink = links?.get("full_report")?.jsonPrimitive?.contentOrNull
 
         val descriptionText = "Comparing ${commitSha?.shortSha()?.wrapToLink(buildLink)} (current) " +
-                "to `${baselineCommitSha?.shortSha()?.wrapToLink(baselineBuildLink)}` (baseline)."
+                "to ${baselineCommitSha?.shortSha()?.wrapToLink(baselineBuildLink)} (baseline)."
         val changesText = "$totalChanges method${totalChanges.pluralEnding("s")} ($newMethods new, $modifiedMethods modified)"
             .takeIf { totalChanges > 0 }
             ?.wrapToLink(changesLink)
