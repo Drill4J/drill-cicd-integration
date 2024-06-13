@@ -17,9 +17,7 @@ package com.epam.drill.integration.gradle
 
 import com.epam.drill.integration.common.client.BuildPayload
 import com.epam.drill.integration.common.client.impl.DataIngestClientImpl
-import com.epam.drill.integration.common.client.impl.MetricsClientImpl
-import com.epam.drill.integration.common.git.getGitBranch
-import com.epam.drill.integration.common.git.getGitCommitInfo
+import com.epam.drill.integration.common.git.impl.GitClientImpl
 import com.epam.drill.integration.common.util.required
 import kotlinx.coroutines.runBlocking
 import org.gradle.api.Task
@@ -36,9 +34,10 @@ fun Task.drillSendBuildInfo(ciCd: DrillCiCdProperties) {
             drillApiUrl = drillApiUrl,
             drillApiKey = drillApiKey
         )
+        val gitClient = GitClientImpl()
 
-        val branch = getGitBranch()
-        val commitInfo = getGitCommitInfo()
+        val branch = gitClient.getGitBranch()
+        val commitInfo = gitClient.getGitCommitInfo()
         val payload = BuildPayload(
             groupId = groupId,
             appId = appId,
@@ -49,7 +48,7 @@ fun Task.drillSendBuildInfo(ciCd: DrillCiCdProperties) {
             commitMessage = commitInfo.message,
             branch = branch
         )
-
+        logger.lifecycle("Sending the current build information to Drill4J for $groupId/$appId...")
         runBlocking {
             dataIngestClient.sendBuild(payload)
         }

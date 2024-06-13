@@ -16,6 +16,7 @@
 package com.epam.drill.integration.gradle
 
 import com.epam.drill.integration.common.client.impl.MetricsClientImpl
+import com.epam.drill.integration.common.git.impl.GitClientImpl
 import com.epam.drill.integration.common.report.impl.MarkdownReportGenerator
 import com.epam.drill.integration.common.util.fromEnv
 import com.epam.drill.integration.common.util.required
@@ -49,8 +50,10 @@ fun Task.drillGithubPullRequestReport(ciCd: DrillCiCdProperties) {
                 drillApiUrl,
                 drillApiKey
             ),
-            MarkdownReportGenerator()
+            MarkdownReportGenerator(),
+            GitClientImpl()
         )
+        logger.lifecycle("Posting Drill4J Testing Report for $groupId/$appId to GitHub by event file $eventFilePath...")
         runBlocking {
             githubCiCdService.postPullRequestReportByEvent(
                 groupId = groupId,

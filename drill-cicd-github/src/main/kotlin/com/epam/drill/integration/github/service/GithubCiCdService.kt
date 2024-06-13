@@ -16,8 +16,7 @@
 package com.epam.drill.integration.github.service
 
 import com.epam.drill.integration.common.client.MetricsClient
-import com.epam.drill.integration.common.git.fetch
-import com.epam.drill.integration.common.git.getMergeBaseCommitSha
+import com.epam.drill.integration.common.git.GitClient
 import com.epam.drill.integration.common.report.ReportFormat
 import com.epam.drill.integration.common.report.ReportGenerator
 import com.epam.drill.integration.common.util.required
@@ -25,13 +24,17 @@ import com.epam.drill.integration.github.client.GithubApiClient
 import com.epam.drill.integration.github.model.GithubEvent
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonNamingStrategy
+import mu.KotlinLogging
 import java.io.File
 
 class GithubCiCdService(
     private val githubApiClient: GithubApiClient,
     private val metricsClient: MetricsClient,
-    private val reportGenerator: ReportGenerator
+    private val reportGenerator: ReportGenerator,
+    private val gitClient: GitClient
 ) {
+    private val logger = KotlinLogging.logger { }
+
     suspend fun postPullRequestReport(
         githubRepository: String,
         githubPullRequestId: Int,
@@ -42,6 +45,7 @@ class GithubCiCdService(
         headCommitSha: String,
         mergeBaseCommitSha: String
     ) {
+        logger.info { "Requesting metrics for $groupId/$appId to compare $headCommitSha with $mergeBaseCommitSha..." }
         val metrics = metricsClient.getBuildComparison(
             groupId = groupId,
             appId = appId,
@@ -53,6 +57,7 @@ class GithubCiCdService(
             ReportFormat.MARKDOWN -> "application/vnd.github.text+json"
             ReportFormat.PLAINTEXT -> "application/json"
         }
+        logger.info { "Posting a comment to GitHub repository $githubRepository to pull request $githubPullRequestId..." }
         githubApiClient.postPullRequestComment(
             githubRepository,
             githubPullRequestId,
@@ -73,7 +78,7 @@ class GithubCiCdService(
         }
         val event = json.decodeFromString<GithubEvent>(githubEventFile.readText())
         val pullRequest = event.pullRequest.required("pullRequest")
-        fetch(fetchDepth)
+        gitClient.fetch(fetchDepth)
         postPullRequestReport(
             githubRepository = event.repository.fullName,
             githubPullRequestId = pullRequest.number,
@@ -82,7 +87,7 @@ class GithubCiCdService(
             sourceBranch = pullRequest.head.ref,
             targetBranch = pullRequest.base.ref,
             headCommitSha = pullRequest.head.sha,
-            mergeBaseCommitSha = getMergeBaseCommitSha(targetRef = "origin/${pullRequest.base.ref}")
+            mergeBaseCommitSha = gitClient.getMergeBaseCommitSha(targetRef = "origin/${pullRequest.base.ref}")
         )
     }
 

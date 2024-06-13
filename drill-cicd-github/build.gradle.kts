@@ -16,6 +16,7 @@ version = rootProject.version
 
 val kotlinxSerializationVersion: String by extra
 val ktorVersion: String by parent!!.extra
+val microutilsLoggingVersion: String by parent!!.extra
 
 
 repositories {
@@ -36,6 +37,8 @@ dependencies {
     implementation("io.ktor:ktor-client-core:$ktorVersion")
     implementation("io.ktor:ktor-client-cio:$ktorVersion")
     implementation("io.ktor:ktor-client-serialization:$ktorVersion")
+    implementation("io.ktor:ktor-client-logging:$ktorVersion")
+    implementation("io.github.microutils:kotlin-logging-jvm:$microutilsLoggingVersion")
     implementation(project(":drill-cicd-common"))
 }
 
