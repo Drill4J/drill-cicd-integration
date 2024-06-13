@@ -28,10 +28,10 @@ open class DrillGitlabProperties(
     @Parameter(property = "commitSha")
     var commitSha: String? = null,
     @Parameter(property = "mergeRequest")
-    var mergeRequest: MergeRequestProperties = MergeRequestProperties(),
+    var mergeRequest: MergeRequest = MergeRequest()
 )
 
-open class MergeRequestProperties(
+open class MergeRequest(
     @Parameter(property = "mergeRequestIid")
     var mergeRequestIid: String? = null,
     @Parameter(property = "mergeBaseCommitSha")
