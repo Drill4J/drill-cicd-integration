@@ -36,11 +36,8 @@ dependencies {
     implementation("org.apache.maven.plugins:maven-surefire-plugin:2.22.2")
     implementation("org.twdata.maven:mojo-executor:2.3.2")
 
-    implementation("io.ktor:ktor-client-core-jvm:$ktorVersion")
-    implementation("io.ktor:ktor-client-cio-jvm:$ktorVersion")
-    implementation("io.ktor:ktor-client-serialization-jvm:$ktorVersion")
-    implementation("io.github.microutils:kotlin-logging-jvm:$microutilsLoggingVersion")
-    implementation("io.ktor:ktor-client-logging-jvm:$ktorVersion")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCoroutinesVersion")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:$kotlinxCoroutinesVersion")
 
     implementation(project(":drill-cicd-common"))
     implementation(project(":drill-cicd-github"))
