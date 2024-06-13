@@ -15,6 +15,9 @@ group = "com.epam.drill.integration"
 version = rootProject.version
 
 val kotlinVersion: String by parent!!.extra
+val ktorVersion: String by parent!!.extra
+val kotlinxCoroutinesVersion: String by parent!!.extra
+val microutilsLoggingVersion: String by parent!!.extra
 
 repositories {
     mavenLocal()
@@ -32,6 +35,12 @@ dependencies {
     implementation("org.apache.maven.plugin-tools:maven-plugin-annotations:3.6.1")
     implementation("org.apache.maven.plugins:maven-surefire-plugin:2.22.2")
     implementation("org.twdata.maven:mojo-executor:2.3.2")
+
+    implementation("io.ktor:ktor-client-core-jvm:$ktorVersion")
+    implementation("io.ktor:ktor-client-cio-jvm:$ktorVersion")
+    implementation("io.ktor:ktor-client-serialization-jvm:$ktorVersion")
+    implementation("io.github.microutils:kotlin-logging-jvm:$microutilsLoggingVersion")
+    implementation("io.ktor:ktor-client-logging-jvm:$ktorVersion")
 
     implementation(project(":drill-cicd-common"))
     implementation(project(":drill-cicd-github"))
@@ -63,7 +72,7 @@ tasks {
         commandLine(*args, "install", "-Ddrill.plugin.version=$version", "-Dkotlin.version=$kotlinVersion")
         workingDir(project.projectDir)
         standardOutput = System.out
-        outputs.file("target/agent-runner-plugin-maven-$version.jar")
+        outputs.file("target/drill-cicd-maven-plugin-$version.jar")
     }
     assemble.get().dependsOn(sourcesJar)
     assemble.get().dependsOn(javadocJar)
