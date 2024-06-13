@@ -133,22 +133,15 @@ Add Drill4J Gitlab integration to your Maven configuration:
 
 <plugin>
     <groupId>com.epam.drill.integration</groupId>
-    <artifactId>drill-maven-plugin</artifactId>
-    <version>0.0.1</version>
+    <artifactId>drill-cicd-maven-plugin</artifactId>
+    <version>0.0.1-beta.5</version>
     <configuration>
-        <!-- Drill4J group ID -->
         <groupId>some-group-id</groupId>
-        <!-- Drill4J application ID -->
         <appId>some-agent-id</appId>
-        <!-- Drill4J API url -->
         <drillApiUrl>http://example.com/api</drillApiUrl>
-        <!-- Drill4J Api Key -->
         <drillApiKey>secret-key</drillApiKey>
-        
         <gitlab>
-            <!-- Gitlab API url -->
-            <apiUrl>https://api.github.com</apiUrl>
-            <!-- Gitlab API Private Token -->
+            <apiUrl>https://gitlab.com/api</apiUrl>
             <privateToken>someToken</privateToken>
         </gitlab>
     </configuration>
@@ -176,21 +169,16 @@ Add Drill4J GitHub integration to your Maven configuration:
 
 <plugin>
     <groupId>com.epam.drill.integration</groupId>
-    <artifactId>drill-maven-plugin</artifactId>
-    <version>0.0.1</version>
+    <artifactId>drill-cicd-maven-plugin</artifactId>
+    <version>0.0.1-beta.5</version>
     <configuration>
-        <!-- Drill4J group ID -->
         <groupId>some-group-id</groupId>
-        <!-- Drill4J application ID -->
         <appId>some-agent-id</appId>
-        <!-- Drill4J API url -->
         <drillApiUrl>http://example.com/api</drillApiUrl>
-        <!-- Drill4J Api Key -->
         <drillApiKey>secret-key</drillApiKey>
-        
         <github>
-            <!-- GitHub API token -->
             <token>someToken</token>
+            <fetchDepth>1000</fetchDepth>
         </github>
     </configuration>
     <executions>
@@ -217,18 +205,13 @@ Add Maven plugin to your Maven configuration:
 
 <plugin>
     <groupId>com.epam.drill.integration</groupId>
-    <artifactId>drill-maven-plugin</artifactId>
-    <version>0.0.1</version>
+    <artifactId>drill-cicd-maven-plugin</artifactId>
+    <version>0.0.1-beta.5</version>
     <configuration>
-        <!-- Drill4J group ID -->
         <groupId>some-group-id</groupId>
-        <!-- Drill4J application ID -->
         <appId>some-agent-id</appId>
-        <!-- Drill4J API url -->
         <drillApiUrl>http://example.com/api</drillApiUrl>
-        <!-- Drill4J Api Key -->
         <drillApiKey>secret-key</drillApiKey>
-        <!-- Version of this build (optional) -->
         <buildVersion>1.2.3-rc.1</buildVersion>
     </configuration>
     <executions>
