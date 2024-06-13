@@ -17,6 +17,7 @@ version = rootProject.version
 val kotlinVersion: String by parent!!.extra
 val ktorVersion: String by parent!!.extra
 val kotlinxCoroutinesVersion: String by parent!!.extra
+val kotlinxSerializationVersion: String by parent!!.extra
 val microutilsLoggingVersion: String by parent!!.extra
 
 repositories {
@@ -135,8 +136,23 @@ publishing {
                     // Serialization
                     this.appendNode("dependency").apply {
                         appendNode("groupId", "io.ktor")
+                        appendNode("artifactId", "ktor-client-serialization")
+                        appendNode("version", ktorVersion)
+                    }
+                    this.appendNode("dependency").apply {
+                        appendNode("groupId", "io.ktor")
                         appendNode("artifactId", "ktor-client-serialization-jvm")
                         appendNode("version", ktorVersion)
+                    }
+                    this.appendNode("dependency").apply {
+                        appendNode("groupId", "org.jetbrains.kotlinx")
+                        appendNode("artifactId", "kotlinx-serialization-core-jvm")
+                        appendNode("version", "1.5.1")
+                    }
+                    this.appendNode("dependency").apply {
+                        appendNode("groupId", "org.jetbrains.kotlinx")
+                        appendNode("artifactId", "kotlinx-serialization-json-jvm")
+                        appendNode("version", "1.5.1")
                     }
                 }
             }
