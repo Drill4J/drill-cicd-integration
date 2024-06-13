@@ -64,7 +64,6 @@ class DrillGithubPullRequestReportMojo : AbstractMojo() {
         val eventFilePath = github.eventFilePath
             .fromEnv("GITHUB_EVENT_PATH")
             .required("github.eventFilePath")
-        val fetchDepth = github.fetchDepth
 
         val githubCiCdService = GithubCiCdService(
             GithubApiClientImpl(
@@ -83,8 +82,7 @@ class DrillGithubPullRequestReportMojo : AbstractMojo() {
             githubCiCdService.postPullRequestReportByEvent(
                 groupId = groupId,
                 appId = appId,
-                githubEventFile = File(eventFilePath),
-                fetchDepth = fetchDepth
+                githubEventFile = File(eventFilePath)
             )
         }
     }
