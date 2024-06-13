@@ -18,12 +18,15 @@ package com.epam.drill.integration.gitlab.service
 import com.epam.drill.integration.common.client.MetricsClient
 import com.epam.drill.integration.common.report.ReportGenerator
 import com.epam.drill.integration.gitlab.client.GitlabApiClient
+import mu.KotlinLogging
 
 class GitlabCiCdService(
     private val gitlabApiClient: GitlabApiClient,
     private val metricsClient: MetricsClient,
     private val reportGenerator: ReportGenerator
 ) {
+    private val logger = KotlinLogging.logger { }
+
     suspend fun postMergeRequestReport(
         gitlabProjectId: String,
         gitlabMergeRequestId: String,
@@ -31,21 +34,23 @@ class GitlabCiCdService(
         appId: String,
         sourceBranch: String,
         targetBranch: String,
-        commitSha: String,
+        headCommitSha: String,
         mergeBaseCommitSha: String
     ) {
+        logger.info { "Requesting metrics for $groupId/$appId to compare $headCommitSha with $mergeBaseCommitSha..." }
         val metrics = metricsClient.getBuildComparison(
             groupId,
             appId,
             sourceBranch,
             targetBranch,
-            commitSha,
+            headCommitSha,
             mergeBaseCommitSha
         )
         val report = reportGenerator.getBuildComparisonReport(
             metrics
         )
-        gitlabApiClient.postMergeRequestReport(
+        logger.info { "Posting a comment to Gitlab project $gitlabProjectId to merge request $gitlabMergeRequestId..." }
+        gitlabApiClient.postMergeRequestComment(
             gitlabProjectId,
             gitlabMergeRequestId,
             report.content

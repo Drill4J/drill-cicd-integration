@@ -17,8 +17,7 @@ package com.epam.drill.integration.cli
 
 import com.epam.drill.integration.common.client.BuildPayload
 import com.epam.drill.integration.common.client.impl.DataIngestClientImpl
-import com.epam.drill.integration.common.git.getGitBranch
-import com.epam.drill.integration.common.git.getGitCommitInfo
+import com.epam.drill.integration.common.git.impl.GitClientImpl
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
@@ -37,9 +36,10 @@ class SendBuildInfoCommand : CliktCommand(name = "sendBuildInfo") {
             drillApiUrl = drillApiUrl,
             drillApiKey = drillApiKey
         )
+        val gitClient = GitClientImpl()
 
-        val branch = getGitBranch()
-        val commitInfo = getGitCommitInfo()
+        val branch = gitClient.getGitBranch()
+        val commitInfo = gitClient.getGitCommitInfo()
         val payload = BuildPayload(
             groupId = groupId,
             appId = appId,

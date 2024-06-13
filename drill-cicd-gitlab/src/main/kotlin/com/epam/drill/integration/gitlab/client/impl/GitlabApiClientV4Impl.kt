@@ -20,6 +20,7 @@ import kotlinx.serialization.json.JsonObject
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.features.json.*
+import io.ktor.client.features.logging.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 
@@ -29,9 +30,12 @@ class GitlabApiClientV4Impl(
 ) : GitlabApiClient {
     private val client = HttpClient(CIO) {
         install(JsonFeature)
+        install(Logging) {
+            level = LogLevel.BODY
+        }
     }
 
-    override suspend fun postMergeRequestReport(projectId: String, mergeRequestId: String, comment: String) {
+    override suspend fun postMergeRequestComment(projectId: String, mergeRequestId: String, comment: String) {
         val url = "$gitlabApiUrl/v4/projects/$projectId/merge_requests/$mergeRequestId/notes"
         client.post<JsonObject>(url) {
             contentType(ContentType.Application.Json)

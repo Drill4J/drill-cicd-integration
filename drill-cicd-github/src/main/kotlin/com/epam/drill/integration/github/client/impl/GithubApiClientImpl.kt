@@ -20,6 +20,7 @@ import kotlinx.serialization.json.JsonObject
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.features.json.*
+import io.ktor.client.features.logging.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 
@@ -29,6 +30,9 @@ class GithubApiClientImpl(
 ) : GithubApiClient {
     private val client = HttpClient(CIO) {
         install(JsonFeature)
+        install(Logging) {
+            level = LogLevel.BODY
+        }
     }
 
     override suspend fun postPullRequestComment(

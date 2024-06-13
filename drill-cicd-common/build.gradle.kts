@@ -16,6 +16,7 @@ group = "com.epam.drill.integration"
 version = rootProject.version
 
 val ktorVersion: String by parent!!.extra
+val microutilsLoggingVersion: String by parent!!.extra
 
 repositories {
     mavenLocal()
@@ -35,6 +36,8 @@ dependencies {
     implementation("io.ktor:ktor-client-core:$ktorVersion")
     implementation("io.ktor:ktor-client-cio:$ktorVersion")
     implementation("io.ktor:ktor-client-serialization:$ktorVersion")
+    implementation("io.ktor:ktor-client-logging:$ktorVersion")
+    implementation("io.github.microutils:kotlin-logging-jvm:$microutilsLoggingVersion")
 }
 
 kotlin.sourceSets.all {

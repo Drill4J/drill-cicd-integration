@@ -19,9 +19,11 @@ import com.epam.drill.integration.common.client.MetricsClient
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.features.json.*
+import io.ktor.client.features.logging.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import kotlinx.serialization.json.JsonObject
+import mu.KotlinLogging
 
 private const val API_KEY_HEADER = "X-Api-Key"
 
@@ -33,6 +35,9 @@ class MetricsClientImpl(
 
     private val client = HttpClient(CIO) {
         install(JsonFeature)
+        install(Logging) {
+            level = LogLevel.BODY
+        }
     }
 
     override suspend fun getBuildComparison(

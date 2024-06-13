@@ -61,6 +61,7 @@ fun Task.drillGitlabMergeRequestReportTask(ciCd: DrillCiCdProperties) {
             ),
             MarkdownReportGenerator()
         )
+        logger.lifecycle("Posting Drill4J Testing Report for $groupId/$appId to Gitlab project $gitlabProjectId to merge request $gitlabMergeRequestIid...")
         runBlocking {
             gitlabCiCdService.postMergeRequestReport(
                 gitlabProjectId = gitlabProjectId,
@@ -69,7 +70,7 @@ fun Task.drillGitlabMergeRequestReportTask(ciCd: DrillCiCdProperties) {
                 appId = appId,
                 sourceBranch = sourceBranch,
                 targetBranch = targetBranch,
-                commitSha = commitSha,
+                headCommitSha = commitSha,
                 mergeBaseCommitSha = mergeBaseCommitSha,
             )
         }
