@@ -91,13 +91,57 @@ publishing {
             name.set("Maven plugin for CI/CD integration")
             description.set("Maven plugin for CI/CD integration")
             withXml {
-                asNode().appendNode("dependencies")
-                    .appendNode("dependency")
-                    .apply {
+                asNode().appendNode("dependencies").apply {
+                    // Kotlin
+                    this.appendNode("dependency").apply {
                         appendNode("groupId", "org.jetbrains.kotlin")
                         appendNode("artifactId", "kotlin-stdlib")
                         appendNode("version", kotlinVersion)
                     }
+                    this.appendNode("dependency").apply {
+                        appendNode("groupId", "org.jetbrains.kotlin")
+                        appendNode("artifactId", "kotlin-reflect")
+                        appendNode("version", kotlinVersion)
+                    }
+                    // Ktor
+                    this.appendNode("dependency").apply {
+                        appendNode("groupId", "io.ktor")
+                        appendNode("artifactId", "ktor-client-cio")
+                        appendNode("version", ktorVersion)
+                    }
+                    this.appendNode("dependency").apply {
+                        appendNode("groupId", "io.ktor")
+                        appendNode("artifactId", "ktor-client-cio-jvm")
+                        appendNode("version", ktorVersion)
+                    }
+                    this.appendNode("dependency").apply {
+                        appendNode("groupId", "io.ktor")
+                        appendNode("artifactId", "ktor-client-json-jvm")
+                        appendNode("version", ktorVersion)
+                    }
+                    this.appendNode("dependency").apply {
+                        appendNode("groupId", "io.ktor")
+                        appendNode("artifactId", "ktor-client-core-jvm")
+                        appendNode("version", ktorVersion)
+                    }
+                    // Logging
+                    this.appendNode("dependency").apply {
+                        appendNode("groupId", "io.ktor")
+                        appendNode("artifactId", "ktor-client-logging-jvm")
+                        appendNode("version", ktorVersion)
+                    }
+                    this.appendNode("dependency").apply {
+                        appendNode("groupId", "io.github.microutils")
+                        appendNode("artifactId", "kotlin-logging-jvm")
+                        appendNode("version", microutilsLoggingVersion)
+                    }
+                    // Serialization
+                    this.appendNode("dependency").apply {
+                        appendNode("groupId", "io.ktor")
+                        appendNode("artifactId", "ktor-client-serialization-jvm")
+                        appendNode("version", ktorVersion)
+                    }
+                }
             }
         }
     }
