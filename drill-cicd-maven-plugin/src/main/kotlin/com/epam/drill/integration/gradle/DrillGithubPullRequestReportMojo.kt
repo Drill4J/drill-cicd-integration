@@ -16,6 +16,7 @@
 package com.epam.drill.integration.gradle
 
 import com.epam.drill.integration.common.client.impl.MetricsClientImpl
+import com.epam.drill.integration.common.git.impl.GitClientImpl
 import com.epam.drill.integration.common.report.impl.MarkdownReportGenerator
 import com.epam.drill.integration.common.util.fromEnv
 import com.epam.drill.integration.common.util.required
@@ -57,11 +58,13 @@ class DrillGithubPullRequestReportMojo : AbstractMojo() {
         val githubApiUrl = github.apiUrl.required("github.apiUrl")
         val githubToken = github.token.required("github.token")
         val drillApiUrl = drillApiUrl.required("drillApiUrl")
+        val drillApiKey = drillApiKey
         val groupId = groupId.required("groupId")
         val appId = appId.required("appId")
         val eventFilePath = github.eventFilePath
             .fromEnv("GITHUB_EVENT_PATH")
             .required("github.eventFilePath")
+        val fetchDepth = github.fetchDepth
 
         val githubCiCdService = GithubCiCdService(
             GithubApiClientImpl(
@@ -72,13 +75,16 @@ class DrillGithubPullRequestReportMojo : AbstractMojo() {
                 drillApiUrl,
                 drillApiKey
             ),
-            MarkdownReportGenerator()
+            MarkdownReportGenerator(),
+            GitClientImpl()
         )
+        log.info("Posting Drill4J Testing Report for $groupId/$appId to GitHub by event file $eventFilePath...")
         runBlocking {
             githubCiCdService.postPullRequestReportByEvent(
+                groupId = groupId,
+                appId = appId,
                 githubEventFile = File(eventFilePath),
-                groupId = groupId.required("groupId"),
-                appId = appId.required("appId"),
+                fetchDepth = fetchDepth
             )
         }
     }

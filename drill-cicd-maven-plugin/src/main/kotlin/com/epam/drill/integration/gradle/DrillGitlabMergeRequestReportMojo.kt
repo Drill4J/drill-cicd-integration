@@ -16,7 +16,7 @@
 package com.epam.drill.integration.gradle
 
 import com.epam.drill.integration.common.client.impl.MetricsClientImpl
-import com.epam.drill.integration.common.report.impl.TextReportGenerator
+import com.epam.drill.integration.common.report.impl.MarkdownReportGenerator
 import com.epam.drill.integration.common.util.fromEnv
 import com.epam.drill.integration.common.util.required
 import com.epam.drill.integration.gitlab.client.impl.GitlabApiClientV4Impl
@@ -56,11 +56,10 @@ class DrillGitlabMergeRequestReportMojo : AbstractMojo() {
         val gitlabApiUrl = gitlab.apiUrl.required("gitlab.apiUrl")
         val gitlabPrivateToken = gitlab.privateToken
         val drillApiUrl = drillApiUrl.required("drillApiUrl")
+        val drillApiKey = drillApiKey
         val groupId = groupId.required("groupId")
         val appId = appId.required("appId")
-        val gitlabProjectId = gitlab.projectId
-            .fromEnv("CI_PROJECT_ID")
-            .required("gitlab.projectId")
+        val gitlabProjectId = gitlab.projectId.required("gitlab.projectId")
         val commitSha = gitlab.commitSha
             .fromEnv("CI_COMMIT_SHA")
             .required("gitlab.commitSha")
@@ -72,7 +71,7 @@ class DrillGitlabMergeRequestReportMojo : AbstractMojo() {
             .required("gitlab.mergeRequest.sourceBranch")
         val targetBranch = gitlab.mergeRequest.targetBranch
             .fromEnv("CI_MERGE_REQUEST_TARGET_BRANCH_NAME")
-            .required("gitlab.mergeRequest.targetBranch")
+            .required("gitlab.mergeRequest.sourceBranch")
         val mergeBaseCommitSha = gitlab.mergeRequest.mergeBaseCommitSha
             .fromEnv("CI_MERGE_REQUEST_DIFF_BASE_SHA")
             .required("gitlab.mergeRequest.mergeBaseCommitSha")
@@ -86,8 +85,9 @@ class DrillGitlabMergeRequestReportMojo : AbstractMojo() {
                 drillApiUrl,
                 drillApiKey
             ),
-            TextReportGenerator()
+            MarkdownReportGenerator()
         )
+        log.info("Posting Drill4J Testing Report for $groupId/$appId to Gitlab project $gitlabProjectId to merge request $gitlabMergeRequestIid...")
         runBlocking {
             gitlabCiCdService.postMergeRequestReport(
                 gitlabProjectId = gitlabProjectId,
@@ -96,8 +96,8 @@ class DrillGitlabMergeRequestReportMojo : AbstractMojo() {
                 appId = appId,
                 sourceBranch = sourceBranch,
                 targetBranch = targetBranch,
-                commitSha = commitSha,
-                mergeBaseCommitSha = mergeBaseCommitSha
+                headCommitSha = commitSha,
+                mergeBaseCommitSha = mergeBaseCommitSha,
             )
         }
     }

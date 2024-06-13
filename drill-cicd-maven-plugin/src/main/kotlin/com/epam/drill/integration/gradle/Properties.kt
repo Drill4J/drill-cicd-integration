@@ -49,4 +49,7 @@ open class DrillGithubProperties(
     var token: String? = null,
     @Parameter(property = "eventFilePath")
     var eventFilePath: String? = null,
+    @Parameter(property = "fetchDepth")
+    var fetchDepth: Int? = null
 )
+

@@ -17,8 +17,7 @@ package com.epam.drill.integration.gradle
 
 import com.epam.drill.integration.common.client.BuildPayload
 import com.epam.drill.integration.common.client.impl.DataIngestClientImpl
-import com.epam.drill.integration.common.git.getGitBranch
-import com.epam.drill.integration.common.git.getGitCommitInfo
+import com.epam.drill.integration.common.git.impl.GitClientImpl
 import com.epam.drill.integration.common.util.required
 import kotlinx.coroutines.runBlocking
 import org.apache.maven.plugin.AbstractMojo
@@ -49,19 +48,21 @@ class DrillPostBuildInfoMojo : AbstractMojo() {
 
     @Parameter(property = "buildVersion")
     var buildVersion: String? = null
-
     override fun execute() {
         val drillApiUrl = drillApiUrl.required("drillApiUrl")
+        val drillApiKey = drillApiKey
         val groupId = groupId.required("groupId")
         val appId = appId.required("appId")
+        val buildVersion = buildVersion
 
-        val drillApiClient = DataIngestClientImpl(
+        val dataIngestClient = DataIngestClientImpl(
             drillApiUrl = drillApiUrl,
             drillApiKey = drillApiKey
         )
+        val gitClient = GitClientImpl()
 
-        val branch = getGitBranch()
-        val commitInfo = getGitCommitInfo()
+        val branch = gitClient.getGitBranch()
+        val commitInfo = gitClient.getGitCommitInfo()
         val payload = BuildPayload(
             groupId = groupId,
             appId = appId,
@@ -73,8 +74,9 @@ class DrillPostBuildInfoMojo : AbstractMojo() {
             branch = branch
         )
 
+        log.info("Sending the current build information to Drill4J for $groupId/$appId...")
         runBlocking {
-            drillApiClient.sendBuild(payload)
+            dataIngestClient.sendBuild(payload)
         }
     }
 }
