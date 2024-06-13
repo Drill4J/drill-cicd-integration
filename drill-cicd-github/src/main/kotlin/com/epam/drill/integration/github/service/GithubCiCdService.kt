@@ -69,8 +69,7 @@ class GithubCiCdService(
     suspend fun postPullRequestReportByEvent(
         githubEventFile: File,
         groupId: String,
-        appId: String,
-        fetchDepth: Int? = null
+        appId: String
     ) {
         val json = Json {
             ignoreUnknownKeys = true
@@ -78,7 +77,6 @@ class GithubCiCdService(
         }
         val event = json.decodeFromString<GithubEvent>(githubEventFile.readText())
         val pullRequest = event.pullRequest.required("pullRequest")
-        gitClient.fetch(fetchDepth)
         postPullRequestReport(
             githubRepository = event.repository.fullName,
             githubPullRequestId = pullRequest.number,

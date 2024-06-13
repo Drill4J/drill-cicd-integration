@@ -22,8 +22,13 @@ import kotlinx.serialization.json.*
 
 class MarkdownReportGenerator : ReportGenerator {
     override fun getBuildComparisonReport(data: JsonObject): Report {
-        val metrics = data["data"]?.jsonObject?.get("metrics")?.jsonObject
+        val inputParameters = data["data"]?.jsonObject?.get("inputParameters")?.jsonObject
+        val groupId = inputParameters?.get("groupId")?.jsonPrimitive?.contentOrNull
+        val appId = inputParameters?.get("appId")?.jsonPrimitive?.contentOrNull
+        val commitSha = inputParameters?.get("commitSha")?.jsonPrimitive?.contentOrNull
+        val baselineCommitSha = inputParameters?.get("baselineCommitSha")?.jsonPrimitive?.contentOrNull
 
+        val metrics = data["data"]?.jsonObject?.get("metrics")?.jsonObject
         val newMethods = metrics?.get("changes_new_methods")?.jsonPrimitive?.intOrNull ?: 0
         val modifiedMethods = metrics?.get("changes_modified_methods")?.jsonPrimitive?.intOrNull ?: 0
         val totalChanges = metrics?.get("total_changes")?.jsonPrimitive?.intOrNull ?: 0
@@ -32,10 +37,14 @@ class MarkdownReportGenerator : ReportGenerator {
         val recommendedTests = metrics?.get("recommended_tests")?.jsonPrimitive?.intOrNull ?: 0
 
         val links = data["data"]?.jsonObject?.get("links")?.jsonObject
+        val buildLink = links?.get("build")?.jsonPrimitive?.contentOrNull
+        val baselineBuildLink = links?.get("baseline_build")?.jsonPrimitive?.contentOrNull
         val changesLink = links?.get("changes")?.jsonPrimitive?.contentOrNull
         val recommendedTestsLink = links?.get("recommended_tests")?.jsonPrimitive?.contentOrNull
         val fullReportLink = links?.get("full_report")?.jsonPrimitive?.contentOrNull
 
+        val descriptionText = "Comparing ${commitSha?.shortSha()?.wrapToLink(buildLink)} (current) " +
+                "to `${baselineCommitSha?.shortSha()?.wrapToLink(baselineBuildLink)}` (baseline)."
         val changesText = "$totalChanges method${totalChanges.pluralEnding("s")} ($newMethods new, $modifiedMethods modified)"
             .takeIf { totalChanges > 0 }
             ?.wrapToLink(changesLink)
@@ -59,34 +68,45 @@ class MarkdownReportGenerator : ReportGenerator {
 ### Drill4J Bot - Change Testing Report
 
 
-        """.trimIndent()
+            """.trimIndent()
+
+        val descriptionParagraph = """
+$descriptionText
+
+
+            """.trimIndent()
+
         val changesParagraph = """
 **Changes**
 $changesText   
 
 
-""".trimIndent()
+            """.trimIndent()
+
         val risksParagraph = """
 **Risks**
 $testedMethodsText
 $coverageText
 
 
-""".trimIndent()
+            """.trimIndent()
             .takeIf { totalChanges > 0 }
             ?: ""
+
         val recommendedTestsParagraph = """
 **Recommended tests**
 $recommendedTestsText
 
 
 """.trimIndent()
+
         val seeDetailsParagraph = """
 $seeDetailsText            
 """.trimIndent()
 
         return Report(
             content = reportHeader
+                    + descriptionParagraph
                     + changesParagraph
                     + risksParagraph
                     + recommendedTestsParagraph
