@@ -7,7 +7,7 @@
     <packaging>maven-plugin</packaging>
     <properties>
         <kotlin.version>1.8.20</kotlin.version>
-        <drill.plugin.version>0.0.1</drill.plugin.version>
+        <microutils.logging.version>3.0.5</microutils.logging.version>
         <ktor.version>1.6.8</ktor.version>
     </properties>
     <name>Drill cicd integration</name>
@@ -154,6 +154,17 @@
             <groupId>io.ktor</groupId>
             <artifactId>ktor-client-serialization-jvm</artifactId>
             <version>${ktor.version}</version>
+        </dependency>
+        <!-- Logging -->
+        <dependency>
+            <groupId>io.ktor</groupId>
+            <artifactId>ktor-client-logging-jvm</artifactId>
+            <version>${ktor.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.microutils</groupId>
+            <artifactId>kotlin-logging-jvm</artifactId>
+            <version>${microutils.logging.version}</version>
         </dependency>
     </dependencies>
 </project>
