@@ -21,6 +21,17 @@ Build all modules:
 ./gradlew publishToMavenLocal
 ```
 
+For using locally built versions of CI/CD plugins in Gradle projects 
+is necessary to add `mavenLocal` repository to your `settings.gradle` file:
+```kotlin
+pluginManagement {
+    repositories {
+        mavenLocal()
+        gradlePluginPortal()
+    }
+}
+```
+
 ## Usage
 
 ### Gitlab integration with Gradle plugin
@@ -83,8 +94,6 @@ drillCiCd {
     github {
         //GitHub API Token
         token = "your-github-token-here"
-        //Limit on number of git commits to download (optional, unlimited by default)
-        fetchDepth = 1000
     }
 }
 ```
