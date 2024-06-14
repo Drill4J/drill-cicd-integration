@@ -22,7 +22,12 @@ open class DrillProperties(
     var groupId: String? = null,
     var appId: String? = null,
     var buildVersion: String? = null,
-)
+    var report: DrillReportProperties? = null,
+) {
+    fun report(configure: DrillReportProperties.() -> Unit) {
+        this.report = DrillReportProperties().apply(configure)
+    }
+}
 
 open class DrillCiCdProperties(
     var gitlab: DrillGitlabProperties? = null,
@@ -60,4 +65,8 @@ open class DrillGithubProperties(
     var apiUrl: String = "https://api.github.com",
     var token: String? = null,
     var eventFilePath: String? = null
+)
+
+open class DrillReportProperties(
+    var tagPattern: String? = null
 )

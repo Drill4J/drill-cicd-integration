@@ -16,6 +16,8 @@
 package com.epam.drill.integration.common.git
 
 interface GitClient {
+    fun getCurrentCommitSha(): String
+    fun findCommitShaByTagPattern(tagPattern: String): String
     fun getGitBranch(): String
     fun getGitCommitInfo(): GitCommitInfo
     fun getMergeBaseCommitSha(targetRef: String): String

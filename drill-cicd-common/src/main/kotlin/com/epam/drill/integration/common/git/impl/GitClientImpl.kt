@@ -17,12 +17,22 @@ package com.epam.drill.integration.common.git.impl
 
 import com.epam.drill.integration.common.git.GitClient
 import com.epam.drill.integration.common.git.GitCommitInfo
+import com.epam.drill.integration.common.git.GitException
 import mu.KotlinLogging
 import java.io.BufferedReader
 import java.io.InputStream
 
-class GitClientImpl: GitClient {
+class GitClientImpl : GitClient {
     private val logger = KotlinLogging.logger { }
+
+    override fun getCurrentCommitSha(): String {
+        return executeGitCommand("git rev-parse HEAD")
+    }
+
+    override fun findCommitShaByTagPattern(tagPattern: String): String {
+        val tag = executeGitCommand("git describe --tags --abbrev=0 --match $tagPattern")
+        return executeGitCommand("git rev-list -n 1 $tag")
+    }
 
     override fun getGitBranch(): String {
         return executeGitCommand("git rev-parse --abbrev-ref HEAD")
@@ -56,10 +66,7 @@ class GitClientImpl: GitClient {
         logger.info { "Executing git command: $command" }
         val process = ProcessBuilder(*command.split(" ").toTypedArray()).start()
         if (process.waitFor() != 0) {
-            throw IllegalStateException(
-                "Git command `$command` failed " +
-                        "with error code ${process.exitValue()}: ${process.errorStream.readText()}"
-            )
+            throw GitException(command, process.exitValue(), process.errorStream.readText())
         }
         return process.inputStream.readText()
     }
