@@ -255,3 +255,38 @@ Run the Gradle command at the build stage of your build pipeline:
 ```shell
 ./mvnw clean install
 ```
+
+### Generating Drill4J Change Testing Report with Gradle plugin
+
+Add Gradle plugin to your Gradle configuration:
+
+```kotlin
+plugins {
+    id("com.epam.drill.integration.cicd") version "0.0.1"
+}
+```
+Add Drill4J CI/CD integration properties to your Kotlin Gradle configuration:
+```kotlin
+drillCiCd {
+    //Drill4J group ID
+    groupId = "realworld"
+    //Drill4J application ID
+    appId = "realworld-backend"
+    //Drill4J API url
+    drillApiUrl = "http://localhost:8090/api"
+    //Drill4J Api Key
+    drillApiKey = "your-drill-api-key-here"
+    
+    report {
+        //Strategy used to find a baseline commit (optional, SEARCH_BY_TAG by default)
+        searchStrategy = "SEARCH_BY_TAG"
+        //Only consider tags matching the given pattern
+        tagPattern = "v[0-9].[0-9].[0-9]*"
+    }
+}
+```
+
+Run the Gradle command at the build stage of your build pipeline:
+```shell
+./gradlew drillSendBuildInfo
+```
