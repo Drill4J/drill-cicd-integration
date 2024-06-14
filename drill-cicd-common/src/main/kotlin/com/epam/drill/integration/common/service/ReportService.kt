@@ -40,7 +40,7 @@ class ReportService(
             gitClient.findCommitShaByTagPattern(tagPattern)
         } catch (e: GitException) {
             if (e.exitCode == 128)
-                throw IllegalStateException("No git tags found matching template $tagPattern", e)
+                throw IllegalStateException("No git tags found matching pattern $tagPattern", e)
             else
                 throw e
         }
