@@ -68,5 +68,10 @@ open class DrillGithubProperties(
 )
 
 open class DrillReportProperties(
-    var tagPattern: String? = null
+    var searchStrategy: BaselineSearchStrategy = BaselineSearchStrategy.SEARCH_BY_TAG,
+    var tagPattern: String = "*"
 )
+
+enum class BaselineSearchStrategy {
+    SEARCH_BY_TAG,
+}

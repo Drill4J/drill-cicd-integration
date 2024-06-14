@@ -29,6 +29,7 @@ fun Task.drillGenerateChangeTestingReport(ciCd: DrillCiCdProperties) {
         val drillApiKey = ciCd.drillApiKey
         val groupId = ciCd.groupId.required("groupId")
         val appId = ciCd.appId.required("appId")
+        val searchStrategy = ciCd.report?.searchStrategy
         val tagPattern = ciCd.report?.tagPattern ?: "*"
 
         val reportService = ReportService(
@@ -40,7 +41,7 @@ fun Task.drillGenerateChangeTestingReport(ciCd: DrillCiCdProperties) {
             reportGenerator = MarkdownReportGenerator()
         )
 
-        logger.lifecycle("Generating Drill4J Testing Report for $groupId/$appId comparing with tag pattern $tagPattern...")
+        logger.lifecycle("Generating Drill4J Testing Report for $groupId/$appId comparing the baseline found by git tag pattern $tagPattern...")
         runBlocking {
             reportService.generateChangeTestingReportByTag(
                 groupId = groupId,
