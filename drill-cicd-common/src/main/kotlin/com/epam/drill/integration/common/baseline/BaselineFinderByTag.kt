@@ -28,7 +28,7 @@ class BaselineFinderByTag(
     override fun findBaseline(criteria: TagCriteria): String = try {
         logger.info { "Looking for git tag ${criteria.tagPattern}..." }
         val tag = gitClient.describe(tags = true, matchPattern = criteria.tagPattern)
-        gitClient.revList(n = 1, ref = tag).first()
+        gitClient.revList(ref = tag).first()
     } catch (e: GitException) {
         if (e.exitCode == GIT_INVALID_ARGUMENT_ERROR)
             throw IllegalStateException("No git tags found matching pattern ${criteria.tagPattern}", e)

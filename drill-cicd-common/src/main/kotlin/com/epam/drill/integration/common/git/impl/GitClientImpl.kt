@@ -20,9 +20,10 @@ import com.epam.drill.integration.common.git.GitCommitInfo
 import com.epam.drill.integration.common.git.GitException
 import mu.KotlinLogging
 import java.io.BufferedReader
+import java.io.File
 import java.io.InputStream
 
-class GitClientImpl : GitClient {
+class GitClientImpl(private val workingDir: File? = null) : GitClient {
     private val logger = KotlinLogging.logger { }
 
     override fun getCurrentCommitSha(): String {
@@ -37,10 +38,12 @@ class GitClientImpl : GitClient {
         excludePattern: String?
     ): String {
         return executeGitCommand(
-            "git describe" +
-                    if (all) " --all" else "" +
-                            if (tags) " --tags" else "" +
-                                    " --abbrev=$abbrev"
+            "git describe"
+                    + (if (all) " --all" else "")
+                    + (if (tags) " --tags" else "")
+                    + (" --abbrev=$abbrev")
+                    + (if (matchPattern != null) " --match=$matchPattern" else "")
+                    + (if (excludePattern != null) " --exclude=$excludePattern" else "")
         )
     }
 
@@ -77,8 +80,12 @@ class GitClientImpl : GitClient {
     }
 
     private fun executeGitCommand(command: String): String {
-        logger.info { "Executing git command: $command" }
-        val process = ProcessBuilder(*command.split(" ").toTypedArray()).start()
+        logger.info { "Executing git command: $command in $workingDir" }
+        val process = ProcessBuilder(*command.split(" ").toTypedArray()).let {
+            if (workingDir != null)
+                it.directory(workingDir)
+            else it
+        }.start()
         if (process.waitFor() != 0) {
             throw GitException(command, process.exitValue(), process.errorStream.readText())
         }
