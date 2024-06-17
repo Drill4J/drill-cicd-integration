@@ -15,8 +15,13 @@
  */
 package com.epam.drill.integration.cli
 
+import ch.qos.logback.classic.Level
+import ch.qos.logback.classic.LoggerContext
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.subcommands
+import com.github.ajalt.clikt.parameters.options.flag
+import com.github.ajalt.clikt.parameters.options.option
+import org.slf4j.LoggerFactory
 
 fun main(args: Array<String>) = Cli().subcommands(
     GitlabMergeRequestReportCommand(),
@@ -26,5 +31,13 @@ fun main(args: Array<String>) = Cli().subcommands(
 ).main(args)
 
 class Cli : CliktCommand() {
-    override fun run() {}
+    private val debug by option().flag("--no-debug")
+
+    override fun run() {
+        if (debug) {
+            val loggerContext = LoggerFactory.getILoggerFactory() as LoggerContext
+            val rootLogger = loggerContext.getLogger("ROOT")
+            rootLogger.level = Level.DEBUG
+        }
+    }
 }
