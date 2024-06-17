@@ -24,6 +24,7 @@ import com.epam.drill.integration.common.service.ReportService
 import com.epam.drill.integration.common.util.required
 import kotlinx.coroutines.runBlocking
 import org.gradle.api.Task
+import java.io.File
 
 fun Task.drillGenerateChangeTestingReport(ciCd: DrillCiCdProperties) {
     doFirst {
@@ -52,7 +53,8 @@ fun Task.drillGenerateChangeTestingReport(ciCd: DrillCiCdProperties) {
                 groupId = groupId,
                 appId = appId,
                 baselineSearchStrategy = baselineSearchStrategy,
-                baselineSearchCriteria = searchCriteria
+                baselineSearchCriteria = searchCriteria,
+                reportPath = File(project.buildDir, "/reports/drill").absolutePath
             )
         }
     }

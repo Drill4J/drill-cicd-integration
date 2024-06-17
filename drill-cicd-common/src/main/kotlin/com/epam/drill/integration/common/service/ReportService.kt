@@ -40,7 +40,8 @@ class ReportService(
         groupId: String,
         appId: String,
         baselineSearchStrategy: BaselineSearchStrategy,
-        baselineSearchCriteria: BaselineSearchCriteria
+        baselineSearchCriteria: BaselineSearchCriteria,
+        reportPath: String = ""
     ) {
         val commitSha = gitClient.getCurrentCommitSha()
         val baselineCommitSha = baselineFinders(baselineSearchStrategy).findBaseline(baselineSearchCriteria)
@@ -57,9 +58,17 @@ class ReportService(
             ReportFormat.MARKDOWN -> "md"
             ReportFormat.PLAINTEXT -> "txt"
         }
+
         val fileName = "drillReport.$fileExt"
-        logger.info { "Saving a report to the file $fileName..." }
-        val file = File(fileName)
+        val file = if (reportPath.isNotEmpty()) {
+            val directory = File(reportPath)
+            if (!directory.exists()) {
+                directory.mkdirs()
+            }
+            File(directory, fileName)
+        } else
+            File(fileName)
+        logger.info { "Saving a report to the file ${file.absolutePath} ..." }
         file.writeText(report.content)
     }
 }
