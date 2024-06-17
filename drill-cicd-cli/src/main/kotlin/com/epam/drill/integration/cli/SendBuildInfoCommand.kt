@@ -31,7 +31,7 @@ class SendBuildInfoCommand : CliktCommand(name = "sendBuildInfo") {
     private val buildVersion by option("-v", "--buildVersion", envvar = "DRILL_BUILD_VERSION")
 
     override fun run() {
-        echo("Posting Drill4J Build Info ...")
+        echo("Posting Drill4J Build Info...")
         val drillApiClient = DataIngestClientImpl(
             drillApiUrl = drillApiUrl,
             drillApiKey = drillApiKey

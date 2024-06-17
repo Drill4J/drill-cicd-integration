@@ -15,9 +15,10 @@
  */
 package com.epam.drill.integration.common.service
 
+import com.epam.drill.integration.common.baseline.*
+import com.epam.drill.integration.common.baseline.BaselineSearchStrategy.SEARCH_BY_TAG
 import com.epam.drill.integration.common.client.MetricsClient
 import com.epam.drill.integration.common.git.GitClient
-import com.epam.drill.integration.common.git.GitException
 import com.epam.drill.integration.common.report.ReportFormat
 import com.epam.drill.integration.common.report.ReportGenerator
 import mu.KotlinLogging
@@ -26,24 +27,24 @@ import java.io.File
 class ReportService(
     private val metricsClient: MetricsClient,
     private val gitClient: GitClient,
-    private val reportGenerator: ReportGenerator
+    private val reportGenerator: ReportGenerator,
+    private val baselineFinders: (BaselineSearchStrategy) -> BaselineFinder<BaselineSearchCriteria> = { strategy ->
+        when (strategy) {
+            SEARCH_BY_TAG -> BaselineFinderByTag(gitClient) as BaselineFinder<BaselineSearchCriteria>
+        }
+    }
 ) {
     private val logger = KotlinLogging.logger {}
 
-    suspend fun generateChangeTestingReportByTag(
+    suspend fun generateChangeTestingReport(
         groupId: String,
         appId: String,
-        tagPattern: String
+        baselineSearchStrategy: BaselineSearchStrategy,
+        baselineSearchCriteria: BaselineSearchCriteria
     ) {
         val commitSha = gitClient.getCurrentCommitSha()
-        val baselineCommitSha = try {
-            gitClient.findCommitShaByTagPattern(tagPattern)
-        } catch (e: GitException) {
-            if (e.exitCode == 128)
-                throw IllegalStateException("No git tags found matching pattern $tagPattern", e)
-            else
-                throw e
-        }
+        val baselineCommitSha = baselineFinders(baselineSearchStrategy).findBaseline(baselineSearchCriteria)
+
         logger.info { "Requesting metrics for $groupId/$appId to compare $commitSha with $baselineCommitSha..." }
         val data = metricsClient.getBuildComparison(
             groupId = groupId,

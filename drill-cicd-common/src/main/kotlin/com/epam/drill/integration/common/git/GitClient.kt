@@ -17,7 +17,11 @@ package com.epam.drill.integration.common.git
 
 interface GitClient {
     fun getCurrentCommitSha(): String
-    fun findCommitShaByTagPattern(tagPattern: String): String
+    fun describe(
+        all: Boolean = false, tags: Boolean = false, abbrev: Int = 0,
+        matchPattern: String? = null, excludePattern: String? = null
+    ): String
+    fun revList(ref: String, n: Int = 1): List<String>
     fun getGitBranch(): String
     fun getGitCommitInfo(): GitCommitInfo
     fun getMergeBaseCommitSha(targetRef: String): String
@@ -30,3 +34,6 @@ data class GitCommitInfo(
     val author: String,
     val message: String
 )
+
+const val GIT_GENERAL_ERROR = 1
+const val GIT_INVALID_ARGUMENT_ERROR = 128

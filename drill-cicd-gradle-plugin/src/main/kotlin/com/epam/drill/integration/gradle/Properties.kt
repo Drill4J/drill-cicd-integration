@@ -15,6 +15,8 @@
  */
 package com.epam.drill.integration.gradle
 
+import com.epam.drill.integration.common.baseline.BaselineSearchStrategy
+
 
 open class DrillProperties(
     var drillApiUrl: String? = null,
@@ -22,10 +24,10 @@ open class DrillProperties(
     var groupId: String? = null,
     var appId: String? = null,
     var buildVersion: String? = null,
-    var report: DrillReportProperties? = null,
+    var baseline: BaselineProperties? = null,
 ) {
-    fun report(configure: DrillReportProperties.() -> Unit) {
-        this.report = DrillReportProperties().apply(configure)
+    fun baseline(configure: BaselineProperties.() -> Unit) {
+        this.baseline = BaselineProperties().apply(configure)
     }
 }
 
@@ -67,11 +69,7 @@ open class DrillGithubProperties(
     var eventFilePath: String? = null
 )
 
-open class DrillReportProperties(
-    var searchStrategy: BaselineSearchStrategy = BaselineSearchStrategy.SEARCH_BY_TAG,
-    var tagPattern: String = "*"
+open class BaselineProperties(
+    var searchStrategy: BaselineSearchStrategy? = null,
+    var tagPattern: String? = null
 )
-
-enum class BaselineSearchStrategy {
-    SEARCH_BY_TAG,
-}

@@ -29,9 +29,23 @@ class GitClientImpl : GitClient {
         return executeGitCommand("git rev-parse HEAD")
     }
 
-    override fun findCommitShaByTagPattern(tagPattern: String): String {
-        val tag = executeGitCommand("git describe --tags --abbrev=0 --match $tagPattern")
-        return executeGitCommand("git rev-list -n 1 $tag")
+    override fun describe(
+        all: Boolean,
+        tags: Boolean,
+        abbrev: Int,
+        matchPattern: String?,
+        excludePattern: String?
+    ): String {
+        return executeGitCommand(
+            "git describe" +
+                    if (all) " --all" else "" +
+                            if (tags) " --tags" else "" +
+                                    " --abbrev=$abbrev"
+        )
+    }
+
+    override fun revList(ref: String, n: Int): List<String> {
+        return executeGitCommand("git rev-list -n $n $ref").split("\n")
     }
 
     override fun getGitBranch(): String {

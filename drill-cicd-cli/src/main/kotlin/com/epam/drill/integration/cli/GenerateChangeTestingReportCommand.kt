@@ -15,8 +15,8 @@
  */
 package com.epam.drill.integration.cli
 
-import com.epam.drill.integration.common.client.BuildPayload
-import com.epam.drill.integration.common.client.impl.DataIngestClientImpl
+import com.epam.drill.integration.common.baseline.BaselineSearchStrategy
+import com.epam.drill.integration.common.baseline.TagCriteria
 import com.epam.drill.integration.common.client.impl.MetricsClientImpl
 import com.epam.drill.integration.common.git.impl.GitClientImpl
 import com.epam.drill.integration.common.report.impl.MarkdownReportGenerator
@@ -27,12 +27,13 @@ import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import kotlinx.coroutines.runBlocking
 
-class GenerateChangeTestingReportCommand : CliktCommand(name = "sendBuildInfo") {
+class GenerateChangeTestingReportCommand : CliktCommand(name = "generateChangeTestingReport") {
     private val drillApiUrl by option("-drill-u", "--drillApiUrl", envvar = "DRILL_API_URL").required()
     private val drillApiKey by option("-drill-k", "--drillApiKey", envvar = "DRILL_API_KEY")
     private val groupId by option("-g", "--groupId", envvar = "DRILL_GROUP_ID").required()
     private val appId by option("-a", "--appId", envvar = "DRILL_APP_ID").required()
-    private val tagPattern by option("-t", "--tagPattern").default("*")
+    private val baselineSearchStrategyName by option("-bl-s", "--baselineSearchStrategy").default(BaselineSearchStrategy.SEARCH_BY_TAG.name)
+    private val baselineTagPattern by option("-bl-t", "--baselineTagPattern").default("*")
 
     override fun run() {
         val reportService = ReportService(
@@ -43,13 +44,18 @@ class GenerateChangeTestingReportCommand : CliktCommand(name = "sendBuildInfo") 
             gitClient = GitClientImpl(),
             reportGenerator = MarkdownReportGenerator()
         )
+        val searchStrategy = BaselineSearchStrategy.valueOf(baselineSearchStrategyName)
+        val searchCriteria = when (searchStrategy) {
+            BaselineSearchStrategy.SEARCH_BY_TAG -> TagCriteria(baselineTagPattern)
+        }
 
-        echo("Generating Drill4J Testing Report for $groupId/$appId comparing with tag pattern $tagPattern...")
+        echo("Generating Drill4J Testing Report...")
         runBlocking {
-            reportService.generateChangeTestingReportByTag(
+            reportService.generateChangeTestingReport(
                 groupId = groupId,
                 appId = appId,
-                tagPattern = tagPattern
+                baselineSearchStrategy = searchStrategy,
+                baselineSearchCriteria = searchCriteria
             )
         }
         echo("Done.")

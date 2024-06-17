@@ -15,6 +15,8 @@
  */
 package com.epam.drill.integration.gradle
 
+import com.epam.drill.integration.common.baseline.BaselineSearchStrategy
+import com.epam.drill.integration.common.baseline.TagCriteria
 import com.epam.drill.integration.common.client.impl.MetricsClientImpl
 import com.epam.drill.integration.common.git.impl.GitClientImpl
 import com.epam.drill.integration.common.report.impl.MarkdownReportGenerator
@@ -29,8 +31,8 @@ fun Task.drillGenerateChangeTestingReport(ciCd: DrillCiCdProperties) {
         val drillApiKey = ciCd.drillApiKey
         val groupId = ciCd.groupId.required("groupId")
         val appId = ciCd.appId.required("appId")
-        val searchStrategy = ciCd.report?.searchStrategy
-        val tagPattern = ciCd.report?.tagPattern ?: "*"
+        val baselineSearchStrategy = ciCd.baseline?.searchStrategy ?: BaselineSearchStrategy.SEARCH_BY_TAG
+        val baselineTagPattern = ciCd.baseline?.tagPattern ?: "*"
 
         val reportService = ReportService(
             metricsClient = MetricsClientImpl(
@@ -40,13 +42,17 @@ fun Task.drillGenerateChangeTestingReport(ciCd: DrillCiCdProperties) {
             gitClient = GitClientImpl(),
             reportGenerator = MarkdownReportGenerator()
         )
+        val searchCriteria = when (baselineSearchStrategy) {
+            BaselineSearchStrategy.SEARCH_BY_TAG -> TagCriteria(baselineTagPattern)
+        }
 
-        logger.lifecycle("Generating Drill4J Testing Report for $groupId/$appId comparing the baseline found by git tag pattern $tagPattern...")
+        logger.lifecycle("Generating Drill4J Change Testing Report...")
         runBlocking {
-            reportService.generateChangeTestingReportByTag(
+            reportService.generateChangeTestingReport(
                 groupId = groupId,
                 appId = appId,
-                tagPattern = tagPattern
+                baselineSearchStrategy = baselineSearchStrategy,
+                baselineSearchCriteria = searchCriteria
             )
         }
     }
