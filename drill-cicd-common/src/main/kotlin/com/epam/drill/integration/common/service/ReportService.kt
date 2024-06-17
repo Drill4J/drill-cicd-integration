@@ -16,6 +16,7 @@
 package com.epam.drill.integration.common.service
 
 import com.epam.drill.integration.common.baseline.*
+import com.epam.drill.integration.common.baseline.BaselineSearchStrategy.SEARCH_BY_MERGE_BASE
 import com.epam.drill.integration.common.baseline.BaselineSearchStrategy.SEARCH_BY_TAG
 import com.epam.drill.integration.common.client.MetricsClient
 import com.epam.drill.integration.common.git.GitClient
@@ -29,9 +30,11 @@ class ReportService(
     private val gitClient: GitClient,
     private val reportGenerator: ReportGenerator,
     private val baselineFinders: (BaselineSearchStrategy) -> BaselineFinder<BaselineSearchCriteria> = { strategy ->
+        @Suppress("UNCHECKED_CAST")
         when (strategy) {
-            SEARCH_BY_TAG -> BaselineFinderByTag(gitClient) as BaselineFinder<BaselineSearchCriteria>
-        }
+            SEARCH_BY_TAG -> BaselineFinderByTag(gitClient)
+            SEARCH_BY_MERGE_BASE -> BaselineFinderByMergeBase(gitClient)
+        } as BaselineFinder<BaselineSearchCriteria>
     }
 ) {
     private val logger = KotlinLogging.logger {}

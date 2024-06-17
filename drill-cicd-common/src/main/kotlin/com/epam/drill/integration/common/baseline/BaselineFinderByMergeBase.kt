@@ -15,7 +15,18 @@
  */
 package com.epam.drill.integration.common.baseline
 
-enum class BaselineSearchStrategy {
-    SEARCH_BY_TAG,
-    SEARCH_BY_MERGE_BASE
+import com.epam.drill.integration.common.git.GitClient
+import mu.KotlinLogging
+
+class BaselineFinderByMergeBase(
+    private val gitClient: GitClient
+) : BaselineFinder<MergeBaseCriteria> {
+    private val logger = KotlinLogging.logger {}
+
+    override fun findBaseline(criteria: MergeBaseCriteria): String {
+        logger.info { "Looking for merge base for ${criteria.targetRef}..." }
+        return gitClient.getMergeBaseCommitSha(criteria.targetRef)
+    }
 }
+
+class MergeBaseCriteria(val targetRef: String): BaselineSearchCriteria

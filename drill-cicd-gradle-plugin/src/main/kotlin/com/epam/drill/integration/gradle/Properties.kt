@@ -71,5 +71,6 @@ open class DrillGithubProperties(
 
 open class BaselineProperties(
     var searchStrategy: BaselineSearchStrategy? = null,
-    var tagPattern: String? = null
+    var tagPattern: String? = null,
+    var targetRef: String? = null,
 )

@@ -16,11 +16,15 @@
 package com.epam.drill.integration.cli
 
 import com.epam.drill.integration.common.baseline.BaselineSearchStrategy
+import com.epam.drill.integration.common.baseline.BaselineSearchStrategy.SEARCH_BY_MERGE_BASE
+import com.epam.drill.integration.common.baseline.BaselineSearchStrategy.SEARCH_BY_TAG
+import com.epam.drill.integration.common.baseline.MergeBaseCriteria
 import com.epam.drill.integration.common.baseline.TagCriteria
 import com.epam.drill.integration.common.client.impl.MetricsClientImpl
 import com.epam.drill.integration.common.git.impl.GitClientImpl
 import com.epam.drill.integration.common.report.impl.MarkdownReportGenerator
 import com.epam.drill.integration.common.service.ReportService
+import com.epam.drill.integration.common.util.required
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
@@ -32,8 +36,10 @@ class GenerateChangeTestingReportCommand : CliktCommand(name = "generateChangeTe
     private val drillApiKey by option("-drill-k", "--drillApiKey", envvar = "DRILL_API_KEY")
     private val groupId by option("-g", "--groupId", envvar = "DRILL_GROUP_ID").required()
     private val appId by option("-a", "--appId", envvar = "DRILL_APP_ID").required()
-    private val baselineSearchStrategyName by option("-bl-s", "--baselineSearchStrategy").default(BaselineSearchStrategy.SEARCH_BY_TAG.name)
+
+    private val baselineSearchStrategyName by option("-bl-s", "--baselineSearchStrategy").default(SEARCH_BY_TAG.name)
     private val baselineTagPattern by option("-bl-t", "--baselineTagPattern").default("*")
+    private val baselineTargetRef by option("-bl-tr", "--baselineTargetRef")
 
     override fun run() {
         val reportService = ReportService(
@@ -46,7 +52,8 @@ class GenerateChangeTestingReportCommand : CliktCommand(name = "generateChangeTe
         )
         val searchStrategy = BaselineSearchStrategy.valueOf(baselineSearchStrategyName)
         val searchCriteria = when (searchStrategy) {
-            BaselineSearchStrategy.SEARCH_BY_TAG -> TagCriteria(baselineTagPattern)
+            SEARCH_BY_TAG -> TagCriteria(baselineTagPattern)
+            SEARCH_BY_MERGE_BASE -> MergeBaseCriteria(baselineTargetRef.required("--baselineTargetRef"))
         }
 
         echo("Generating Drill4J Testing Report...")

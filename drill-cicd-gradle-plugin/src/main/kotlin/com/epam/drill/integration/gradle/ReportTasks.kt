@@ -16,6 +16,9 @@
 package com.epam.drill.integration.gradle
 
 import com.epam.drill.integration.common.baseline.BaselineSearchStrategy
+import com.epam.drill.integration.common.baseline.BaselineSearchStrategy.SEARCH_BY_MERGE_BASE
+import com.epam.drill.integration.common.baseline.BaselineSearchStrategy.SEARCH_BY_TAG
+import com.epam.drill.integration.common.baseline.MergeBaseCriteria
 import com.epam.drill.integration.common.baseline.TagCriteria
 import com.epam.drill.integration.common.client.impl.MetricsClientImpl
 import com.epam.drill.integration.common.git.impl.GitClientImpl
@@ -32,8 +35,9 @@ fun Task.drillGenerateChangeTestingReport(ciCd: DrillCiCdProperties) {
         val drillApiKey = ciCd.drillApiKey
         val groupId = ciCd.groupId.required("groupId")
         val appId = ciCd.appId.required("appId")
-        val baselineSearchStrategy = ciCd.baseline?.searchStrategy ?: BaselineSearchStrategy.SEARCH_BY_TAG
+        val baselineSearchStrategy = ciCd.baseline?.searchStrategy ?: SEARCH_BY_TAG
         val baselineTagPattern = ciCd.baseline?.tagPattern ?: "*"
+        val baselineTargetRef = ciCd.baseline?.targetRef
 
         val reportService = ReportService(
             metricsClient = MetricsClientImpl(
@@ -44,7 +48,8 @@ fun Task.drillGenerateChangeTestingReport(ciCd: DrillCiCdProperties) {
             reportGenerator = MarkdownReportGenerator()
         )
         val searchCriteria = when (baselineSearchStrategy) {
-            BaselineSearchStrategy.SEARCH_BY_TAG -> TagCriteria(baselineTagPattern)
+            SEARCH_BY_TAG -> TagCriteria(baselineTagPattern)
+            SEARCH_BY_MERGE_BASE -> MergeBaseCriteria(baselineTargetRef.required("baseline.targetRef"))
         }
 
         logger.lifecycle("Generating Drill4J Change Testing Report...")
