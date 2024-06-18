@@ -94,6 +94,23 @@ Add general properties to your Drill4J plugin configuration:
 </plugin>
 ```
 
+#### CLI App
+
+General format of command to run Drill4J CI/CD App is:
+```shell
+java -jar drill-cicd-0.0.1.jar [command] 
+  #Drill4J group ID
+  --groupId realworld
+  #Drill4J application ID  
+  --appId realworld-backend 
+  #Drill4J API url
+  --drillApiUrl http://localhost:8090/api
+  #Drill4J Api Key
+  --drillApiKey your-drill-api-key-here
+  #Other options
+  [other options]
+```
+
 ### Testing report in Gitlab Merge Requests
 
 #### Gradle plugin
@@ -168,6 +185,19 @@ Run the Maven command in your merge request pipeline after a test stage:
 mvn drill-maven-plugin:drillGitlabMergeRequestReport
 ```
 
+#### CLI App
+
+Run the CLI command in your merge request pipeline after a test stage:
+```shell
+java -jar drill-cicd-0.0.1.jar gitlabMergeRequestReport
+  #General options
+  [general options]
+  #Gitlab API url
+  --gitlabApiUrl https://api.github.com
+  --gitlabPrivateToken someToken
+```
+
+
 ### Testing report in GitHub Pull Requests
 
 #### Gradle plugin
@@ -238,6 +268,17 @@ Run the Maven command in your pull request workflow after a test stage:
 mvn drill-maven-plugin:drillGithubPullRequestReport
 ```
 
+#### CLI App
+
+Run the CLI command in your pull request workflow after a test stage:
+```shell
+java -jar drill-cicd-0.0.1.jar githubPullRequestReport
+  #General options
+  [general options]
+  #GitHub Token
+  --githubToken your-github-token-here
+```
+
 ### Sending build information
 
 #### Gradle plugin
@@ -302,6 +343,16 @@ Run the Maven command at the build stage of your CI/CD pipeline:
 mvn drill-maven-plugin:drillSendBuildInfo
 ```
 
+#### CLI App
+
+Run the CLI command at the build stage of your CI/CD pipeline:
+```shell
+java -jar drill-cicd-0.0.1.jar sendBuildInfo
+  #General options
+  [general options]
+  #Version of current build (optional)
+  --buildVersion 1.2.3
+```
 
 ### Generating a Change Testing Report
 
@@ -419,3 +470,32 @@ mvn drill-maven-plugin:drillGenerateChangeTestingReport
 ```
 
 Find a report file in `/target/reports/drill/` directory.
+
+#### CLI App
+
+Choose a strategy for finding baseline commits to compare and
+run the CLI command after running the tests:
+
+Search by tags strategy:
+```shell
+java -jar drill-cicd-0.0.1.jar generateChangeTestingReport
+  #General options
+  [general options]
+  #Strategy used to find a baseline commit (optional, 'SEARCH_BY_TAG' by default) 
+  --baselineSearchStrategy SEARCH_BY_TAG
+  #Only consider tags matching the given pattern (optional, '*' by default) 
+  --baselineTagPattern v[0-9].[0-9].[0-9]*
+```
+
+Search by merge base strategy:
+```shell
+java -jar drill-cicd-0.0.1.jar generateChangeTestingReport
+  #General options
+  [general options]
+  #Strategy used to find a baseline commit (optional, 'SEARCH_BY_TAG' by default) 
+  --baselineSearchStrategy SEARCH_BY_MERGE_BASE
+  #A branch, tag, or commit of a baseline version to compare to the current build 
+  --baselineTargetRef main
+```
+
+Find a report file in a current directory.
