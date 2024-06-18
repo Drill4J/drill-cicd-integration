@@ -15,6 +15,7 @@
  */
 package com.epam.drill.integration.gradle
 
+import com.epam.drill.integration.common.baseline.BaselineSearchStrategy
 import org.apache.maven.plugins.annotations.Parameter
 
 
@@ -51,3 +52,11 @@ open class DrillGithubProperties(
     var eventFilePath: String? = null,
 )
 
+open class DrillBaselineProperties(
+    @Parameter(property = "searchStrategy")
+    var searchStrategy: BaselineSearchStrategy? = null,
+    @Parameter(property = "tagPattern")
+    var tagPattern: String? = null,
+    @Parameter(property = "targetRef")
+    var targetRef: String? = null,
+)
