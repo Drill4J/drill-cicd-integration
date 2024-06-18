@@ -29,12 +29,12 @@ import org.apache.maven.plugins.annotations.Parameter
 import org.apache.maven.plugins.annotations.ResolutionScope
 
 @Mojo(
-    name = "drillGitlabMergeRequestReport",
+    name = "gitlabMergeRequestReport",
     defaultPhase = LifecyclePhase.INSTALL,
     requiresDependencyResolution = ResolutionScope.RUNTIME,
     threadSafe = true
 )
-class DrillGitlabMergeRequestReportMojo : AbstractMojo() {
+class GitlabMergeRequestReportMojo : AbstractMojo() {
 
     @Parameter(property = "drillApiUrl", required = true)
     var drillApiUrl: String? = null

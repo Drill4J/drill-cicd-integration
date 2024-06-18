@@ -27,12 +27,12 @@ import org.apache.maven.plugins.annotations.Parameter
 import org.apache.maven.plugins.annotations.ResolutionScope
 
 @Mojo(
-    name = "drillSendBuildInfo",
+    name = "sendBuildInfo",
     defaultPhase = LifecyclePhase.INSTALL,
     requiresDependencyResolution = ResolutionScope.RUNTIME,
     threadSafe = true
 )
-class DrillPostBuildInfoMojo : AbstractMojo() {
+class PostBuildInfoMojo : AbstractMojo() {
 
     @Parameter(property = "drillApiUrl", required = true)
     var drillApiUrl: String? = null

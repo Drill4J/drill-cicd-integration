@@ -173,7 +173,7 @@ Set up executable goals:
     <executions>
         <execution>
             <goals>
-                <goal>drillGitlabMergeRequestReport</goal>
+                <goal>gitlabMergeRequestReport</goal>
             </goals>
         </execution>
     </executions>
@@ -182,7 +182,7 @@ Set up executable goals:
 
 Run the Maven command in your merge request pipeline after a test stage:
 ```shell
-mvn drill-cicd:drillGitlabMergeRequestReport
+mvn drill-cicd:gitlabMergeRequestReport
 ```
 
 #### CLI App
@@ -256,7 +256,7 @@ Set up executable goals:
     <executions>
         <execution>
             <goals>
-                <goal>drillGithubPullRequestReport</goal>
+                <goal>githubPullRequestReport</goal>
             </goals>
         </execution>
     </executions>
@@ -265,7 +265,7 @@ Set up executable goals:
 
 Run the Maven command in your pull request workflow after a test stage:
 ```shell
-mvn drill-cicd:drillGithubPullRequestReport
+mvn drill-cicd:githubPullRequestReport
 ```
 
 #### CLI App
@@ -331,7 +331,7 @@ Set up executable goals:
     <executions>
         <execution>
             <goals>
-                <goal>drillSendBuildInfo</goal>
+                <goal>sendBuildInfo</goal>
             </goals>
         </execution>
     </executions>
@@ -340,7 +340,7 @@ Set up executable goals:
 
 Run the Maven command at the build stage of your CI/CD pipeline:
 ```shell
-mvn drill-cicd:drillSendBuildInfo
+mvn drill-cicd:sendBuildInfo
 ```
 
 #### CLI App
@@ -457,7 +457,7 @@ Set up executable goals:
     <executions>
         <execution>
             <goals>
-                <goal>drillGenerateChangeTestingReport</goal>
+                <goal>generateChangeTestingReport</goal>
             </goals>
         </execution>
     </executions>
@@ -466,7 +466,7 @@ Set up executable goals:
 
 Run the Maven command after running the tests:
 ```shell
-mvn drill-cicd:drillGenerateChangeTestingReport
+mvn drill-cicd:generateChangeTestingReport
 ```
 
 Find a report file in `/target/reports/drill/` directory.

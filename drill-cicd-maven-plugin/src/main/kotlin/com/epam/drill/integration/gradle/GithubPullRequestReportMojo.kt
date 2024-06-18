@@ -31,12 +31,12 @@ import org.apache.maven.plugins.annotations.ResolutionScope
 import java.io.File
 
 @Mojo(
-    name = "drillGithubPullRequestReport",
+    name = "githubPullRequestReport",
     defaultPhase = LifecyclePhase.INSTALL,
     requiresDependencyResolution = ResolutionScope.RUNTIME,
     threadSafe = true
 )
-class DrillGithubPullRequestReportMojo : AbstractMojo() {
+class GithubPullRequestReportMojo : AbstractMojo() {
 
     @Parameter(property = "drillApiUrl", required = true)
     var drillApiUrl: String? = null
