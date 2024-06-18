@@ -17,12 +17,39 @@ package com.epam.drill.integration.common.git.impl
 
 import com.epam.drill.integration.common.git.GitClient
 import com.epam.drill.integration.common.git.GitCommitInfo
+import com.epam.drill.integration.common.git.GitException
 import mu.KotlinLogging
 import java.io.BufferedReader
+import java.io.File
 import java.io.InputStream
 
-class GitClientImpl: GitClient {
+class GitClientImpl(private val workingDir: File? = null) : GitClient {
     private val logger = KotlinLogging.logger { }
+
+    override fun getCurrentCommitSha(): String {
+        return executeGitCommand("git rev-parse HEAD")
+    }
+
+    override fun describe(
+        all: Boolean,
+        tags: Boolean,
+        abbrev: Int,
+        matchPattern: String?,
+        excludePattern: String?
+    ): String {
+        return executeGitCommand(
+            "git describe"
+                    + (if (all) " --all" else "")
+                    + (if (tags) " --tags" else "")
+                    + (" --abbrev=$abbrev")
+                    + (if (matchPattern != null) " --match=$matchPattern" else "")
+                    + (if (excludePattern != null) " --exclude=$excludePattern" else "")
+        )
+    }
+
+    override fun revList(ref: String, n: Int): List<String> {
+        return executeGitCommand("git rev-list -n $n $ref").split("\n")
+    }
 
     override fun getGitBranch(): String {
         return executeGitCommand("git rev-parse --abbrev-ref HEAD")
@@ -53,13 +80,14 @@ class GitClientImpl: GitClient {
     }
 
     private fun executeGitCommand(command: String): String {
-        logger.info { "Executing git command: $command" }
-        val process = ProcessBuilder(*command.split(" ").toTypedArray()).start()
+        logger.info { "Executing git command: $command in $workingDir" }
+        val process = ProcessBuilder(*command.split(" ").toTypedArray()).let {
+            if (workingDir != null)
+                it.directory(workingDir)
+            else it
+        }.start()
         if (process.waitFor() != 0) {
-            throw IllegalStateException(
-                "Git command `$command` failed " +
-                        "with error code ${process.exitValue()}: ${process.errorStream.readText()}"
-            )
+            throw GitException(command, process.exitValue(), process.errorStream.readText())
         }
         return process.inputStream.readText()
     }

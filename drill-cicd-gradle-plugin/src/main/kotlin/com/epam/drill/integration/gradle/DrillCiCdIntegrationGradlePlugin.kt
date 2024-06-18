@@ -41,6 +41,12 @@ class DrillCiCdIntegrationGradlePlugin : Plugin<Project> {
         }.also {
             it.group = TASK_GROUP
         }
+
+        project.task("drillGenerateChangeTestingReport") {
+            drillGenerateChangeTestingReport(ciCd)
+        }.also {
+            it.group = TASK_GROUP
+        }
     }
 }
 

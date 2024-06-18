@@ -17,6 +17,9 @@ version = rootProject.version
 
 val ktorVersion: String by parent!!.extra
 val microutilsLoggingVersion: String by parent!!.extra
+val kotlinVersion: String by parent!!.extra
+val mockitoKotlinVersion: String by parent!!.extra
+val logbackClassicVersion: String by parent!!.extra
 
 repositories {
     mavenLocal()
@@ -41,6 +44,10 @@ dependencies {
     implementation("io.ktor:ktor-client-logging:$ktorVersion")
     implementation("io.ktor:ktor-client-logging-jvm:$ktorVersion")
     implementation("io.github.microutils:kotlin-logging-jvm:$microutilsLoggingVersion")
+
+    testImplementation("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion")
+    testImplementation("ch.qos.logback:logback-classic:$logbackClassicVersion")
 }
 
 kotlin.sourceSets.all {

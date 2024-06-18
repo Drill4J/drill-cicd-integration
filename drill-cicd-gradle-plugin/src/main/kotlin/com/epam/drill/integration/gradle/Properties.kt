@@ -15,6 +15,8 @@
  */
 package com.epam.drill.integration.gradle
 
+import com.epam.drill.integration.common.baseline.BaselineSearchStrategy
+
 
 open class DrillProperties(
     var drillApiUrl: String? = null,
@@ -22,7 +24,12 @@ open class DrillProperties(
     var groupId: String? = null,
     var appId: String? = null,
     var buildVersion: String? = null,
-)
+    var baseline: BaselineProperties? = null,
+) {
+    fun baseline(configure: BaselineProperties.() -> Unit) {
+        this.baseline = BaselineProperties().apply(configure)
+    }
+}
 
 open class DrillCiCdProperties(
     var gitlab: DrillGitlabProperties? = null,
@@ -60,4 +67,10 @@ open class DrillGithubProperties(
     var apiUrl: String = "https://api.github.com",
     var token: String? = null,
     var eventFilePath: String? = null
+)
+
+open class BaselineProperties(
+    var searchStrategy: BaselineSearchStrategy? = null,
+    var tagPattern: String? = null,
+    var targetRef: String? = null,
 )

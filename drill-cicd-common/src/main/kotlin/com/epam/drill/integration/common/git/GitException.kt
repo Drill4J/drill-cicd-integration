@@ -15,25 +15,10 @@
  */
 package com.epam.drill.integration.common.git
 
-interface GitClient {
-    fun getCurrentCommitSha(): String
-    fun describe(
-        all: Boolean = false, tags: Boolean = false, abbrev: Int = 0,
-        matchPattern: String? = null, excludePattern: String? = null
-    ): String
-    fun revList(ref: String, n: Int = 1): List<String>
-    fun getGitBranch(): String
-    fun getGitCommitInfo(): GitCommitInfo
-    fun getMergeBaseCommitSha(targetRef: String): String
-    fun fetch(depth: Int? = null)
-}
-
-data class GitCommitInfo(
-    val sha: String,
-    val date: String,
-    val author: String,
-    val message: String
+class GitException(
+    val command: String,
+    val exitCode: Int,
+    val outputMessage: String
+) : RuntimeException(
+    "Git command `$command` failed with error code $exitCode: $outputMessage"
 )
-
-const val GIT_GENERAL_ERROR = 1
-const val GIT_INVALID_ARGUMENT_ERROR = 128
