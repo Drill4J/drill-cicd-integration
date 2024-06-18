@@ -21,8 +21,7 @@ Build all modules:
 ./gradlew publishToMavenLocal
 ```
 
-For using locally built versions of CI/CD plugins in Gradle projects 
-is necessary to add `mavenLocal` repository to your `settings.gradle` file:
+For using locally in Gradle projects is necessary to add `mavenLocal` repository to your `settings.gradle` file:
 ```kotlin
 pluginManagement {
     repositories {
@@ -34,16 +33,18 @@ pluginManagement {
 
 ## Usage
 
-### Gitlab integration with Gradle plugin
+### General settings
 
-Add Gradle plugin to your Gradle configuration:
+#### Gradle plugin
+
+Add Drill4J CI/CD plugin to your Gradle build file:
 ```kotlin
 plugins {
     id("com.epam.drill.integration.cicd") version "0.0.1"
 }
 ```
 
-Add Drill4J Gitlab integration properties to your Kotlin Gradle configuration:
+Add general properties to your Gradle build file:
 
 ```kotlin
 drillCiCd {
@@ -55,7 +56,55 @@ drillCiCd {
     drillApiUrl = "http://localhost:8090/api"
     //Drill4J Api Key
     drillApiKey = "your-drill-api-key-here"
+    //Other settings
+    ...
+}
+```
 
+#### Maven plugin
+
+Add general properties to your Drill4J plugin configuration:
+
+```xml
+<plugin>
+    <groupId>com.epam.drill.integration</groupId>
+    <artifactId>drill-maven-plugin</artifactId>
+    <version>0.0.1</version>
+    <configuration>
+        <!-- Drill4J group ID -->
+        <groupId>realworld</groupId>
+        <!-- Drill4J application ID -->
+        <appId>realworld-backend</appId>
+        <!-- Drill4J API url -->
+        <drillApiUrl>http://localhost:8090/api</drillApiUrl>
+        <!-- Drill4J Api Key -->
+        <drillApiKey>your-drill-api-key-here</drillApiKey>
+        
+        <!-- Other settings -->
+        ...
+    </configuration>
+    <executions>
+        <execution>
+            <goals>
+                <!-- Executable goals -->
+                ...
+            </goals>
+        </execution>
+    </executions>
+</plugin>
+```
+
+### Testing report in Gitlab Merge Requests
+
+#### Gradle plugin
+
+Add Gitlab integration properties to your Kotlin Gradle build file:
+
+```kotlin
+drillCiCd {
+    //General properties
+    ...
+    
     gitlab {
         //Gitlab API url
         apiUrl = "https://gitlab.com/api"
@@ -65,94 +114,22 @@ drillCiCd {
 }
 ```
 
-Run the Gradle command in the Merge Request Pipeline after a test stage:
+Run the Gradle command in your merge request pipeline after a test stage:
 ```shell
 ./gradlew drillGitlabMergeRequestReport
 ```
 
-### GitHub integration with Gradle plugin
+#### Maven plugin
 
-Add Gradle plugin to your Gradle configuration:
-
-```kotlin
-plugins {
-    id("com.epam.drill.integration.cicd") version "0.0.1"
-}
-```
-Add Drill4J GitHub integration properties to your Kotlin Gradle configuration:
-```kotlin
-drillCiCd {
-    //Drill4J group ID
-    groupId = "realworld"
-    //Drill4J application ID
-    appId = "realworld-backend"
-    //Drill4J API url
-    drillApiUrl = "http://localhost:8090/api"
-    //Drill4J Api Key
-    drillApiKey = "your-drill-api-key-here"
-    
-    github {
-        //GitHub API Token
-        token = "your-github-token-here"
-    }
-}
-```
-
-Run the Gradle command in the Pull Request Pipeline after a test stage:
-```shell
-./gradlew drillGithubPullRequestReport
-```
-
-### Build stage integration with Gradle plugin
-
-Add Gradle plugin to your Gradle configuration:
-
-```kotlin
-plugins {
-    id("com.epam.drill.integration.cicd") version "0.0.1"
-}
-```
-Add Drill4J CI/CD integration properties to your Kotlin Gradle configuration:
-```kotlin
-drillCiCd {
-    //Drill4J group ID
-    groupId = "realworld"
-    //Drill4J application ID
-    appId = "realworld-backend"
-    //Drill4J API url
-    drillApiUrl = "http://localhost:8090/api"
-    //Drill4J Api Key
-    drillApiKey = "your-drill-api-key-here"
-    //Version of this build (optional)
-    buildVersion = "1.2.3-rc.1"   
-}
-```
-
-Run the Gradle command at the build stage of your build pipeline:
-```shell
-./gradlew drillSendBuildInfo
-```
-
-
-### Gitlab integration with Maven plugin
-
-Add Drill4J Gitlab integration to your Maven configuration:
-
+Add Gitlab integration properties to your Maven build file:
 ```xml
-
 <plugin>
     <groupId>com.epam.drill.integration</groupId>
     <artifactId>drill-maven-plugin</artifactId>
     <version>0.0.1</version>
     <configuration>
-        <!-- Drill4J group ID -->
-        <groupId>some-group-id</groupId>
-        <!-- Drill4J application ID -->
-        <appId>some-agent-id</appId>
-        <!-- Drill4J API url -->
-        <drillApiUrl>http://example.com/api</drillApiUrl>
-        <!-- Drill4J Api Key -->
-        <drillApiKey>secret-key</drillApiKey>
+        <!-- General properties -->
+        ...
         
         <gitlab>
             <!-- Gitlab API url -->
@@ -160,6 +137,21 @@ Add Drill4J Gitlab integration to your Maven configuration:
             <!-- Gitlab API Private Token -->
             <privateToken>someToken</privateToken>
         </gitlab>
+    </configuration>
+    <executions>
+       ...
+    </executions>
+</plugin>
+```
+
+Set up executable goals:
+```xml
+<plugin>
+    <groupId>com.epam.drill.integration</groupId>
+    <artifactId>drill-maven-plugin</artifactId>
+    <version>0.0.1</version>
+    <configuration>
+        ...
     </configuration>
     <executions>
         <execution>
@@ -171,15 +163,35 @@ Add Drill4J Gitlab integration to your Maven configuration:
 </plugin>
 ```
 
-Run the Maven command after a test stage:
-
+Run the Maven command in your merge request pipeline after a test stage:
 ```shell
-./mvnw clean install
+mvn drill-maven-plugin:drillGitlabMergeRequestReport
 ```
 
-### GitHub integration with Maven plugin
+### Testing report in GitHub Pull Requests
 
-Add Drill4J GitHub integration to your Maven configuration:
+#### Gradle plugin
+
+Add GitHub integration properties to your Kotlin Gradle build file:
+```kotlin
+drillCiCd {
+    //General properties
+    ...
+    
+    github {
+        //GitHub API Token
+        token = "your-github-token-here"
+    }
+}
+```
+
+Run the Gradle command in your pull request workflow after a test stage:
+```shell
+./gradlew drillGithubPullRequestReport
+```
+#### Maven plugin
+
+Add GitHub properties to your Maven build file:
 
 ```xml
 
@@ -188,19 +200,28 @@ Add Drill4J GitHub integration to your Maven configuration:
     <artifactId>drill-maven-plugin</artifactId>
     <version>0.0.1</version>
     <configuration>
-        <!-- Drill4J group ID -->
-        <groupId>some-group-id</groupId>
-        <!-- Drill4J application ID -->
-        <appId>some-agent-id</appId>
-        <!-- Drill4J API url -->
-        <drillApiUrl>http://example.com/api</drillApiUrl>
-        <!-- Drill4J Api Key -->
-        <drillApiKey>secret-key</drillApiKey>
+        <!-- General properties -->
+        ...
         
         <github>
-            <!-- GitHub API token -->
-            <token>someToken</token>
+            <!-- GitHub Token -->
+            <token>your-github-token-here</token>
         </github>
+    </configuration>
+    <executions>
+        ...
+    </executions>
+</plugin>
+```
+
+Set up executable goals:
+```xml
+<plugin>
+    <groupId>com.epam.drill.integration</groupId>
+    <artifactId>drill-maven-plugin</artifactId>
+    <version>0.0.1</version>
+    <configuration>
+        ...
     </configuration>
     <executions>
         <execution>
@@ -212,33 +233,59 @@ Add Drill4J GitHub integration to your Maven configuration:
 </plugin>
 ```
 
-Run the Maven command after a test stage:
-
+Run the Maven command in your pull request workflow after a test stage:
 ```shell
-./mvnw clean install
+mvn drill-maven-plugin:drillGithubPullRequestReport
 ```
 
-### Build stage integration with Maven plugin
+### Sending build information
 
-Add Maven plugin to your Maven configuration:
+#### Gradle plugin
 
+Add information about a current build version to your Gradle build file:
+```kotlin
+drillCiCd {
+    //General properties
+    ...
+    //Version of current build (optional)
+    buildVersion = "1.2.3"   
+}
+```
+
+Run the Gradle command at the build stage of your CI/CD pipeline:
+```shell
+./gradlew drillSendBuildInfo
+```
+
+#### Maven plugin
+
+Add information about a current build version to your Maven build file:
 ```xml
-
 <plugin>
     <groupId>com.epam.drill.integration</groupId>
     <artifactId>drill-maven-plugin</artifactId>
     <version>0.0.1</version>
     <configuration>
-        <!-- Drill4J group ID -->
-        <groupId>some-group-id</groupId>
-        <!-- Drill4J application ID -->
-        <appId>some-agent-id</appId>
-        <!-- Drill4J API url -->
-        <drillApiUrl>http://example.com/api</drillApiUrl>
-        <!-- Drill4J Api Key -->
-        <drillApiKey>secret-key</drillApiKey>
-        <!-- Version of this build (optional) -->
-        <buildVersion>1.2.3-rc.1</buildVersion>
+        <!-- General properties -->
+        ...
+        
+        <!-- Version of current build (optional) -->
+        <buildVersion>1.2.3</buildVersion>
+    </configuration>
+    <executions>
+        ...
+    </executions>
+</plugin>
+```
+
+Set up executable goals:
+```xml
+<plugin>
+    <groupId>com.epam.drill.integration</groupId>
+    <artifactId>drill-maven-plugin</artifactId>
+    <version>0.0.1</version>
+    <configuration>
+        ...
     </configuration>
     <executions>
         <execution>
@@ -250,34 +297,25 @@ Add Maven plugin to your Maven configuration:
 </plugin>
 ```
 
-Run the Gradle command at the build stage of your build pipeline:
-
+Run the Maven command at the build stage of your CI/CD pipeline:
 ```shell
-./mvnw clean install
+mvn drill-maven-plugin:drillSendBuildInfo
 ```
 
-### Generating Drill4J Change Testing Report with Gradle plugin
 
-Add Gradle plugin to your Gradle configuration:
+### Generating a Change Testing Report
 
-```kotlin
-plugins {
-    id("com.epam.drill.integration.cicd") version "0.0.1"
-}
-```
-Add Drill4J CI/CD integration properties to your Kotlin Gradle configuration:
+#### Gradle plugin
+
+Choose a strategy for finding baseline commits to compare.
+
+Search by tags strategy:
 ```kotlin
 drillCiCd {
-    //Drill4J group ID
-    groupId = "realworld"
-    //Drill4J application ID
-    appId = "realworld-backend"
-    //Drill4J API url
-    drillApiUrl = "http://localhost:8090/api"
-    //Drill4J Api Key
-    drillApiKey = "your-drill-api-key-here"
+    //General properties
+    ...
     
-    report {
+    baseline {
         //Strategy used to find a baseline commit (optional, SEARCH_BY_TAG by default)
         searchStrategy = "SEARCH_BY_TAG"
         //Only consider tags matching the given pattern
@@ -285,8 +323,99 @@ drillCiCd {
     }
 }
 ```
-
-Run the Gradle command at the build stage of your build pipeline:
-```shell
-./gradlew drillSendBuildInfo
+Search by merge base strategy:
+```kotlin
+drillCiCd {
+    //General properties
+    ...
+    
+    baseline {
+        //Strategy used to find a baseline commit (optional, SEARCH_BY_TAG by default)
+        searchStrategy = "SEARCH_BY_MERGE_BASE"
+        //A branch, tag, or commit of a baseline version to compare to the current build
+        targetRef = "main"
+    }
+}
 ```
+
+Run the Gradle command after running the tests:
+```shell
+./gradlew drillGenerateChangeTestingReport
+```
+
+Find a report file in `/build/reports/drill/` directory.
+
+#### Maven plugin
+
+Choose a strategy for finding baseline commits to compare.
+
+Search by tags strategy:
+```xml
+<plugin>
+    <groupId>com.epam.drill.integration</groupId>
+    <artifactId>drill-maven-plugin</artifactId>
+    <version>0.0.1</version>
+    <configuration>
+        <!-- General properties -->
+        ...
+        
+        <baseline>
+            <!-- Strategy used to find a baseline commit (optional, 'SEARCH_BY_TAG' by default) -->
+            <searchStrategy>SEARCH_BY_TAG</searchStrategy>
+            <!-- Only consider tags matching the given pattern (optional, '*' by default) -->
+            <tagPattern>v[0-9].[0-9].[0-9]*</tagPattern>
+        </baseline>
+    </configuration>
+    <executions>
+        ...
+    </executions>
+</plugin>
+```
+Search by merge base strategy:
+```xml
+<plugin>
+    <groupId>com.epam.drill.integration</groupId>
+    <artifactId>drill-maven-plugin</artifactId>
+    <version>0.0.1</version>
+    <configuration>
+        <!-- General properties -->
+        ...
+        
+        <baseline>
+            <!-- Strategy used to find a baseline commit (optional, 'SEARCH_BY_TAG' by default) -->
+            <searchStrategy>SEARCH_BY_MERGE_BASE</searchStrategy>
+            <!-- A branch, tag, or commit of a baseline version to compare to the current build -->
+            <targetRef>main</targetRef>
+        </baseline>
+    </configuration>
+    <executions>
+        ...
+    </executions>
+</plugin>
+```
+
+Set up executable goals:
+```xml
+<plugin>
+    <groupId>com.epam.drill.integration</groupId>
+    <artifactId>drill-maven-plugin</artifactId>
+    <version>0.0.1</version>
+    <configuration>
+        ...
+    </configuration>
+    <executions>
+        <execution>
+            <goals>
+                <goal>drillGenerateChangeTestingReport</goal>
+            </goals>
+        </execution>
+    </executions>
+</plugin>
+```
+
+Run the Maven command after running the tests:
+```shell
+mvn drill-maven-plugin:drillGenerateChangeTestingReport
+```
+
+Find a report file in `/target/reports/drill/` directory.
