@@ -28,7 +28,7 @@ import org.apache.maven.plugins.annotations.ResolutionScope
 
 @Mojo(
     name = "sendBuildInfo",
-    defaultPhase = LifecyclePhase.INSTALL,
+    defaultPhase = LifecyclePhase.DEPLOY,
     requiresDependencyResolution = ResolutionScope.RUNTIME,
     threadSafe = true
 )

@@ -32,7 +32,7 @@ import java.io.File
 
 @Mojo(
     name = "githubPullRequestReport",
-    defaultPhase = LifecyclePhase.INSTALL,
+    defaultPhase = LifecyclePhase.SITE,
     requiresDependencyResolution = ResolutionScope.RUNTIME,
     threadSafe = true
 )

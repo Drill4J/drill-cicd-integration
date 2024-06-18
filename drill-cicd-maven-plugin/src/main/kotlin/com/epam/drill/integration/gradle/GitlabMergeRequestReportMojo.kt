@@ -30,7 +30,7 @@ import org.apache.maven.plugins.annotations.ResolutionScope
 
 @Mojo(
     name = "gitlabMergeRequestReport",
-    defaultPhase = LifecyclePhase.INSTALL,
+    defaultPhase = LifecyclePhase.SITE,
     requiresDependencyResolution = ResolutionScope.RUNTIME,
     threadSafe = true
 )
