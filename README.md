@@ -9,9 +9,9 @@ Tools for integration with CI/CD systems such as Gitlab and GitHub.
 - **drill-cicd-common**: Common library
 - **drill-cicd-gitlab**: Gitlab integration services
 - **drill-cicd-github**: GitHub integration services
-- **drill-gradle-plugin**: Gradle plugin for CI/CD integration
+- **drill-cicd-gradle-plugin**: Gradle plugin for CI/CD integration
 - **drill-cicd-maven-plugin**: Maven plugin for CI/CD integration 
-- **drill-cli**: CLI Application for CI/CD integration
+- **drill-cicd-cli**: CLI Application for CI/CD integration
 
 ## Build
 
