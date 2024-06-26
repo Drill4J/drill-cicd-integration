@@ -24,23 +24,35 @@ open class DrillProperties(
     var groupId: String? = null,
     var appId: String? = null,
     var buildVersion: String? = null,
+    var packagePrefixes : Array<String> = emptyArray(),
+
     var baseline: BaselineProperties? = null,
+    var gitlab: DrillGitlabProperties? = null,
+    var github: DrillGithubProperties? = null,
+
+    var testAgent: TestAgentProperties? = null,
+    var appAgent: AppAgentProperties? = null
 ) {
     fun baseline(configure: BaselineProperties.() -> Unit) {
         this.baseline = BaselineProperties().apply(configure)
     }
-}
-
-open class DrillCiCdProperties(
-    var gitlab: DrillGitlabProperties? = null,
-    var github: DrillGithubProperties? = null,
-) : DrillProperties() {
     fun gitlab(configure: DrillGitlabProperties.() -> Unit) {
         this.gitlab = DrillGitlabProperties().apply(configure)
     }
-
     fun github(configure: DrillGithubProperties.() -> Unit) {
         this.github = DrillGithubProperties().apply(configure)
+    }
+    fun enableTestAgent(configure: TestAgentProperties.() -> Unit) {
+        this.testAgent = TestAgentProperties().apply(configure)
+    }
+    fun enableTestAgent() {
+        this.testAgent = TestAgentProperties()
+    }
+    fun enableAppAgent(configure: AppAgentProperties.() -> Unit) {
+        this.appAgent = AppAgentProperties().apply(configure)
+    }
+    fun enableAppAgent() {
+        this.appAgent = AppAgentProperties()
     }
 }
 
@@ -74,3 +86,16 @@ open class BaselineProperties(
     var tagPattern: String? = null,
     var targetRef: String? = null,
 )
+
+abstract class AgentProperties(
+    var version: String? = null,
+    var downloadUrl: String? = null,
+    var zipPath: String? = null,
+
+    var logLevel: String? = null,
+    var logFile: String? = null,
+)
+
+open class TestAgentProperties() : AgentProperties()
+
+open class AppAgentProperties() : AgentProperties()

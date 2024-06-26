@@ -29,7 +29,7 @@ import kotlinx.coroutines.runBlocking
 import org.gradle.api.Task
 import java.io.File
 
-fun Task.drillGenerateChangeTestingReport(ciCd: DrillCiCdProperties) {
+fun Task.drillGenerateChangeTestingReport(ciCd: DrillProperties) {
     doFirst {
         val drillApiUrl = ciCd.drillApiUrl.required("drillApiUrl")
         val drillApiKey = ciCd.drillApiKey
