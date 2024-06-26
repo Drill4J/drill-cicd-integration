@@ -22,7 +22,7 @@ import com.epam.drill.integration.common.util.required
 import kotlinx.coroutines.runBlocking
 import org.gradle.api.Task
 
-fun Task.drillSendBuildInfo(ciCd: DrillCiCdProperties) {
+fun Task.drillSendBuildInfo(ciCd: DrillProperties) {
     doFirst {
         val drillApiUrl = ciCd.drillApiUrl.required("drillApiUrl")
         val drillApiKey = ciCd.drillApiKey

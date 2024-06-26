@@ -24,7 +24,7 @@ import com.epam.drill.integration.gitlab.service.GitlabCiCdService
 import kotlinx.coroutines.runBlocking
 import org.gradle.api.Task
 
-fun Task.drillGitlabMergeRequestReportTask(ciCd: DrillCiCdProperties) {
+fun Task.drillGitlabMergeRequestReportTask(ciCd: DrillProperties) {
     doFirst {
         val gitlab = ciCd.gitlab.required("gitlab")
         val gitlabApiUrl = gitlab.apiUrl.required("gitlab.apiUrl")

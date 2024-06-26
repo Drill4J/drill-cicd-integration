@@ -17,12 +17,17 @@ package com.epam.drill.integration.gradle
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.tasks.JavaExec
+import org.gradle.api.tasks.testing.Test
+import org.gradle.process.JavaForkOptions
+import kotlin.reflect.KClass
 
-private const val TASK_GROUP = "Drill4J"
+private const val TASK_GROUP = "drill"
+private val taskType: Set<KClass<out JavaForkOptions>> = setOf(Test::class, JavaExec::class)
 
 class DrillCiCdIntegrationGradlePlugin : Plugin<Project> {
     override fun apply(project: Project) {
-        val ciCd = project.extensions.create("drillCiCd", DrillCiCdProperties::class.java)
+        val ciCd = project.extensions.create("drill", DrillProperties::class.java)
 
         project.task("drillGitlabMergeRequestReport") {
             drillGitlabMergeRequestReportTask(ciCd)
@@ -46,6 +51,15 @@ class DrillCiCdIntegrationGradlePlugin : Plugin<Project> {
             drillGenerateChangeTestingReport(ciCd)
         }.also {
             it.group = TASK_GROUP
+        }
+
+        project.afterEvaluate {
+            tasks
+                .filter { taskType.any { taskType -> taskType.java.isInstance(it) } }
+                .filter { it is JavaForkOptions }
+                .forEach { task ->
+                    modifyToRunDrillAgents(task, project, ciCd)
+                }
         }
     }
 }

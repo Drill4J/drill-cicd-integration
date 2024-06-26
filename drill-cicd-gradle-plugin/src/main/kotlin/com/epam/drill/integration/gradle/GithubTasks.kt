@@ -27,7 +27,7 @@ import org.gradle.api.Task
 import java.io.File
 
 
-fun Task.drillGithubPullRequestReport(ciCd: DrillCiCdProperties) {
+fun Task.drillGithubPullRequestReport(ciCd: DrillProperties) {
     doFirst {
         val github = ciCd.github.required("github")
         val githubApiUrl = github.apiUrl.required("github.apiUrl")

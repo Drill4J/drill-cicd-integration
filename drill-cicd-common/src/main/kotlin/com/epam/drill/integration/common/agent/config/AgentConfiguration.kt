@@ -22,7 +22,7 @@ abstract class AgentConfiguration {
     var drillApiKey: String? = null
     var groupId: String? = null
 
-    var logLevel: String = "INFO"
+    var logLevel: String? = null
     var logFile: File? = null
 
     var version: String? = null
