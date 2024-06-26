@@ -66,12 +66,6 @@ class GitlabMergeRequestReportMojo : AbstractMojo() {
         val gitlabMergeRequestIid = gitlab.mergeRequest.mergeRequestIid
             .fromEnv("CI_MERGE_REQUEST_IID")
             .required("gitlab.mergeRequest.mergeRequestIid")
-        val sourceBranch = gitlab.mergeRequest.sourceBranch
-            .fromEnv("CI_MERGE_REQUEST_SOURCE_BRANCH_NAME")
-            .required("gitlab.mergeRequest.sourceBranch")
-        val targetBranch = gitlab.mergeRequest.targetBranch
-            .fromEnv("CI_MERGE_REQUEST_TARGET_BRANCH_NAME")
-            .required("gitlab.mergeRequest.sourceBranch")
         val mergeBaseCommitSha = gitlab.mergeRequest.mergeBaseCommitSha
             .fromEnv("CI_MERGE_REQUEST_DIFF_BASE_SHA")
             .required("gitlab.mergeRequest.mergeBaseCommitSha")
@@ -94,8 +88,6 @@ class GitlabMergeRequestReportMojo : AbstractMojo() {
                 gitlabMergeRequestId = gitlabMergeRequestIid,
                 groupId = groupId,
                 appId = appId,
-                sourceBranch = sourceBranch,
-                targetBranch = targetBranch,
                 headCommitSha = commitSha,
                 mergeBaseCommitSha = mergeBaseCommitSha,
             )
