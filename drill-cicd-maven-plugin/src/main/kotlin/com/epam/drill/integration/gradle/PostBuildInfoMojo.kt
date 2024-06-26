@@ -1,9 +1,23 @@
+/**
+ * Copyright 2020 - 2022 EPAM Systems
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.epam.drill.integration.gradle
 
 import com.epam.drill.integration.common.client.BuildPayload
 import com.epam.drill.integration.common.client.impl.DataIngestClientImpl
-import com.epam.drill.integration.common.git.getGitBranch
-import com.epam.drill.integration.common.git.getGitCommitInfo
+import com.epam.drill.integration.common.git.impl.GitClientImpl
 import com.epam.drill.integration.common.util.required
 import kotlinx.coroutines.runBlocking
 import org.apache.maven.plugin.AbstractMojo
@@ -13,12 +27,12 @@ import org.apache.maven.plugins.annotations.Parameter
 import org.apache.maven.plugins.annotations.ResolutionScope
 
 @Mojo(
-    name = "drillSendBuildInfo",
-    defaultPhase = LifecyclePhase.INSTALL,
+    name = "sendBuildInfo",
+    defaultPhase = LifecyclePhase.DEPLOY,
     requiresDependencyResolution = ResolutionScope.RUNTIME,
     threadSafe = true
 )
-class DrillPostBuildInfoMojo : AbstractMojo() {
+class PostBuildInfoMojo : AbstractMojo() {
 
     @Parameter(property = "drillApiUrl", required = true)
     var drillApiUrl: String? = null
@@ -34,19 +48,21 @@ class DrillPostBuildInfoMojo : AbstractMojo() {
 
     @Parameter(property = "buildVersion")
     var buildVersion: String? = null
-
     override fun execute() {
         val drillApiUrl = drillApiUrl.required("drillApiUrl")
+        val drillApiKey = drillApiKey
         val groupId = groupId.required("groupId")
         val appId = appId.required("appId")
+        val buildVersion = buildVersion
 
-        val drillApiClient = DataIngestClientImpl(
+        val dataIngestClient = DataIngestClientImpl(
             drillApiUrl = drillApiUrl,
             drillApiKey = drillApiKey
         )
+        val gitClient = GitClientImpl()
 
-        val branch = getGitBranch()
-        val commitInfo = getGitCommitInfo()
+        val branch = gitClient.getGitBranch()
+        val commitInfo = gitClient.getGitCommitInfo()
         val payload = BuildPayload(
             groupId = groupId,
             appId = appId,
@@ -58,8 +74,9 @@ class DrillPostBuildInfoMojo : AbstractMojo() {
             branch = branch
         )
 
+        log.info("Sending the current build information to Drill4J for $groupId/$appId...")
         runBlocking {
-            drillApiClient.sendBuild(payload)
+            dataIngestClient.sendBuild(payload)
         }
     }
 }

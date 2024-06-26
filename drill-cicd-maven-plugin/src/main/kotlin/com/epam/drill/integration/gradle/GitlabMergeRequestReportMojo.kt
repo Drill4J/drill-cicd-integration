@@ -19,23 +19,22 @@ import com.epam.drill.integration.common.client.impl.MetricsClientImpl
 import com.epam.drill.integration.common.report.impl.MarkdownReportGenerator
 import com.epam.drill.integration.common.util.fromEnv
 import com.epam.drill.integration.common.util.required
-import com.epam.drill.integration.github.client.impl.GithubApiClientImpl
-import com.epam.drill.integration.github.service.GithubCiCdService
+import com.epam.drill.integration.gitlab.client.impl.GitlabApiClientV4Impl
+import com.epam.drill.integration.gitlab.service.GitlabCiCdService
 import kotlinx.coroutines.runBlocking
 import org.apache.maven.plugin.AbstractMojo
 import org.apache.maven.plugins.annotations.LifecyclePhase
 import org.apache.maven.plugins.annotations.Mojo
 import org.apache.maven.plugins.annotations.Parameter
 import org.apache.maven.plugins.annotations.ResolutionScope
-import java.io.File
 
 @Mojo(
-    name = "drillGithubPullRequestReport",
-    defaultPhase = LifecyclePhase.INSTALL,
+    name = "gitlabMergeRequestReport",
+    defaultPhase = LifecyclePhase.SITE,
     requiresDependencyResolution = ResolutionScope.RUNTIME,
     threadSafe = true
 )
-class DrillGithubPullRequestReportMojo : AbstractMojo() {
+class GitlabMergeRequestReportMojo : AbstractMojo() {
 
     @Parameter(property = "drillApiUrl", required = true)
     var drillApiUrl: String? = null
@@ -49,24 +48,32 @@ class DrillGithubPullRequestReportMojo : AbstractMojo() {
     @Parameter(property = "appId", required = true)
     var appId: String? = null
 
-    @Parameter(property = "github", required = true)
-    var github: DrillGithubProperties? = null
+    @Parameter(property = "gitlab", required = true)
+    var gitlab: DrillGitlabProperties? = null
 
     override fun execute() {
-        val github = github.required("github")
-        val githubApiUrl = github.apiUrl.required("github.apiUrl")
-        val githubToken = github.token.required("github.token")
+        val gitlab = gitlab.required("gitlab")
+        val gitlabApiUrl = gitlab.apiUrl.required("gitlab.apiUrl")
+        val gitlabPrivateToken = gitlab.privateToken
         val drillApiUrl = drillApiUrl.required("drillApiUrl")
+        val drillApiKey = drillApiKey
         val groupId = groupId.required("groupId")
         val appId = appId.required("appId")
-        val eventFilePath = github.eventFilePath
-            .fromEnv("GITHUB_EVENT_PATH")
-            .required("github.eventFilePath")
+        val gitlabProjectId = gitlab.projectId.required("gitlab.projectId")
+        val commitSha = gitlab.commitSha
+            .fromEnv("CI_COMMIT_SHA")
+            .required("gitlab.commitSha")
+        val gitlabMergeRequestIid = gitlab.mergeRequest.mergeRequestIid
+            .fromEnv("CI_MERGE_REQUEST_IID")
+            .required("gitlab.mergeRequest.mergeRequestIid")
+        val mergeBaseCommitSha = gitlab.mergeRequest.mergeBaseCommitSha
+            .fromEnv("CI_MERGE_REQUEST_DIFF_BASE_SHA")
+            .required("gitlab.mergeRequest.mergeBaseCommitSha")
 
-        val githubCiCdService = GithubCiCdService(
-            GithubApiClientImpl(
-                githubApiUrl,
-                githubToken,
+        val gitlabCiCdService = GitlabCiCdService(
+            GitlabApiClientV4Impl(
+                gitlabApiUrl,
+                gitlabPrivateToken
             ),
             MetricsClientImpl(
                 drillApiUrl,
@@ -74,11 +81,15 @@ class DrillGithubPullRequestReportMojo : AbstractMojo() {
             ),
             MarkdownReportGenerator()
         )
+        log.info("Posting Drill4J Testing Report for $groupId/$appId to Gitlab project $gitlabProjectId to merge request $gitlabMergeRequestIid...")
         runBlocking {
-            githubCiCdService.postPullRequestReportByEvent(
-                githubEventFile = File(eventFilePath),
-                groupId = groupId.required("groupId"),
-                appId = appId.required("appId"),
+            gitlabCiCdService.postMergeRequestReport(
+                gitlabProjectId = gitlabProjectId,
+                gitlabMergeRequestId = gitlabMergeRequestIid,
+                groupId = groupId,
+                appId = appId,
+                headCommitSha = commitSha,
+                mergeBaseCommitSha = mergeBaseCommitSha,
             )
         }
     }

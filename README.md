@@ -9,9 +9,9 @@ Tools for integration with CI/CD systems such as Gitlab and GitHub.
 - **drill-cicd-common**: Common library
 - **drill-cicd-gitlab**: Gitlab integration services
 - **drill-cicd-github**: GitHub integration services
-- **drill-gradle-plugin**: Gradle plugin for CI/CD integration
-- **drill-maven-plugin**: Maven plugin for CI/CD integration 
-- **drill-cli**: CLI Application for CI/CD integration
+- **drill-cicd-gradle-plugin**: Gradle plugin for CI/CD integration
+- **drill-cicd-maven-plugin**: Maven plugin for CI/CD integration 
+- **drill-cicd-cli**: CLI Application for CI/CD integration
 
 ## Build
 
@@ -68,7 +68,7 @@ Add general properties to your Drill4J plugin configuration:
 ```xml
 <plugin>
     <groupId>com.epam.drill.integration</groupId>
-    <artifactId>drill-maven-plugin</artifactId>
+    <artifactId>drill-cicd-maven-plugin</artifactId>
     <version>0.0.1</version>
     <configuration>
         <!-- Drill4J group ID -->
@@ -142,7 +142,7 @@ Add Gitlab integration properties to your Maven build file:
 ```xml
 <plugin>
     <groupId>com.epam.drill.integration</groupId>
-    <artifactId>drill-maven-plugin</artifactId>
+    <artifactId>drill-cicd-maven-plugin</artifactId>
     <version>0.0.1</version>
     <configuration>
         <!-- General properties -->
@@ -165,7 +165,7 @@ Set up executable goals:
 ```xml
 <plugin>
     <groupId>com.epam.drill.integration</groupId>
-    <artifactId>drill-maven-plugin</artifactId>
+    <artifactId>drill-cicd-maven-plugin</artifactId>
     <version>0.0.1</version>
     <configuration>
         ...
@@ -173,7 +173,7 @@ Set up executable goals:
     <executions>
         <execution>
             <goals>
-                <goal>drillGitlabMergeRequestReport</goal>
+                <goal>gitlabMergeRequestReport</goal>
             </goals>
         </execution>
     </executions>
@@ -182,7 +182,7 @@ Set up executable goals:
 
 Run the Maven command in your merge request pipeline after a test stage:
 ```shell
-mvn drill-maven-plugin:drillGitlabMergeRequestReport
+mvn drill-cicd:gitlabMergeRequestReport
 ```
 
 #### CLI App
@@ -227,7 +227,7 @@ Add GitHub properties to your Maven build file:
 
 <plugin>
     <groupId>com.epam.drill.integration</groupId>
-    <artifactId>drill-maven-plugin</artifactId>
+    <artifactId>drill-cicd-maven-plugin</artifactId>
     <version>0.0.1</version>
     <configuration>
         <!-- General properties -->
@@ -248,7 +248,7 @@ Set up executable goals:
 ```xml
 <plugin>
     <groupId>com.epam.drill.integration</groupId>
-    <artifactId>drill-maven-plugin</artifactId>
+    <artifactId>drill-cicd-maven-plugin</artifactId>
     <version>0.0.1</version>
     <configuration>
         ...
@@ -256,7 +256,7 @@ Set up executable goals:
     <executions>
         <execution>
             <goals>
-                <goal>drillGithubPullRequestReport</goal>
+                <goal>githubPullRequestReport</goal>
             </goals>
         </execution>
     </executions>
@@ -265,7 +265,7 @@ Set up executable goals:
 
 Run the Maven command in your pull request workflow after a test stage:
 ```shell
-mvn drill-maven-plugin:drillGithubPullRequestReport
+mvn drill-cicd:githubPullRequestReport
 ```
 
 #### CLI App
@@ -304,7 +304,7 @@ Add information about a current build version to your Maven build file:
 ```xml
 <plugin>
     <groupId>com.epam.drill.integration</groupId>
-    <artifactId>drill-maven-plugin</artifactId>
+    <artifactId>drill-cicd-maven-plugin</artifactId>
     <version>0.0.1</version>
     <configuration>
         <!-- General properties -->
@@ -323,7 +323,7 @@ Set up executable goals:
 ```xml
 <plugin>
     <groupId>com.epam.drill.integration</groupId>
-    <artifactId>drill-maven-plugin</artifactId>
+    <artifactId>drill-cicd-maven-plugin</artifactId>
     <version>0.0.1</version>
     <configuration>
         ...
@@ -331,7 +331,7 @@ Set up executable goals:
     <executions>
         <execution>
             <goals>
-                <goal>drillSendBuildInfo</goal>
+                <goal>sendBuildInfo</goal>
             </goals>
         </execution>
     </executions>
@@ -340,7 +340,7 @@ Set up executable goals:
 
 Run the Maven command at the build stage of your CI/CD pipeline:
 ```shell
-mvn drill-maven-plugin:drillSendBuildInfo
+mvn drill-cicd:sendBuildInfo
 ```
 
 #### CLI App
@@ -404,7 +404,7 @@ Search by tags strategy:
 ```xml
 <plugin>
     <groupId>com.epam.drill.integration</groupId>
-    <artifactId>drill-maven-plugin</artifactId>
+    <artifactId>drill-cicd-maven-plugin</artifactId>
     <version>0.0.1</version>
     <configuration>
         <!-- General properties -->
@@ -426,7 +426,7 @@ Search by merge base strategy:
 ```xml
 <plugin>
     <groupId>com.epam.drill.integration</groupId>
-    <artifactId>drill-maven-plugin</artifactId>
+    <artifactId>drill-cicd-maven-plugin</artifactId>
     <version>0.0.1</version>
     <configuration>
         <!-- General properties -->
@@ -449,7 +449,7 @@ Set up executable goals:
 ```xml
 <plugin>
     <groupId>com.epam.drill.integration</groupId>
-    <artifactId>drill-maven-plugin</artifactId>
+    <artifactId>drill-cicd-maven-plugin</artifactId>
     <version>0.0.1</version>
     <configuration>
         ...
@@ -457,7 +457,7 @@ Set up executable goals:
     <executions>
         <execution>
             <goals>
-                <goal>drillGenerateChangeTestingReport</goal>
+                <goal>generateChangeTestingReport</goal>
             </goals>
         </execution>
     </executions>
@@ -466,7 +466,7 @@ Set up executable goals:
 
 Run the Maven command after running the tests:
 ```shell
-mvn drill-maven-plugin:drillGenerateChangeTestingReport
+mvn drill-cicd:generateChangeTestingReport
 ```
 
 Find a report file in `/target/reports/drill/` directory.

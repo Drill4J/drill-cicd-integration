@@ -80,7 +80,7 @@ class GitClientImpl(private val workingDir: File? = null) : GitClient {
     }
 
     private fun executeGitCommand(command: String): String {
-        logger.info { "Executing git command: $command in $workingDir" }
+        logger.info { "Executing git command: $command ${workingDir?.let { "in ${it.absolutePath}"}}" }
         val process = ProcessBuilder(*command.split(" ").toTypedArray()).let {
             if (workingDir != null)
                 it.directory(workingDir)

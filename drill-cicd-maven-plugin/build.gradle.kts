@@ -3,8 +3,9 @@ import com.hierynomus.gradle.license.tasks.LicenseFormat
 import org.jetbrains.kotlin.konan.target.HostManager
 import java.net.URI
 
+@Suppress("RemoveRedundantBackticks")
 plugins {
-    signing
+    `signing`
     `maven-publish`
     kotlin("jvm")
     id("com.github.hierynomus.license")
@@ -13,8 +14,11 @@ plugins {
 group = "com.epam.drill.integration"
 version = rootProject.version
 
-val kotlinVersion: String by extra
-val ktorVersion: String by extra
+val kotlinVersion: String by parent!!.extra
+val ktorVersion: String by parent!!.extra
+val kotlinxCoroutinesVersion: String by parent!!.extra
+val kotlinxSerializationVersion: String by parent!!.extra
+val microutilsLoggingVersion: String by parent!!.extra
 
 repositories {
     mavenLocal()
@@ -33,9 +37,8 @@ dependencies {
     implementation("org.apache.maven.plugins:maven-surefire-plugin:2.22.2")
     implementation("org.twdata.maven:mojo-executor:2.3.2")
 
-    implementation("io.ktor:ktor-client-core:$ktorVersion")
-    implementation("io.ktor:ktor-client-cio:$ktorVersion")
-    implementation("io.ktor:ktor-client-serialization:$ktorVersion")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCoroutinesVersion")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:$kotlinxCoroutinesVersion")
 
     implementation(project(":drill-cicd-common"))
     implementation(project(":drill-cicd-github"))
@@ -67,7 +70,7 @@ tasks {
         commandLine(*args, "install", "-Ddrill.plugin.version=$version", "-Dkotlin.version=$kotlinVersion")
         workingDir(project.projectDir)
         standardOutput = System.out
-        outputs.file("target/agent-runner-plugin-maven-$version.jar")
+        outputs.file("target/drill-cicd-maven-plugin-$version.jar")
     }
     assemble.get().dependsOn(sourcesJar)
     assemble.get().dependsOn(javadocJar)
@@ -86,19 +89,72 @@ publishing {
             name.set("Maven plugin for CI/CD integration")
             description.set("Maven plugin for CI/CD integration")
             withXml {
-                asNode().appendNode("dependencies")
-                    .appendNode("dependency")
-                    .apply {
+                asNode().appendNode("dependencies").apply {
+                    // Kotlin
+                    this.appendNode("dependency").apply {
                         appendNode("groupId", "org.jetbrains.kotlin")
                         appendNode("artifactId", "kotlin-stdlib")
                         appendNode("version", kotlinVersion)
                     }
-                    .appendNode("dependency")
-                    .apply {
+                    this.appendNode("dependency").apply {
                         appendNode("groupId", "org.jetbrains.kotlin")
-                        appendNode("artifactId", "kotlin-stdlib")
+                        appendNode("artifactId", "kotlin-reflect")
                         appendNode("version", kotlinVersion)
                     }
+                    // Ktor
+                    this.appendNode("dependency").apply {
+                        appendNode("groupId", "io.ktor")
+                        appendNode("artifactId", "ktor-client-cio")
+                        appendNode("version", ktorVersion)
+                    }
+                    this.appendNode("dependency").apply {
+                        appendNode("groupId", "io.ktor")
+                        appendNode("artifactId", "ktor-client-cio-jvm")
+                        appendNode("version", ktorVersion)
+                    }
+                    this.appendNode("dependency").apply {
+                        appendNode("groupId", "io.ktor")
+                        appendNode("artifactId", "ktor-client-json-jvm")
+                        appendNode("version", ktorVersion)
+                    }
+                    this.appendNode("dependency").apply {
+                        appendNode("groupId", "io.ktor")
+                        appendNode("artifactId", "ktor-client-core-jvm")
+                        appendNode("version", ktorVersion)
+                    }
+                    // Logging
+                    this.appendNode("dependency").apply {
+                        appendNode("groupId", "io.ktor")
+                        appendNode("artifactId", "ktor-client-logging-jvm")
+                        appendNode("version", ktorVersion)
+                    }
+                    this.appendNode("dependency").apply {
+                        appendNode("groupId", "io.github.microutils")
+                        appendNode("artifactId", "kotlin-logging-jvm")
+                        appendNode("version", microutilsLoggingVersion)
+                    }
+                    // Serialization
+                    this.appendNode("dependency").apply {
+                        appendNode("groupId", "io.ktor")
+                        appendNode("artifactId", "ktor-client-serialization")
+                        appendNode("version", ktorVersion)
+                    }
+                    this.appendNode("dependency").apply {
+                        appendNode("groupId", "io.ktor")
+                        appendNode("artifactId", "ktor-client-serialization-jvm")
+                        appendNode("version", ktorVersion)
+                    }
+                    this.appendNode("dependency").apply {
+                        appendNode("groupId", "org.jetbrains.kotlinx")
+                        appendNode("artifactId", "kotlinx-serialization-core-jvm")
+                        appendNode("version", "1.5.1")
+                    }
+                    this.appendNode("dependency").apply {
+                        appendNode("groupId", "org.jetbrains.kotlinx")
+                        appendNode("artifactId", "kotlinx-serialization-json-jvm")
+                        appendNode("version", "1.5.1")
+                    }
+                }
             }
         }
     }
