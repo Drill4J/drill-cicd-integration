@@ -29,8 +29,6 @@ class GitlabMergeRequestReportCommand : CliktCommand(name = "gitlabMergeRequestR
     private val drillApiKey by option("-drill-k", "--drillApiKey", envvar = "DRILL_API_KEY")
     private val groupId by option("-g", "--groupId", envvar = "DRILL_GROUP_ID").required()
     private val appId by option("-a", "--appId", envvar = "DRILL_APP_ID").required()
-    private val sourceBranch by option("-sb", "--sourceBranch", envvar = "CI_MERGE_REQUEST_SOURCE_BRANCH_NAME").required()
-    private val targetBranch by option("-tb", "--targetBranch", envvar = "CI_MERGE_REQUEST_TARGET_BRANCH_NAME").required()
     private val commitSha by option("-c", "--commitSha", envvar = "CI_COMMIT_SHA").required()
     private val mergeBaseCommitSha by option("-mb", "--mergeBaseCommitSha", envvar = "CI_MERGE_REQUEST_DIFF_BASE_SHA").required()
     private val gitlabApiUrl by option("-gl-u", "--gitlabApiUrl", envvar = "GITLAB_API_URL").required()
@@ -47,14 +45,12 @@ class GitlabMergeRequestReportCommand : CliktCommand(name = "gitlabMergeRequestR
         )
         runBlocking {
             gitlabCiCdService.postMergeRequestReport(
-                gitlabProjectId,
-                gitlabMergeRequestId,
-                groupId,
-                appId,
-                sourceBranch,
-                targetBranch,
-                commitSha,
-                mergeBaseCommitSha
+                gitlabProjectId = gitlabProjectId,
+                gitlabMergeRequestId = gitlabMergeRequestId,
+                groupId = groupId,
+                appId = appId,
+                headCommitSha = commitSha,
+                mergeBaseCommitSha = mergeBaseCommitSha
             )
         }
         echo("Done.")
