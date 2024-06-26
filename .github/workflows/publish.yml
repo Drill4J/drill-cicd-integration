@@ -14,9 +14,11 @@ jobs:
           distribution: corretto
       - uses: gradle/wrapper-validation-action@v1
       - run: chmod +x ${{ github.workspace }}/gradlew
+      - run: git config --global user.email "test@test.test"
+      - run: git config --global user.name "test"
       - uses: gradle/gradle-build-action@v2
         with:
-          arguments: check
+          arguments: check --stacktrace
       - if: always()
         uses: actions/upload-artifact@v3
         with:

@@ -1,5 +1,6 @@
 import com.hierynomus.gradle.license.tasks.LicenseCheck
 import com.hierynomus.gradle.license.tasks.LicenseFormat
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.net.URI
 
@@ -58,7 +59,29 @@ tasks {
     withType<KotlinCompile> {
         kotlinOptions.jvmTarget = "1.8"
     }
+    test {
+        // Enable all test events to be logged
+        testLogging {
+            // Show the standard output and error for every test
+            showStandardStreams = true
+            // Show the stack trace for every test failure
+            exceptionFormat = TestExceptionFormat.FULL
+            // Log test events
+            events("passed", "skipped", "failed")
+            // Customize log level for debug
+            debug {
+                events("started", "skipped", "passed", "failed")
+                exceptionFormat = TestExceptionFormat.FULL
+            }
+            // Customize log level for info
+            info {
+                events("started", "skipped", "passed", "failed")
+                exceptionFormat = TestExceptionFormat.FULL
+            }
+        }
+    }
 }
+
 
 publishing {
     publications.create<MavenPublication>("drill-cicd-common") {

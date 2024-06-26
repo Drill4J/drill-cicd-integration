@@ -40,8 +40,6 @@ class GithubCiCdService(
         githubPullRequestId: Int,
         groupId: String,
         appId: String,
-        sourceBranch: String,
-        targetBranch: String,
         headCommitSha: String,
         mergeBaseCommitSha: String
     ) {
@@ -82,8 +80,6 @@ class GithubCiCdService(
             githubPullRequestId = pullRequest.number,
             groupId = groupId,
             appId = appId,
-            sourceBranch = pullRequest.head.ref,
-            targetBranch = pullRequest.base.ref,
             headCommitSha = pullRequest.head.sha,
             mergeBaseCommitSha = gitClient.getMergeBaseCommitSha(targetRef = "origin/${pullRequest.base.ref}")
         )
