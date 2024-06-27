@@ -39,7 +39,7 @@ class AgentInstallerImpl : AgentInstaller {
     var httpClient: HttpClient = HttpClient(CIO) {
         install(JsonFeature)
         install(Logging) {
-            level = LogLevel.BODY
+            level = LogLevel.INFO
         }
     }
 
@@ -71,13 +71,13 @@ class AgentInstallerImpl : AgentInstaller {
     }
 
     override suspend fun download(downloadUrl: FileUrl, downloadDir: Directory): File {
-        val response: HttpResponse = httpClient.get(downloadUrl.url)
         if (!downloadDir.exists()) {
             downloadDir.mkdirs()
         }
         val file = File(downloadDir, downloadUrl.filename)
         if (!file.exists()) {
-            response.content.copyAndClose(file.writeChannel())
+            httpClient.get<HttpResponse>(downloadUrl.url).content
+                .copyAndClose(file.writeChannel())
         }
         return file
     }
