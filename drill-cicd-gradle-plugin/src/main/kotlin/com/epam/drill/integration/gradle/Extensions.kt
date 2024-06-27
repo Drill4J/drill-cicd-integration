@@ -16,9 +16,11 @@
 package com.epam.drill.integration.gradle
 
 import com.epam.drill.integration.common.baseline.BaselineSearchStrategy
+import org.gradle.api.Action
+import org.gradle.internal.Actions
 
 
-open class DrillProperties(
+open class DrillExtension(
     var drillApiUrl: String? = null,
     var drillApiKey: String? = null,
     var groupId: String? = null,
@@ -26,68 +28,72 @@ open class DrillProperties(
     var buildVersion: String? = null,
     var packagePrefixes : Array<String> = emptyArray(),
 
-    var baseline: BaselineProperties? = null,
-    var gitlab: DrillGitlabProperties? = null,
-    var github: DrillGithubProperties? = null,
+    var baseline: BaselineExtension = BaselineExtension(),
+    var gitlab: GitlabExtension = GitlabExtension(),
+    var github: GithubExtension = GithubExtension(),
 
-    var testAgent: TestAgentProperties? = null,
-    var appAgent: AppAgentProperties? = null
+    var testAgent: TestAgentExtension? = null,
+    var appAgent: AppAgentExtension? = null
 ) {
-    fun baseline(configure: BaselineProperties.() -> Unit) {
-        this.baseline = BaselineProperties().apply(configure)
+    fun baseline(action: Action<BaselineExtension>) {
+        action.execute(baseline)
     }
-    fun gitlab(configure: DrillGitlabProperties.() -> Unit) {
-        this.gitlab = DrillGitlabProperties().apply(configure)
+    fun gitlab(action: Action<GitlabExtension>) {
+       action.execute(gitlab)
     }
-    fun github(configure: DrillGithubProperties.() -> Unit) {
-        this.github = DrillGithubProperties().apply(configure)
+    fun github(action: Action<GithubExtension>) {
+        action.execute(github)
     }
-    fun enableTestAgent(configure: TestAgentProperties.() -> Unit) {
-        this.testAgent = TestAgentProperties().apply(configure)
+    fun enableTestAgent(action: Action<TestAgentExtension>) {
+        testAgent = (testAgent ?: TestAgentExtension()).also {
+            action.execute(it)
+        }
     }
     fun enableTestAgent() {
-        this.testAgent = TestAgentProperties()
+        enableTestAgent(Actions.doNothing())
     }
-    fun enableAppAgent(configure: AppAgentProperties.() -> Unit) {
-        this.appAgent = AppAgentProperties().apply(configure)
+    fun enableAppAgent(action: Action<AppAgentExtension>) {
+        appAgent = (appAgent ?: AppAgentExtension()).also {
+            action.execute(it)
+        }
     }
     fun enableAppAgent() {
-        this.appAgent = AppAgentProperties()
+        enableAppAgent(Actions.doNothing())
     }
 }
 
-open class DrillGitlabProperties(
+open class GitlabExtension(
     var apiUrl: String? = null,
     var privateToken: String? = null,
     var projectId: String? = null,
     var commitSha: String? = null,
-    var mergeRequest: MergeRequest = MergeRequest()
+    var mergeRequest: MergeRequestExtension = MergeRequestExtension()
 ) {
-    fun mergeRequest(configure: MergeRequest.() -> Unit) {
-        this.mergeRequest = MergeRequest().apply(configure)
+    fun mergeRequest(action: Action<MergeRequestExtension>) {
+        action.execute(mergeRequest)
     }
 }
 
-open class MergeRequest(
+open class MergeRequestExtension(
     var mergeRequestIid: String? = null,
     var sourceBranch: String? = null,
     var targetBranch: String? = null,
     var mergeBaseCommitSha: String? = null,
 )
 
-open class DrillGithubProperties(
+open class GithubExtension(
     var apiUrl: String = "https://api.github.com",
     var token: String? = null,
     var eventFilePath: String? = null
 )
 
-open class BaselineProperties(
+open class BaselineExtension(
     var searchStrategy: BaselineSearchStrategy? = null,
     var tagPattern: String? = null,
     var targetRef: String? = null,
 )
 
-abstract class AgentProperties(
+abstract class AgentExtension(
     var version: String? = null,
     var downloadUrl: String? = null,
     var zipPath: String? = null,
@@ -96,6 +102,6 @@ abstract class AgentProperties(
     var logFile: String? = null,
 )
 
-open class TestAgentProperties() : AgentProperties()
+open class TestAgentExtension() : AgentExtension()
 
-open class AppAgentProperties() : AgentProperties()
+open class AppAgentExtension() : AgentExtension()

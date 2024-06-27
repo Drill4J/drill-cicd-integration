@@ -15,7 +15,6 @@
  */
 package com.epam.drill.integration.gradle
 
-import com.epam.drill.integration.common.baseline.BaselineSearchStrategy
 import com.epam.drill.integration.common.baseline.BaselineSearchStrategy.SEARCH_BY_MERGE_BASE
 import com.epam.drill.integration.common.baseline.BaselineSearchStrategy.SEARCH_BY_TAG
 import com.epam.drill.integration.common.baseline.MergeBaseCriteria
@@ -29,15 +28,15 @@ import kotlinx.coroutines.runBlocking
 import org.gradle.api.Task
 import java.io.File
 
-fun Task.drillGenerateChangeTestingReport(ciCd: DrillProperties) {
+fun Task.drillGenerateChangeTestingReport(config: DrillExtension) {
     doFirst {
-        val drillApiUrl = ciCd.drillApiUrl.required("drillApiUrl")
-        val drillApiKey = ciCd.drillApiKey
-        val groupId = ciCd.groupId.required("groupId")
-        val appId = ciCd.appId.required("appId")
-        val baselineSearchStrategy = ciCd.baseline?.searchStrategy ?: SEARCH_BY_TAG
-        val baselineTagPattern = ciCd.baseline?.tagPattern ?: "*"
-        val baselineTargetRef = ciCd.baseline?.targetRef
+        val drillApiUrl = config.drillApiUrl.required("drillApiUrl")
+        val drillApiKey = config.drillApiKey
+        val groupId = config.groupId.required("groupId")
+        val appId = config.appId.required("appId")
+        val baselineSearchStrategy = config.baseline?.searchStrategy ?: SEARCH_BY_TAG
+        val baselineTagPattern = config.baseline?.tagPattern ?: "*"
+        val baselineTargetRef = config.baseline?.targetRef
 
         val reportService = ReportService(
             metricsClient = MetricsClientImpl(
