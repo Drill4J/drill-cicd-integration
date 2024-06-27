@@ -32,7 +32,7 @@ fun modifyToRunDrillAgents(
     ciCd: DrillProperties
 ) {
     task.doFirst {
-        logger.lifecycle("Task ${task.name} is modified by Drill")
+        logger.lifecycle("Task :${task.name} is modified by Drill")
 
         val agentInstaller = AgentInstallerImpl()
         val agentRunner = AgentRunner(agentInstaller)
@@ -61,6 +61,7 @@ fun modifyToRunDrillAgents(
             }
         }.flatten().run {
             (task as JavaForkOptions).jvmArgs = this
+            logger.info("JVM args $this have been added to :${task.name} task")
         }
     }
 }
