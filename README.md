@@ -13,6 +13,75 @@ Tools for integration with CI/CD systems such as Gitlab and GitHub.
 - **drill-cicd-maven-plugin**: Maven plugin for CI/CD integration 
 - **drill-cicd-cli**: CLI Application for CI/CD integration
 
+## Gitlab integration
+
+To receive coverage report from Drill4J you have to:
+
+1. Set-up env.variables for repo:
+   - **DRILL_API_KEY** - api-key to access drill4j backend;
+   - **DRILL_API_URL** - url that points to drill4j admin;
+   - **DRILL_BOT_GITLAB_TOKEN** - gitlab token. [Here](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html)
+     is description how to get it;
+   - **JAVA_AGENT_URL** - url to download java-agent.
+
+2. Add to your `pom.xml` or `build.gradle` file drill-ci-cd-plugin. See how to do it at `Usage` section.
+
+3. Add to your `pom.xml` or `build.gradle` file autotest-agent plugin.
+
+4. Configure `.gitlab-ci.yml` file:
+   * For main branch add sendBuildInfo task. See example below:
+```yaml
+build:
+  stage: build
+  image: docker:stable
+  services:
+    - docker:dind
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
+      when: never
+    - if: $CI_COMMIT_BRANCH
+  before_script:
+    - apk add --no-cache openjdk11 # needed to run gradle wrapper
+    - apk add --no-cache git # needed to execute drillSendBuildInfo task
+    - chmod +x ./gradlew # make gradle wrapper executable
+  script:
+     - ./gradlew clean assemble # run assemble operation
+     #some operations...
+     - ./gradlew drillSendBuildInfo # task that will send all needed info to admin to compare main and feature branches
+```
+   * For feature branches add to your pipline jobs:
+   **drillGitlabMergeRequestReport** job will create at merge request comment with coverage info:
+```yaml
+report_by_pr:
+  stage: report_by_pr
+  image: openjdk:11
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+  before_script:
+    - apt-get install git # needed to execute drillGitlabMergeRequestReport task
+    - chmod +x ./gradlew #  make gradle wrapper executable
+  script:
+    - ./gradlew drillGitlabMergeRequestReport
+```
+   **report_by_branch** job will attach as an artifact to your pipline .zip file with coverage report:
+ ```yaml
+report_by_branch:
+  stage: report_by_branch
+  image: openjdk:11
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+  before_script:
+    - apt-get install git # needed to execute drillGenerateChangeTestingReport task
+    - chmod +x ./gradlew #  make gradle wrapper executable
+  script:
+    - ./gradlew drillGenerateChangeTestingReport
+  artifacts:
+    paths:
+      - ./build/reports/drill/drillReport.md
+```
+
+
 ## Build
 
 Build all modules:
