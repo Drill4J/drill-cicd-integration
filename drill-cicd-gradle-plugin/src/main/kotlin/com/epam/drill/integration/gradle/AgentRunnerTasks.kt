@@ -29,7 +29,7 @@ import java.io.File
 fun modifyToRunDrillAgents(
     task: Task,
     project: Project,
-    ciCd: DrillProperties
+    config: DrillExtension
 ) {
     task.doFirst {
         logger.lifecycle("Task :${task.name} is modified by Drill")
@@ -40,16 +40,16 @@ fun modifyToRunDrillAgents(
 
 
         listOfNotNull(
-            ciCd.testAgent?.let {
+            config.testAgent?.let {
                 TestAgentConfiguration().apply {
-                    mapGeneralAgentProperties(it, ciCd)
+                    mapGeneralAgentProperties(it, config)
                 }
             },
-            ciCd.appAgent?.let {
+            config.appAgent?.let {
                 AppAgentConfiguration().apply {
-                    mapGeneralAgentProperties(it, ciCd)
-                    appId = ciCd.appId
-                    packagePrefixes = ciCd.packagePrefixes
+                    mapGeneralAgentProperties(it, config)
+                    appId = config.appId
+                    packagePrefixes = config.packagePrefixes
                 }
             }
         ).map { config ->
@@ -67,17 +67,17 @@ fun modifyToRunDrillAgents(
 }
 
 private fun AgentConfiguration.mapGeneralAgentProperties(
-    agent: AgentProperties,
-    ciCd: DrillProperties
+    agentExtension: AgentExtension,
+    generalExtension: DrillExtension
 ) {
-    version = agent.version
-    downloadUrl = agent.downloadUrl
-    zipPath = agent.zipPath?.let { File(it) }
+    version = agentExtension.version
+    downloadUrl = agentExtension.downloadUrl
+    zipPath = agentExtension.zipPath?.let { File(it) }
 
-    logLevel = agent.logLevel
-    logFile = agent.logFile?.let { File(it) }
+    logLevel = agentExtension.logLevel
+    logFile = agentExtension.logFile?.let { File(it) }
 
-    drillApiUrl = ciCd.drillApiUrl
-    drillApiKey = ciCd.drillApiKey
-    groupId = ciCd.groupId
+    drillApiUrl = generalExtension.drillApiUrl
+    drillApiKey = generalExtension.drillApiKey
+    groupId = generalExtension.groupId
 }
