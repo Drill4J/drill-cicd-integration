@@ -50,7 +50,7 @@ class MarkdownReportGenerator : ReportGenerator {
                 .takeIf { totalChanges > 0 }
                 ?.wrapToLink(changesLink)
                 ?: "No changes detected"
-        val testedMethodsText = "${totalChanges - testedChanges}/$totalChanges methods not tested"
+        val testedMethodsText = "${totalChanges - testedChanges}/$totalChanges methods not tested."
             .takeIf { totalChanges - testedChanges > 0 }
             ?.wrapToLink(changesLink)
             ?: "All changes tested".wrapToLink(changesLink)
