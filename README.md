@@ -498,3 +498,83 @@ java -jar drill-cli-0.0.1.jar generateChangeTestingReport
 ```
 
 Find a report file in a current directory.
+
+
+### Running tests using Drill4J
+
+Drill4J allows you to run tests by collecting code coverage 
+and linking them to specific tests.
+
+#### Gradle plugin
+
+Enable running Drill4J Agents to your Gradle file:
+```kotlin
+drill {
+    //General properties
+    ...
+    //Prefixes of the Java packages from which the coverage will be collected
+    packagePrefixes = ["some/package"]
+
+    //Enables test executions collection
+    enableTestAgent {
+        //Set the version of the Drill4J Java Autotest Agent you want to use 
+        version = "0.23.*"
+    }
+    //Enables code coverage collection
+    enableAppAgent {
+        //Set the version of the Drill4J Java Application Agent you want to use
+        version = "0.9.*"
+    }
+}
+```
+
+#### Maven plugin
+
+Enable running Drill4J Agents to your Maven file:
+```xml
+<plugin>
+    <groupId>com.epam.drill.integration</groupId>
+    <artifactId>drill-maven-plugin</artifactId>
+    <version>0.0.1</version>
+    <configuration>
+        <!-- General properties -->
+        ...
+        <!-- Prefixes of the Java packages from which the coverage will be collected (comma separator) -->
+        <packagePrefixes>com/realworld</packagePrefixes>
+        
+        <!-- Enables test executions collection -->
+        <testAgent>
+            <!-- Set the version of the Drill4J Java Autotest Agent you want to use -->
+            <version>0.23.*</version>
+        </testAgent>
+        <!-- Enables code coverage collection -->
+        <appAgent>
+            <!-- Set the version of the Drill4J Java Application Agent you want to use -->
+            <version>0.9.*</version>
+        </appAgent>
+    </configuration>
+    <executions>
+        ...
+    </executions>
+</plugin>
+```
+
+Set up executable goals:
+```xml
+<plugin>
+    <groupId>com.epam.drill.integration</groupId>
+    <artifactId>drill-maven-plugin</artifactId>
+    <version>0.0.1</version>
+    <configuration>
+        ...
+    </configuration>
+    <executions>
+        <execution>
+            <goals>
+                <goal>enableAppAgent</goal>
+                <goal>enableTestAgent</goal>
+            </goals>
+        </execution>
+    </executions>
+</plugin>
+```
