@@ -53,6 +53,8 @@ abstract class AgentMavenConfiguration(
 
     var logLevel: String? = "INFO",
     var logFile: String? = null,
+
+    var additionalParams: Map<String, String>? = null,
 )
 
 open class TestAgentMavenConfiguration() : AgentMavenConfiguration()
