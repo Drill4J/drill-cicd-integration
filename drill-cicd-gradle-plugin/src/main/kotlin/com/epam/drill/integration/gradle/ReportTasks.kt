@@ -34,9 +34,9 @@ fun Task.drillGenerateChangeTestingReport(config: DrillExtension) {
         val drillApiKey = config.drillApiKey
         val groupId = config.groupId.required("groupId")
         val appId = config.appId.required("appId")
-        val baselineSearchStrategy = config.baseline?.searchStrategy ?: SEARCH_BY_TAG
-        val baselineTagPattern = config.baseline?.tagPattern ?: "*"
-        val baselineTargetRef = config.baseline?.targetRef
+        val baselineSearchStrategy = config.baseline.searchStrategy ?: SEARCH_BY_TAG
+        val baselineTagPattern = config.baseline.tagPattern ?: "*"
+        val baselineTargetRef = config.baseline.targetRef
 
         val reportService = ReportService(
             metricsClient = MetricsClientImpl(
@@ -58,7 +58,7 @@ fun Task.drillGenerateChangeTestingReport(config: DrillExtension) {
                 appId = appId,
                 baselineSearchStrategy = baselineSearchStrategy,
                 baselineSearchCriteria = searchCriteria,
-                reportPath = File(project.buildDir, "/reports/drill").absolutePath
+                reportPath = File(project.buildDir, "/drill-reports").absolutePath
             )
         }
     }
