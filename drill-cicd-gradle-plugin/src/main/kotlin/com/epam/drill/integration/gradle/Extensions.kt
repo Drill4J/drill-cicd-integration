@@ -33,7 +33,7 @@ open class DrillExtension(
     var github: GithubExtension = GithubExtension(),
 
     var testAgent: TestAgentExtension? = null,
-    var appAgent: AppAgentExtension? = null
+    var appAgent: AppAgentExtension? = null,
 ) {
     fun baseline(action: Action<BaselineExtension>) {
         action.execute(baseline)
@@ -100,6 +100,8 @@ abstract class AgentExtension(
 
     var logLevel: String? = null,
     var logFile: String? = null,
+
+    var additionalParams: Map<String, String>? = null
 )
 
 open class TestAgentExtension() : AgentExtension()

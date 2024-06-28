@@ -29,6 +29,8 @@ abstract class AgentConfiguration {
     var downloadUrl: String? = null
     var zipPath: File? = null
 
+    var additionalParams: Map<String, String>? = null
+
     abstract val githubRepository: String
     abstract val agentName: String
 
@@ -38,5 +40,6 @@ abstract class AgentConfiguration {
         this[AgentConfiguration::groupId.name] = groupId
         this[AgentConfiguration::logLevel.name] = logLevel
         this[AgentConfiguration::logFile.name] = logFile?.absolutePath
+        additionalParams?.let { this.putAll(it) }
     }
 }

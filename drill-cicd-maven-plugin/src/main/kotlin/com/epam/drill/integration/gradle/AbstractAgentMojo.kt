@@ -61,4 +61,6 @@ fun AgentConfiguration.setGeneralAgentProperties(
     drillApiUrl = mavenGeneralConfig.drillApiUrl
     drillApiKey = mavenGeneralConfig.drillApiKey
     groupId = mavenGeneralConfig.groupId
+
+    additionalParams = mavenAgentConfig.additionalParams
 }

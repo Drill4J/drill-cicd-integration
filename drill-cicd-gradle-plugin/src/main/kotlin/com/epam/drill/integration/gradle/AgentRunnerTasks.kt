@@ -80,4 +80,6 @@ private fun AgentConfiguration.mapGeneralAgentProperties(
     drillApiUrl = generalExtension.drillApiUrl
     drillApiKey = generalExtension.drillApiKey
     groupId = generalExtension.groupId
+
+    additionalParams = agentExtension.additionalParams
 }
