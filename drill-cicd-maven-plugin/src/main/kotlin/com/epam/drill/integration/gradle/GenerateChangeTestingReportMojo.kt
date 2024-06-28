@@ -74,7 +74,7 @@ class GenerateChangeTestingReportMojo : AbstractDrillMojo() {
                 appId = appId,
                 baselineSearchStrategy = baselineSearchStrategy,
                 baselineSearchCriteria = searchCriteria,
-                reportPath = File(project.build?.directory, "/reports/drill").absolutePath
+                reportPath = File(project.build?.directory, "/drill-reports").absolutePath
             )
         }
     }
