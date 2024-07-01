@@ -22,7 +22,6 @@ import com.epam.drill.integration.common.util.required
 import com.epam.drill.integration.gitlab.client.impl.GitlabApiClientV4Impl
 import com.epam.drill.integration.gitlab.service.GitlabCiCdService
 import kotlinx.coroutines.runBlocking
-import org.apache.maven.plugin.AbstractMojo
 import org.apache.maven.plugins.annotations.LifecyclePhase
 import org.apache.maven.plugins.annotations.Mojo
 import org.apache.maven.plugins.annotations.Parameter
@@ -30,26 +29,17 @@ import org.apache.maven.plugins.annotations.ResolutionScope
 
 @Mojo(
     name = "gitlabMergeRequestReport",
-    defaultPhase = LifecyclePhase.SITE,
+    defaultPhase = LifecyclePhase.NONE,
     requiresDependencyResolution = ResolutionScope.RUNTIME,
     threadSafe = true
 )
-class GitlabMergeRequestReportMojo : AbstractMojo() {
-
-    @Parameter(property = "drillApiUrl", required = true)
-    var drillApiUrl: String? = null
-
-    @Parameter(property = "drillApiKey")
-    var drillApiKey: String? = null
-
-    @Parameter(property = "groupId", required = true)
-    var groupId: String? = null
+class GitlabMergeRequestReportMojo : AbstractDrillMojo() {
 
     @Parameter(property = "appId", required = true)
     var appId: String? = null
 
     @Parameter(property = "gitlab", required = true)
-    var gitlab: DrillGitlabProperties? = null
+    var gitlab: GitlabConfiguration? = null
 
     override fun execute() {
         val gitlab = gitlab.required("gitlab")

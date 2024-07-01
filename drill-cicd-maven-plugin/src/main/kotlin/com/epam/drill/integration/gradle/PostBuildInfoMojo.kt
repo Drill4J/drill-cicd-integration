@@ -28,26 +28,18 @@ import org.apache.maven.plugins.annotations.ResolutionScope
 
 @Mojo(
     name = "sendBuildInfo",
-    defaultPhase = LifecyclePhase.DEPLOY,
+    defaultPhase = LifecyclePhase.NONE,
     requiresDependencyResolution = ResolutionScope.RUNTIME,
     threadSafe = true
 )
-class PostBuildInfoMojo : AbstractMojo() {
-
-    @Parameter(property = "drillApiUrl", required = true)
-    var drillApiUrl: String? = null
-
-    @Parameter(property = "drillApiKey")
-    var drillApiKey: String? = null
-
-    @Parameter(property = "groupId", required = true)
-    var groupId: String? = null
+class PostBuildInfoMojo : AbstractDrillMojo() {
 
     @Parameter(property = "appId", required = true)
     var appId: String? = null
 
     @Parameter(property = "buildVersion")
     var buildVersion: String? = null
+
     override fun execute() {
         val drillApiUrl = drillApiUrl.required("drillApiUrl")
         val drillApiKey = drillApiKey

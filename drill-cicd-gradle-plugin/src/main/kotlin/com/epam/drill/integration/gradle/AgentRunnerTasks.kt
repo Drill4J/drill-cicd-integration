@@ -1,0 +1,85 @@
+/**
+ * Copyright 2020 - 2022 EPAM Systems
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.epam.drill.integration.gradle
+
+import com.epam.drill.integration.common.agent.AgentRunner
+import com.epam.drill.integration.common.agent.config.AgentConfiguration
+import com.epam.drill.integration.common.agent.config.TestAgentConfiguration
+import com.epam.drill.integration.common.agent.config.AppAgentConfiguration
+import com.epam.drill.integration.common.agent.impl.AgentInstallerImpl
+import kotlinx.coroutines.runBlocking
+import org.gradle.api.Project
+import org.gradle.api.Task
+import org.gradle.process.JavaForkOptions
+import java.io.File
+
+fun modifyToRunDrillAgents(
+    task: Task,
+    project: Project,
+    config: DrillExtension
+) {
+    task.doFirst {
+        logger.lifecycle("Task :${task.name} is modified by Drill")
+
+        val agentInstaller = AgentInstallerImpl()
+        val agentRunner = AgentRunner(agentInstaller)
+        val distDir = File(project.buildDir, "/drill")
+
+
+        listOfNotNull(
+            config.testAgent?.let {
+                TestAgentConfiguration().apply {
+                    mapGeneralAgentProperties(it, config)
+                }
+            },
+            config.appAgent?.let {
+                AppAgentConfiguration().apply {
+                    mapGeneralAgentProperties(it, config)
+                    appId = config.appId
+                    packagePrefixes = config.packagePrefixes
+                }
+            }
+        ).map { config ->
+            runBlocking {
+                agentRunner.getJvmOptionsToRun(
+                    File(distDir, config.agentName),
+                    config
+                )
+            }
+        }.flatten().run {
+            (task as JavaForkOptions).jvmArgs = this
+            logger.info("JVM args $this have been added to :${task.name} task")
+        }
+    }
+}
+
+private fun AgentConfiguration.mapGeneralAgentProperties(
+    agentExtension: AgentExtension,
+    generalExtension: DrillExtension
+) {
+    version = agentExtension.version
+    downloadUrl = agentExtension.downloadUrl
+    zipPath = agentExtension.zipPath?.let { File(it) }
+
+    logLevel = agentExtension.logLevel
+    logFile = agentExtension.logFile?.let { File(it) }
+
+    drillApiUrl = generalExtension.drillApiUrl
+    drillApiKey = generalExtension.drillApiKey
+    groupId = generalExtension.groupId
+
+    additionalParams = agentExtension.additionalParams
+}

@@ -23,6 +23,7 @@ repositories {
 
 application {
     mainClass.set(jarMainClassName)
+
 }
 
 kotlin.sourceSets.all {
@@ -42,6 +43,7 @@ tasks {
             sourceSets.main.get().output,
             configurations.runtimeClasspath.get().resolve().map(::zipTree)
         )
+        archiveFileName.set("drill-cli-${project.version}.jar")
     }
     assemble.get().dependsOn(runtimeJar)
 }
