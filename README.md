@@ -528,6 +528,11 @@ drill {
 }
 ```
 
+Run Gradle tests:
+```shell
+./gradlew test
+```
+
 #### Maven plugin
 
 Enable running Drill4J Agents to your Maven file:
@@ -577,4 +582,9 @@ Set up executable goals:
         </execution>
     </executions>
 </plugin>
+```
+
+Run the Maven tests:
+```shell
+mvn clean test
 ```
