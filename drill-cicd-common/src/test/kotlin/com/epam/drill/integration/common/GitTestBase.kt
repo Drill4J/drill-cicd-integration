@@ -34,7 +34,10 @@ abstract class GitTestBase {
     }
 
     fun exec(command: String): String {
-        val process = ProcessBuilder(command.split(" "))
+        val process = ProcessBuilder(Regex("""[^\s"]+|"([^"]*)"""")
+            .findAll(command)
+            .map { it.groupValues[1].ifEmpty { it.value } }
+            .toList())
             .directory(workingDir)
             .start()
         if (process.waitFor() != 0)

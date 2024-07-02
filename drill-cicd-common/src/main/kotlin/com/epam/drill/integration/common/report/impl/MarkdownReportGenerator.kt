@@ -22,13 +22,13 @@ import kotlinx.serialization.json.*
 
 class MarkdownReportGenerator : ReportGenerator {
     override fun getBuildComparisonReport(data: JsonObject): Report {
-        val inputParameters = data["data"]?.jsonObject?.get("inputParameters")?.jsonObject
+        val inputParameters = data["data"]?.jsonObject?.get("inputParameters") as? JsonObject
         val groupId = inputParameters?.get("groupId")?.jsonPrimitive?.contentOrNull
         val appId = inputParameters?.get("appId")?.jsonPrimitive?.contentOrNull
         val commitSha = inputParameters?.get("commitSha")?.jsonPrimitive?.contentOrNull
         val baselineCommitSha = inputParameters?.get("baselineCommitSha")?.jsonPrimitive?.contentOrNull
 
-        val metrics = data["data"]?.jsonObject?.get("metrics")?.jsonObject
+        val metrics = data["data"]?.jsonObject?.get("metrics") as? JsonObject
         val newMethods = metrics?.get("changes_new_methods")?.jsonPrimitive?.intOrNull ?: 0
         val modifiedMethods = metrics?.get("changes_modified_methods")?.jsonPrimitive?.intOrNull ?: 0
         val totalChanges = metrics?.get("total_changes")?.jsonPrimitive?.intOrNull ?: 0
@@ -36,7 +36,7 @@ class MarkdownReportGenerator : ReportGenerator {
         val coverage = metrics?.get("coverage")?.jsonPrimitive?.doubleOrNull ?: 0.0
         val recommendedTests = metrics?.get("recommended_tests")?.jsonPrimitive?.intOrNull ?: 0
 
-        val links = data["data"]?.jsonObject?.get("links")?.jsonObject
+        val links = data["data"]?.jsonObject?.get("links") as? JsonObject
         val buildLink = links?.get("build")?.jsonPrimitive?.contentOrNull
         val baselineBuildLink = links?.get("baseline_build")?.jsonPrimitive?.contentOrNull
         val changesLink = links?.get("changes")?.jsonPrimitive?.contentOrNull
@@ -45,11 +45,12 @@ class MarkdownReportGenerator : ReportGenerator {
 
         val descriptionText = "Comparing ${commitSha?.shortSha()?.wrapToLink(buildLink)} (current) " +
                 "to ${baselineCommitSha?.shortSha()?.wrapToLink(baselineBuildLink)} (baseline)."
-        val changesText = "$totalChanges method${totalChanges.pluralEnding("s")} ($newMethods new, $modifiedMethods modified)"
-            .takeIf { totalChanges > 0 }
-            ?.wrapToLink(changesLink)
-            ?: "No changes detected"
-        val testedMethodsText = "${totalChanges - testedChanges}/$totalChanges methods not tested"
+        val changesText =
+            "$totalChanges method${totalChanges.pluralEnding("s")} ($newMethods new, $modifiedMethods modified)"
+                .takeIf { totalChanges > 0 }
+                ?.wrapToLink(changesLink)
+                ?: "No changes detected"
+        val testedMethodsText = "${totalChanges - testedChanges}/$totalChanges methods not tested."
             .takeIf { totalChanges - testedChanges > 0 }
             ?.wrapToLink(changesLink)
             ?: "All changes tested".wrapToLink(changesLink)
