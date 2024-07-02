@@ -21,9 +21,12 @@ import io.ktor.client.engine.mock.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.utils.io.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
+import java.lang.Thread.sleep
 import java.nio.file.Files
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
@@ -169,7 +172,7 @@ class AgentInstallerImplTest {
         val agentInstaller = AgentInstallerImpl().also { it.httpClient = mockHttpClient }
 
         val result = agentInstaller.download(testDownloadUrl, testDownloadDir)
-
+        sleep(1000)
         assertEquals(testDownloadUrl.filename, result.name)
         assertEquals("Some text content", result.readText())
     }
