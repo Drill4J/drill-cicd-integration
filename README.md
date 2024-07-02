@@ -517,12 +517,14 @@ drill {
 
     //Enables test executions collection
     enableTestAgent {
-        //Set the version of the Drill4J Java Autotest Agent you want to use 
+        //Set the version of the Drill4J Java Autotest Agent you want to use
+        //See all versions here https://github.com/Drill4J/autotest-agent/releases
         version = "0.23.*"
     }
     //Enables code coverage collection
     enableAppAgent {
         //Set the version of the Drill4J Java Application Agent you want to use
+        //See all versions here https://github.com/Drill4J/java-agent/releases
         version = "0.9.*"
     }
 }
@@ -550,11 +552,13 @@ Enable running Drill4J Agents to your Maven file:
         <!-- Enables test executions collection -->
         <testAgent>
             <!-- Set the version of the Drill4J Java Autotest Agent you want to use -->
+            <!-- See all versions here https://github.com/Drill4J/autotest-agent/releases -->
             <version>0.23.*</version>
         </testAgent>
         <!-- Enables code coverage collection -->
         <appAgent>
             <!-- Set the version of the Drill4J Java Application Agent you want to use -->
+            <!-- See all versions here https://github.com/Drill4J/java-agent/releases -->
             <version>0.9.*</version>
         </appAgent>
     </configuration>
@@ -576,8 +580,8 @@ Set up executable goals:
     <executions>
         <execution>
             <goals>
-                <goal>enableAppAgent</goal>
                 <goal>enableTestAgent</goal>
+                <goal>enableAppAgent</goal>
             </goals>
         </execution>
     </executions>
