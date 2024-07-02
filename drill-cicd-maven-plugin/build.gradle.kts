@@ -81,7 +81,7 @@ tasks {
 }
 
 publishing {
-    publications.create<MavenPublication>("drill-maven-plugin") {
+    publications.withType<MavenPublication> {
         artifact(tasks["sourcesJar"])
         artifact(tasks["javadocJar"])
         artifact(tasks["mvnInstall"].outputs.files.singleFile).builtBy(tasks["mvnInstall"])
