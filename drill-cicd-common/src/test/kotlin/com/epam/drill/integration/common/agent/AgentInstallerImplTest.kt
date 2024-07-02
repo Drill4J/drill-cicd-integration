@@ -172,7 +172,7 @@ class AgentInstallerImplTest {
         val agentInstaller = AgentInstallerImpl().also { it.httpClient = mockHttpClient }
 
         val result = agentInstaller.download(testDownloadUrl, testDownloadDir)
-        sleep(1000)
+
         assertEquals(testDownloadUrl.filename, result.name)
         assertEquals("Some text content", result.readText())
     }

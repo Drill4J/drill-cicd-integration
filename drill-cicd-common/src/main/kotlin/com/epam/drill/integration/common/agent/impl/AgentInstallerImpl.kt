@@ -17,19 +17,25 @@ package com.epam.drill.integration.common.agent.impl
 
 import com.epam.drill.integration.common.agent.*
 import io.ktor.client.*
+import io.ktor.client.call.*
 import io.ktor.client.engine.cio.*
+import io.ktor.client.features.*
 import io.ktor.client.features.json.*
 import io.ktor.client.features.logging.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.util.cio.*
 import io.ktor.utils.io.*
+import io.ktor.utils.io.core.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import java.io.File
 import java.util.zip.ZipFile
+import kotlin.io.use
 
 private const val GITHUB_API_URL = "https://api.github.com"
 
@@ -76,8 +82,18 @@ class AgentInstallerImpl : AgentInstaller {
         }
         val file = File(downloadDir, downloadUrl.filename)
         if (!file.exists()) {
-            httpClient.get<HttpResponse>(downloadUrl.url).content
-                .copyAndClose(file.writeChannel())
+            val response: HttpResponse = httpClient.get(downloadUrl.url)
+            val channel: ByteReadChannel = response.receive()
+
+            file.outputStream().use { fileStream ->
+                val buffer = ByteArray(4096)
+                while (!channel.isClosedForRead) {
+                    val bytesRead = channel.readAvailable(buffer)
+                    if (bytesRead > 0) {
+                        fileStream.write(buffer, 0, bytesRead)
+                    }
+                }
+            }
         }
         return file
     }
