@@ -99,6 +99,9 @@ class AgentInstallerImpl : AgentInstaller {
     }
 
     override fun unzip(zipFile: File): Directory {
+        if (!zipFile.exists()) {
+            throw IllegalStateException("File $zipFile doesn't exist")
+        }
         val destDir = Directory(zipFile.parentFile, zipFile.nameWithoutExtension)
         if (!destDir.exists()) {
             destDir.mkdirs()
