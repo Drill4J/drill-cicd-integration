@@ -105,7 +105,6 @@ class AgentRunner(
         agentArgs: Map<String, String?>
     ) = listOf(
         "-agentpath:${agentFile.absolutePath}="
-                + "drillInstallationDir=${agentFile.parent ?: ""},"
                 + agentArgs.map { (k, v) -> "$k=$v" }.joinToString(",")
     )
 }
