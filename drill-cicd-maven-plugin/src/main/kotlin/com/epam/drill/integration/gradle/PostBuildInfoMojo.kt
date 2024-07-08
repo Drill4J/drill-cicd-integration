@@ -18,6 +18,7 @@ package com.epam.drill.integration.gradle
 import com.epam.drill.integration.common.client.BuildPayload
 import com.epam.drill.integration.common.client.impl.DataIngestClientImpl
 import com.epam.drill.integration.common.git.impl.GitClientImpl
+import com.epam.drill.integration.common.util.fromEnv
 import com.epam.drill.integration.common.util.required
 import kotlinx.coroutines.runBlocking
 import org.apache.maven.plugin.AbstractMojo
@@ -49,8 +50,8 @@ class PostBuildInfoMojo : AbstractMojo() {
     @Parameter(property = "buildVersion")
     var buildVersion: String? = null
     override fun execute() {
-        val drillApiUrl = drillApiUrl.required("drillApiUrl")
-        val drillApiKey = drillApiKey
+        val drillApiUrl = drillApiUrl.fromEnv("DRILL_API_URL").required("drillApiUrl")
+        val drillApiKey = drillApiKey.fromEnv("DRILL_API_KEY")
         val groupId = groupId.required("groupId")
         val appId = appId.required("appId")
         val buildVersion = buildVersion

@@ -15,7 +15,6 @@
  */
 package com.epam.drill.integration.gradle
 
-import com.epam.drill.integration.common.baseline.BaselineSearchStrategy
 import com.epam.drill.integration.common.baseline.BaselineSearchStrategy.SEARCH_BY_MERGE_BASE
 import com.epam.drill.integration.common.baseline.BaselineSearchStrategy.SEARCH_BY_TAG
 import com.epam.drill.integration.common.baseline.MergeBaseCriteria
@@ -24,6 +23,7 @@ import com.epam.drill.integration.common.client.impl.MetricsClientImpl
 import com.epam.drill.integration.common.git.impl.GitClientImpl
 import com.epam.drill.integration.common.report.impl.MarkdownReportGenerator
 import com.epam.drill.integration.common.service.ReportService
+import com.epam.drill.integration.common.util.fromEnv
 import com.epam.drill.integration.common.util.required
 import kotlinx.coroutines.runBlocking
 import org.gradle.api.Task
@@ -31,8 +31,8 @@ import java.io.File
 
 fun Task.drillGenerateChangeTestingReport(ciCd: DrillCiCdProperties) {
     doFirst {
-        val drillApiUrl = ciCd.drillApiUrl.required("drillApiUrl")
-        val drillApiKey = ciCd.drillApiKey
+        val drillApiUrl = ciCd.drillApiUrl.fromEnv("DRILL_API_URL").required("drillApiUrl")
+        val drillApiKey = ciCd.drillApiKey.fromEnv("DRILL_API_KEY")
         val groupId = ciCd.groupId.required("groupId")
         val appId = ciCd.appId.required("appId")
         val baselineSearchStrategy = ciCd.baseline?.searchStrategy ?: SEARCH_BY_TAG

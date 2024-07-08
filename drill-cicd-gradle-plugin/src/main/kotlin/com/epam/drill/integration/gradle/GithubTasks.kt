@@ -32,8 +32,8 @@ fun Task.drillGithubPullRequestReport(ciCd: DrillCiCdProperties) {
         val github = ciCd.github.required("github")
         val githubApiUrl = github.apiUrl.required("github.apiUrl")
         val githubToken = github.token.required("github.token")
-        val drillApiUrl = ciCd.drillApiUrl.required("drillApiUrl")
-        val drillApiKey = ciCd.drillApiKey
+        val drillApiUrl = ciCd.drillApiUrl.fromEnv("DRILL_API_URL").required("drillApiUrl")
+        val drillApiKey = ciCd.drillApiKey.fromEnv("DRILL_API_KEY")
         val groupId = ciCd.groupId.required("groupId")
         val appId = ciCd.appId.required("appId")
         val eventFilePath = github.eventFilePath
