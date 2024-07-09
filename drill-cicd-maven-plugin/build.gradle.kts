@@ -18,6 +18,7 @@ val kotlinVersion: String by parent!!.extra
 val ktorVersion: String by parent!!.extra
 val kotlinxCoroutinesVersion: String by parent!!.extra
 val kotlinxSerializationVersion: String by parent!!.extra
+val kotlinxCollectionsVersion: String by parent!!.extra
 val microutilsLoggingVersion: String by parent!!.extra
 
 repositories {
@@ -67,7 +68,14 @@ tasks {
     }
     val mvnInstall by registering(Exec::class) {
         val args = if (HostManager.hostIsMingw) arrayOf("cmd", "/c", "mvnw.cmd") else arrayOf("sh", "./mvnw")
-        commandLine(*args, "install", "-Ddrill.plugin.version=$version", "-Dkotlin.version=$kotlinVersion")
+        commandLine(
+            *args, "install",
+            "-Ddrill.plugin.version=$version",
+            "-Dkotlin.version=$kotlinVersion",
+            "-Dkotlinx.collections.version=$kotlinxCollectionsVersion",
+            "-Dkotlinx.coroutines.version=$kotlinxCoroutinesVersion",
+            "-Dkotlinx.serialization.version=$kotlinxSerializationVersion"
+        )
         workingDir(project.projectDir)
         standardOutput = System.out
         outputs.file("target/drill-maven-plugin-$version.jar")
