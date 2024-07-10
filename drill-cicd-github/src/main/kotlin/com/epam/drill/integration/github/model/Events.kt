@@ -15,35 +15,47 @@
  */
 package com.epam.drill.integration.github.model
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 
 @Serializable
-data class GithubUser(val login: String)
+data class GithubUser(@SerialName("login") val login: String)
 
 @Serializable
 data class GithubRepository(
+    @SerialName("name")
     val name: String,
+    @SerialName("full_name")
     val fullName: String,
+    @SerialName("owner")
     val owner: GithubUser
 )
 
 @Serializable
 data class GithubPullRequestBranch(
+    @SerialName("sha")
     val sha: String,
+    @SerialName("ref")
     val ref: String
 )
 
 @Serializable
 data class GithubPullRequest(
+    @SerialName("number")
     val number: Int,
+    @SerialName("user")
     val user: GithubUser,
+    @SerialName("head")
     val head: GithubPullRequestBranch,
+    @SerialName("base")
     val base: GithubPullRequestBranch,
 )
 
 @Serializable
 data class GithubEvent(
+    @SerialName("pull_request")
     val pullRequest: GithubPullRequest?,
+    @SerialName("repository")
     val repository: GithubRepository
 )
