@@ -23,7 +23,6 @@ val mockitoKotlinVersion: String by parent!!.extra
 val logbackClassicVersion: String by parent!!.extra
 
 repositories {
-    mavenLocal()
     mavenCentral()
 }
 

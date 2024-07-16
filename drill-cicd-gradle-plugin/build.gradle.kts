@@ -17,7 +17,6 @@ version = rootProject.version
 val kotlinxCoroutinesVersion: String by parent!!.extra
 
 repositories {
-    mavenLocal()
     mavenCentral()
 }
 

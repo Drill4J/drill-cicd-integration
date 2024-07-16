@@ -19,7 +19,6 @@ val ktorVersion: String by parent!!.extra
 val microutilsLoggingVersion: String by parent!!.extra
 
 repositories {
-    mavenLocal()
     mavenCentral()
 }
 

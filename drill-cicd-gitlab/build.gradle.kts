@@ -20,7 +20,6 @@ val microutilsLoggingVersion: String by parent!!.extra
 
 
 repositories {
-    mavenLocal()
     mavenCentral()
 }
 

@@ -17,7 +17,6 @@ val jarMainClassName = "com.epam.drill.integration.cli.CliAppKt"
 val logbackClassicVersion: String by parent!!.extra
 
 repositories {
-    mavenLocal()
     mavenCentral()
 }
 
