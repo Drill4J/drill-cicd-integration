@@ -17,8 +17,6 @@ package com.epam.drill.integration.gradle
 
 import com.epam.drill.integration.common.baseline.BaselineSearchStrategy
 import org.gradle.api.Action
-import org.gradle.internal.Actions
-
 
 open class DrillPluginExtension(
     var drillApiUrl: String? = null,
@@ -32,8 +30,8 @@ open class DrillPluginExtension(
     var gitlab: GitlabExtension = GitlabExtension(),
     var github: GithubExtension = GithubExtension(),
 
-    var testAgent: AgentExtension = AgentExtension(),
-    var appAgent: AgentExtension = AgentExtension(),
+    internal var testAgent: TestAgentExtension = TestAgentExtension(),
+    internal var appAgent: AppAgentExtension = AppAgentExtension(),
 ) {
     fun baseline(action: Action<BaselineExtension>) {
         action.execute(baseline)
@@ -47,11 +45,13 @@ open class DrillPluginExtension(
         action.execute(github)
     }
 
-    fun testAgent(action: Action<AgentExtension>) {
+    fun enableTestAgent(action: Action<TestAgentExtension>) {
+        testAgent.enabled = true
         action.execute(testAgent)
     }
 
-    fun appAgent(action: Action<AgentExtension>) {
+    fun enableAppAgent(action: Action<AppAgentExtension>) {
+        appAgent.enabled = true
         action.execute(appAgent)
     }
 }
@@ -88,6 +88,8 @@ open class BaselineExtension(
 )
 
 open class AgentExtension(
+    var enabled: Boolean? = null,
+
     var version: String? = null,
     var downloadUrl: String? = null,
     var zipPath: String? = null,
@@ -105,26 +107,16 @@ open class TestAgentExtension(
 open class AppAgentExtension : AgentExtension()
 
 open class DrillTaskExtension(
-    internal var testAgent: TestAgentExtension? = null,
-    internal var appAgent: AppAgentExtension? = null
+    var testAgent: TestAgentExtension = TestAgentExtension(),
+    var appAgent: AppAgentExtension = AppAgentExtension(),
 ) {
-    fun enableTestAgent() {
-        enableTestAgent(Actions.doNothing())
+    fun testAgent(action: Action<TestAgentExtension>) {
+        testAgent.enabled = true
+        action.execute(testAgent)
     }
 
-    fun enableTestAgent(action: Action<TestAgentExtension>) {
-        testAgent = TestAgentExtension().also {
-            action.execute(it)
-        }
-    }
-
-    fun enableAppAgent() {
-        enableAppAgent(Actions.doNothing())
-    }
-
-    fun enableAppAgent(action: Action<AppAgentExtension>) {
-        appAgent = AppAgentExtension().also {
-            action.execute(it)
-        }
+    fun appAgent(action: Action<AppAgentExtension>) {
+        appAgent.enabled = true
+        action.execute(appAgent)
     }
 }

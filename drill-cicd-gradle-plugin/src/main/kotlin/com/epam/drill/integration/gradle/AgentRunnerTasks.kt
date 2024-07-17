@@ -42,19 +42,23 @@ fun modifyToRunDrillAgents(
 
 
         listOfNotNull(
-            taskConfig?.testAgent?.let {
-                TestAgentConfiguration().apply {
-                    mapGeneralAgentProperties(it, pluginConfig.testAgent, pluginConfig)
-                    this.testTaskId = it.testTaskId ?: "${project.group}:${project.name}:${this@doFirst.name}"
+            taskConfig?.testAgent
+                ?.takeIf { it.enabled ?: pluginConfig.testAgent.enabled ?: false }
+                ?.let {
+                    TestAgentConfiguration().apply {
+                        mapGeneralAgentProperties(it, pluginConfig.testAgent, pluginConfig)
+                        this.testTaskId = it.testTaskId ?: generateTestTaskId(project)
+                    }
+                },
+            taskConfig?.appAgent
+                ?.takeIf { it.enabled ?: pluginConfig.appAgent.enabled ?: false }
+                ?.let {
+                    AppAgentConfiguration().apply {
+                        mapGeneralAgentProperties(it, pluginConfig.appAgent, pluginConfig)
+                        this.appId = pluginConfig.appId
+                        this.packagePrefixes = pluginConfig.packagePrefixes
+                    }
                 }
-            },
-            taskConfig?.appAgent?.let {
-                AppAgentConfiguration().apply {
-                    mapGeneralAgentProperties(it, pluginConfig.appAgent, pluginConfig)
-                    this.appId = pluginConfig.appId
-                    this.packagePrefixes = pluginConfig.packagePrefixes
-                }
-            }
         ).map { config ->
             runBlocking {
                 agentRunner.getJvmOptionsToRun(
@@ -69,10 +73,12 @@ fun modifyToRunDrillAgents(
     }
 }
 
+private fun Task.generateTestTaskId(project: Project) = "${project.group}:${project.name}:${this.name}"
+
 private fun AgentConfiguration.mapGeneralAgentProperties(
     agentTaskExtension: AgentExtension,
     agentPluginExtension: AgentExtension,
-    generalExtension: DrillPluginExtension
+    pluginExtension: DrillPluginExtension
 ) {
     (agentTaskExtension.takeIf {
         it.version != null || it.zipPath != null || it.downloadUrl != null
@@ -85,9 +91,9 @@ private fun AgentConfiguration.mapGeneralAgentProperties(
     this.logLevel = agentTaskExtension.logLevel ?: agentPluginExtension.logLevel
     this.logFile = (agentTaskExtension.logFile ?: agentPluginExtension.logFile)?.let { File(it) }
 
-    this.additionalParams = agentPluginExtension.additionalParams + agentTaskExtension.additionalParams
+    this.drillApiUrl = pluginExtension.drillApiUrl
+    this.drillApiKey = pluginExtension.drillApiKey
+    this.groupId = pluginExtension.groupId
 
-    this.drillApiUrl = generalExtension.drillApiUrl
-    this.drillApiKey = generalExtension.drillApiKey
-    this.groupId = generalExtension.groupId
+    this.additionalParams = agentPluginExtension.additionalParams + agentTaskExtension.additionalParams
 }

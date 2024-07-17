@@ -520,15 +520,37 @@ drill {
         //Set the version of the Drill4J Java Autotest Agent you want to use
         //See all versions here https://github.com/Drill4J/autotest-agent/releases
         version = "0.23.*"
+        //either you can set `downloadUrl` to download the agent from a direct URL
+        //either you can set `zipPath` which points to the local agent archive location
     }
     //Enables code coverage collection
     enableAppAgent {
         //Set the version of the Drill4J Java Application Agent you want to use
         //See all versions here https://github.com/Drill4J/java-agent/releases
         version = "0.9.*"
+        //either you can set `downloadUrl` to download the agent from a direct URL
+        //either you can set `zipPath` which points to the local agent archive location
     }
 }
 ```
+
+If you want to disable agents for specific test task you can set the following:
+```kotlin
+test {
+    //general properties of your test task
+    ...
+    
+    drill {
+        testAgent {
+            enabled = false
+        }
+        appAgent {
+            enabled = false
+        }
+    }
+}
+```
+
 
 Run Gradle tests:
 ```shell
