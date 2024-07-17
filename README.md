@@ -24,6 +24,7 @@ For using locally in Gradle projects is necessary to add `mavenLocal` repository
 ```kotlin
 pluginManagement {
     repositories {
+        mavenLocal()
         gradlePluginPortal()
     }
 }
