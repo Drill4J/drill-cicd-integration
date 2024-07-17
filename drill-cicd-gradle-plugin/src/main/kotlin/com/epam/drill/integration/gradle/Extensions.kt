@@ -20,45 +20,39 @@ import org.gradle.api.Action
 import org.gradle.internal.Actions
 
 
-open class DrillExtension(
+open class DrillPluginExtension(
     var drillApiUrl: String? = null,
     var drillApiKey: String? = null,
     var groupId: String? = null,
     var appId: String? = null,
     var buildVersion: String? = null,
-    var packagePrefixes : Array<String> = emptyArray(),
+    var packagePrefixes: Array<String> = emptyArray(),
 
     var baseline: BaselineExtension = BaselineExtension(),
     var gitlab: GitlabExtension = GitlabExtension(),
     var github: GithubExtension = GithubExtension(),
 
-    var testAgent: TestAgentExtension? = null,
-    var appAgent: AppAgentExtension? = null,
+    var testAgent: AgentExtension = AgentExtension(),
+    var appAgent: AgentExtension = AgentExtension(),
 ) {
     fun baseline(action: Action<BaselineExtension>) {
         action.execute(baseline)
     }
+
     fun gitlab(action: Action<GitlabExtension>) {
-       action.execute(gitlab)
+        action.execute(gitlab)
     }
+
     fun github(action: Action<GithubExtension>) {
         action.execute(github)
     }
-    fun enableTestAgent(action: Action<TestAgentExtension>) {
-        testAgent = (testAgent ?: TestAgentExtension()).also {
-            action.execute(it)
-        }
+
+    fun testAgent(action: Action<AgentExtension>) {
+        action.execute(testAgent)
     }
-    fun enableTestAgent() {
-        enableTestAgent(Actions.doNothing())
-    }
-    fun enableAppAgent(action: Action<AppAgentExtension>) {
-        appAgent = (appAgent ?: AppAgentExtension()).also {
-            action.execute(it)
-        }
-    }
-    fun enableAppAgent() {
-        enableAppAgent(Actions.doNothing())
+
+    fun appAgent(action: Action<AgentExtension>) {
+        action.execute(appAgent)
     }
 }
 
@@ -93,7 +87,7 @@ open class BaselineExtension(
     var targetRef: String? = null,
 )
 
-abstract class AgentExtension(
+open class AgentExtension(
     var version: String? = null,
     var downloadUrl: String? = null,
     var zipPath: String? = null,
@@ -101,9 +95,36 @@ abstract class AgentExtension(
     var logLevel: String? = null,
     var logFile: String? = null,
 
-    var additionalParams: Map<String, String>? = null
+    var additionalParams: Map<String, String> = mutableMapOf()
 )
 
-open class TestAgentExtension() : AgentExtension()
+open class TestAgentExtension(
+    var testTaskId: String? = null
+) : AgentExtension()
 
-open class AppAgentExtension() : AgentExtension()
+open class AppAgentExtension : AgentExtension()
+
+open class DrillTaskExtension(
+    internal var testAgent: TestAgentExtension? = null,
+    internal var appAgent: AppAgentExtension? = null
+) {
+    fun enableTestAgent() {
+        enableTestAgent(Actions.doNothing())
+    }
+
+    fun enableTestAgent(action: Action<TestAgentExtension>) {
+        testAgent = TestAgentExtension().also {
+            action.execute(it)
+        }
+    }
+
+    fun enableAppAgent() {
+        enableAppAgent(Actions.doNothing())
+    }
+
+    fun enableAppAgent(action: Action<AppAgentExtension>) {
+        appAgent = AppAgentExtension().also {
+            action.execute(it)
+        }
+    }
+}

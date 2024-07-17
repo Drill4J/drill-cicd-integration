@@ -27,7 +27,7 @@ private val taskType: Set<KClass<out JavaForkOptions>> = setOf(Test::class, Java
 
 class DrillCiCdIntegrationGradlePlugin : Plugin<Project> {
     override fun apply(project: Project) {
-        val config = project.extensions.create("drill", DrillExtension::class.java)
+        val config = project.extensions.create("drill", DrillPluginExtension::class.java)
 
         project.task("drillGitlabMergeRequestReport") {
             drillGitlabMergeRequestReportTask(config)
@@ -51,6 +51,14 @@ class DrillCiCdIntegrationGradlePlugin : Plugin<Project> {
             drillGenerateChangeTestingReport(config)
         }.also {
             it.group = TASK_GROUP
+        }
+
+        project.tasks.withType(Test::class.java) {
+            extensions.create("drill", DrillTaskExtension::class.java)
+        }
+
+        project.tasks.withType(JavaExec::class.java) {
+            extensions.create("drill", DrillTaskExtension::class.java)
         }
 
         project.afterEvaluate {

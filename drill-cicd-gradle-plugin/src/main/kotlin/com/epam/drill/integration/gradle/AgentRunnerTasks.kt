@@ -29,8 +29,10 @@ import java.io.File
 fun modifyToRunDrillAgents(
     task: Task,
     project: Project,
-    config: DrillExtension
+    pluginConfig: DrillPluginExtension
 ) {
+    val taskConfig = task.extensions.findByType(DrillTaskExtension::class.java)
+
     task.doFirst {
         logger.lifecycle("Task :${task.name} is modified by Drill")
 
@@ -40,16 +42,17 @@ fun modifyToRunDrillAgents(
 
 
         listOfNotNull(
-            config.testAgent?.let {
+            taskConfig?.testAgent?.let {
                 TestAgentConfiguration().apply {
-                    mapGeneralAgentProperties(it, config)
+                    mapGeneralAgentProperties(it, pluginConfig.testAgent, pluginConfig)
+                    this.testTaskId = it.testTaskId ?: "${project.group}:${project.name}:${this@doFirst.name}"
                 }
             },
-            config.appAgent?.let {
+            taskConfig?.appAgent?.let {
                 AppAgentConfiguration().apply {
-                    mapGeneralAgentProperties(it, config)
-                    appId = config.appId
-                    packagePrefixes = config.packagePrefixes
+                    mapGeneralAgentProperties(it, pluginConfig.appAgent, pluginConfig)
+                    this.appId = pluginConfig.appId
+                    this.packagePrefixes = pluginConfig.packagePrefixes
                 }
             }
         ).map { config ->
@@ -67,19 +70,24 @@ fun modifyToRunDrillAgents(
 }
 
 private fun AgentConfiguration.mapGeneralAgentProperties(
-    agentExtension: AgentExtension,
-    generalExtension: DrillExtension
+    agentTaskExtension: AgentExtension,
+    agentPluginExtension: AgentExtension,
+    generalExtension: DrillPluginExtension
 ) {
-    version = agentExtension.version
-    downloadUrl = agentExtension.downloadUrl
-    zipPath = agentExtension.zipPath?.let { File(it) }
+    (agentTaskExtension.takeIf {
+        it.version != null || it.zipPath != null || it.downloadUrl != null
+    } ?: agentPluginExtension).let { agentExtension ->
+        this.version = agentExtension.version
+        this.downloadUrl = agentExtension.downloadUrl
+        this.zipPath = agentExtension.zipPath?.let { File(it) }
+    }
 
-    logLevel = agentExtension.logLevel
-    logFile = agentExtension.logFile?.let { File(it) }
+    this.logLevel = agentTaskExtension.logLevel ?: agentPluginExtension.logLevel
+    this.logFile = (agentTaskExtension.logFile ?: agentPluginExtension.logFile)?.let { File(it) }
 
-    drillApiUrl = generalExtension.drillApiUrl
-    drillApiKey = generalExtension.drillApiKey
-    groupId = generalExtension.groupId
+    this.additionalParams = agentPluginExtension.additionalParams + agentTaskExtension.additionalParams
 
-    additionalParams = agentExtension.additionalParams
+    this.drillApiUrl = generalExtension.drillApiUrl
+    this.drillApiKey = generalExtension.drillApiKey
+    this.groupId = generalExtension.groupId
 }

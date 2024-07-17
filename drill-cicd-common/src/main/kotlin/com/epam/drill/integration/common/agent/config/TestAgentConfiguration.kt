@@ -16,6 +16,7 @@
 package com.epam.drill.integration.common.agent.config
 
 class TestAgentConfiguration : AgentConfiguration() {
+    var testTaskId: String? = null
     var labels: Map<String, String>? = null
 
     override val githubRepository: String = "Drill4J/autotest-agent"
@@ -24,6 +25,7 @@ class TestAgentConfiguration : AgentConfiguration() {
 
     override fun toAgentArguments(): MutableMap<String, String?> {
         return super.toAgentArguments().apply {
+            testTaskId?.let { this[TestAgentConfiguration::testTaskId.name] = it }
             labels?.let {
                 this[TestAgentConfiguration::labels.name] = it.map { (k, v) -> "$k:$v" }.joinToString(";")
             }
