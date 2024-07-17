@@ -19,44 +19,44 @@ import com.epam.drill.integration.common.baseline.BaselineSearchStrategy
 import org.apache.maven.plugins.annotations.Parameter
 
 
-open class DrillGitlabProperties(
-    @Parameter(property = "apiUrl", required = true)
+open class GitlabConfiguration(
     var apiUrl: String? = null,
-    @Parameter(property = "privateToken", required = true)
     var privateToken: String? = null,
-    @Parameter(property = "projectId")
     var projectId: String? = null,
-    @Parameter(property = "commitSha")
     var commitSha: String? = null,
-    @Parameter(property = "mergeRequest")
-    var mergeRequest: MergeRequest = MergeRequest()
+    var mergeRequest: MergeRequestConfiguration = MergeRequestConfiguration()
 )
 
-open class MergeRequest(
-    @Parameter(property = "mergeRequestIid")
+open class MergeRequestConfiguration(
     var mergeRequestIid: String? = null,
-    @Parameter(property = "mergeBaseCommitSha")
     var mergeBaseCommitSha: String? = null,
-    @Parameter(property = "sourceBranch")
     var sourceBranch: String? = null,
-    @Parameter(property = "targetBranch")
     var targetBranch: String? = null,
 )
 
-open class DrillGithubProperties(
-    @Parameter(property = "apiUrl")
+open class GithubConfiguration(
     var apiUrl: String = "https://api.github.com",
-    @Parameter(property = "token", required = true)
     var token: String? = null,
-    @Parameter(property = "eventFilePath")
     var eventFilePath: String? = null,
 )
 
-open class DrillBaselineProperties(
-    @Parameter(property = "searchStrategy")
+open class BaselineConfiguration(
     var searchStrategy: BaselineSearchStrategy? = null,
-    @Parameter(property = "tagPattern")
     var tagPattern: String? = null,
-    @Parameter(property = "targetRef")
     var targetRef: String? = null,
 )
+
+abstract class AgentMavenConfiguration(
+    var version: String? = null,
+    var downloadUrl: String? = null,
+    var zipPath: String? = null,
+
+    var logLevel: String? = "INFO",
+    var logFile: String? = null,
+
+    var additionalParams: Map<String, String>? = null,
+)
+
+open class TestAgentMavenConfiguration() : AgentMavenConfiguration()
+
+open class AppAgentMavenConfiguration() : AgentMavenConfiguration()

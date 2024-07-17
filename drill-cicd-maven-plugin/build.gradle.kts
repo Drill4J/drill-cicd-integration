@@ -12,7 +12,7 @@ plugins {
 }
 
 group = "com.epam.drill.integration"
-version = rootProject.version
+version = "0.0.5-SNAPSHOT"
 
 val kotlinVersion: String by parent!!.extra
 val ktorVersion: String by parent!!.extra
@@ -70,7 +70,7 @@ tasks {
         commandLine(*args, "install", "-Ddrill.plugin.version=$version", "-Dkotlin.version=$kotlinVersion")
         workingDir(project.projectDir)
         standardOutput = System.out
-        outputs.file("target/drill-cicd-maven-plugin-$version.jar")
+        outputs.file("target/drill-maven-plugin-$version.jar")
     }
     assemble.get().dependsOn(sourcesJar)
     assemble.get().dependsOn(javadocJar)
@@ -81,7 +81,7 @@ tasks {
 }
 
 publishing {
-    publications.create<MavenPublication>("drill-cicd-maven-plugin") {
+    publications.withType<MavenPublication> {
         artifact(tasks["sourcesJar"])
         artifact(tasks["javadocJar"])
         artifact(tasks["mvnInstall"].outputs.files.singleFile).builtBy(tasks["mvnInstall"])
