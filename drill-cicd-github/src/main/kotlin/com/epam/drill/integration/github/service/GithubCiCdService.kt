@@ -22,8 +22,8 @@ import com.epam.drill.integration.common.report.ReportGenerator
 import com.epam.drill.integration.common.util.required
 import com.epam.drill.integration.github.client.GithubApiClient
 import com.epam.drill.integration.github.model.GithubEvent
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonNamingStrategy
 import mu.KotlinLogging
 import java.io.File
 
@@ -71,6 +71,7 @@ class GithubCiCdService(
     ) {
         val json = Json {
             ignoreUnknownKeys = true
+            namingStrategy = JsonNamingStrategy.SnakeCase
         }
         val event = json.decodeFromString<GithubEvent>(githubEventFile.readText())
         val pullRequest = event.pullRequest.required("pullRequest")
