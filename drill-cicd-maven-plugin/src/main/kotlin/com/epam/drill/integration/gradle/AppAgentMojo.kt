@@ -47,5 +47,8 @@ class AppAgentMojo : AbstractAgentMojo() {
             .split(*arrayOf(",", ";"))
             .map(String::trim)
             .toTypedArray()
+        additionalParams = mapOf(
+            "scanClassPath" to "target/classes;target/test-classes"
+        ) + (additionalParams ?: emptyMap())
     }
 }
