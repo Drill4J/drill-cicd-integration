@@ -15,7 +15,6 @@
  */
 package com.epam.drill.integration.github.model
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 

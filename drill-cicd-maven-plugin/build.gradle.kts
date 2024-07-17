@@ -15,7 +15,10 @@ group = "com.epam.drill.integration"
 version = rootProject.version
 
 val kotlinVersion: String by parent!!.extra
+val ktorVersion: String by parent!!.extra
 val kotlinxCoroutinesVersion: String by parent!!.extra
+val kotlinxSerializationVersion: String by parent!!.extra
+val microutilsLoggingVersion: String by parent!!.extra
 
 repositories {
     mavenCentral()
@@ -26,7 +29,7 @@ kotlin.sourceSets.all {
 }
 
 dependencies {
-    implementation((kotlin("stdlib-jdk8")))
+    implementation(kotlin("stdlib"))
     implementation("org.apache.maven:maven-core:3.8.1")
     implementation("org.apache.maven:maven-plugin-api:3.8.1")
     implementation("org.apache.maven.plugin-tools:maven-plugin-annotations:3.6.1")
@@ -62,8 +65,6 @@ tasks {
         archiveClassifier.set("javadoc")
     }
     val mvnInstall by registering(Exec::class) {
-        dependsOn(javadocJar)
-        dependsOn(sourcesJar)
         val args = if (HostManager.hostIsMingw) arrayOf("cmd", "/c", "mvnw.cmd") else arrayOf("sh", "./mvnw")
         commandLine(
             *args, "install",
@@ -71,6 +72,9 @@ tasks {
             "-Dkotlin.version=$kotlinVersion",
             "-Dproject.root.dir=${project.rootDir}",
             "-Dkotlinx.coroutines.version=$kotlinxCoroutinesVersion",
+            "-Dktor.version=$ktorVersion",
+            "-Dmicroutils.logging.version=$microutilsLoggingVersion",
+            "-Dkotlinx.serialization.version=$kotlinxSerializationVersion"
         )
         workingDir(project.projectDir)
         standardOutput = System.out
