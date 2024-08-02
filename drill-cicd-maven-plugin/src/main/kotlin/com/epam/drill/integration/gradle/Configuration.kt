@@ -57,6 +57,8 @@ abstract class AgentMavenConfiguration(
     var additionalParams: Map<String, String>? = null,
 )
 
-open class TestAgentMavenConfiguration() : AgentMavenConfiguration()
+open class TestAgentMavenConfiguration(
+    var testTaskId: String? = null
+) : AgentMavenConfiguration()
 
 open class AppAgentMavenConfiguration() : AgentMavenConfiguration()
