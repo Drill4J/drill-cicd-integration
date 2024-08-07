@@ -20,6 +20,8 @@ import com.epam.drill.integration.common.agent.config.AgentConfiguration
 import com.epam.drill.integration.common.agent.config.TestAgentConfiguration
 import com.epam.drill.integration.common.agent.config.AppAgentConfiguration
 import com.epam.drill.integration.common.agent.impl.AgentInstallerImpl
+import com.epam.drill.integration.common.util.fromEnv
+import com.epam.drill.integration.common.util.required
 import kotlinx.coroutines.runBlocking
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -91,9 +93,9 @@ private fun AgentConfiguration.mapGeneralAgentProperties(
     this.logLevel = agentTaskExtension.logLevel ?: agentPluginExtension.logLevel
     this.logFile = (agentTaskExtension.logFile ?: agentPluginExtension.logFile)?.let { File(it) }
 
-    this.drillApiUrl = pluginExtension.drillApiUrl
-    this.drillApiKey = pluginExtension.drillApiKey
-    this.groupId = pluginExtension.groupId
+    this.drillApiUrl = pluginExtension.drillApiUrl.fromEnv("DRILL_API_URL").required("drillApiUrl")
+    this.drillApiKey = pluginExtension.drillApiKey.fromEnv("DRILL_API_KEY")
+    this.groupId = pluginExtension.groupId.required("groupId")
 
     this.additionalParams = agentPluginExtension.additionalParams + agentTaskExtension.additionalParams
 }

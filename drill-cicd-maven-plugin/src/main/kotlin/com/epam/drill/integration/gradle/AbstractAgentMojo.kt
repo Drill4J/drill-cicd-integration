@@ -18,6 +18,8 @@ package com.epam.drill.integration.gradle
 import com.epam.drill.integration.common.agent.AgentRunner
 import com.epam.drill.integration.common.agent.config.AgentConfiguration
 import com.epam.drill.integration.common.agent.impl.AgentInstallerImpl
+import com.epam.drill.integration.common.util.fromEnv
+import com.epam.drill.integration.common.util.required
 import kotlinx.coroutines.runBlocking
 import java.io.File
 
@@ -58,9 +60,9 @@ fun AgentConfiguration.setGeneralAgentProperties(
     logLevel = mavenAgentConfig.logLevel
     logFile = mavenAgentConfig.logFile?.let { File(it) }
 
-    drillApiUrl = mavenGeneralConfig.drillApiUrl
-    drillApiKey = mavenGeneralConfig.drillApiKey
-    groupId = mavenGeneralConfig.groupId
+    drillApiUrl = mavenGeneralConfig.drillApiUrl.fromEnv("DRILL_API_URL").required("drillApiUrl")
+    drillApiKey = mavenGeneralConfig.drillApiKey.fromEnv("DRILL_API_KEY")
+    groupId = mavenGeneralConfig.groupId.required("groupId")
 
     additionalParams = mavenAgentConfig.additionalParams
 }
