@@ -534,6 +534,23 @@ drill {
 }
 ```
 
+To add additional parameters to Drill agents, use the `additionalParams` property:
+```kotlin
+drill {
+    //General properties
+    ...
+
+    enableTestAgent {
+        //Any additional parameters for Test Agent
+        additionalParams = [devToolsProxyAddress: "http://localhost:9090", withJsCoverage: "true"]
+    }
+    enableAppAgent {
+        //Any additional parameters for App Agent
+        additionalParams = [classScanDelay: "3000"]
+    }
+}
+```
+
 If you want to disable agents for specific test task you can set the following:
 ```kotlin
 test {
@@ -550,7 +567,6 @@ test {
     }
 }
 ```
-
 
 Run Gradle tests:
 ```shell
@@ -587,6 +603,32 @@ Enable running Drill4J Agents to your Maven file:
     <executions>
         ...
     </executions>
+</plugin>
+```
+
+To add additional parameters to Drill agents, use the `additionalParams` property:
+```xml
+<plugin>
+    <groupId>com.epam.drill.integration</groupId>
+    <artifactId>drill-maven-plugin</artifactId>
+    <version>0.0.1</version>
+    <configuration>
+        <!-- General properties -->
+        
+        <testAgent>
+            <additionalParams>
+                <!-- Any additional parameters for Test Agent-->
+                <devToolsProxyAddress>http://localhost:9090</devToolsProxyAddress>
+                <withJsCoverage>true</withJsCoverage>
+            </additionalParams>
+        </testAgent>
+        <appAgent>
+            <additionalParams>
+                <!-- Any additional parameters for App Agent-->
+                <classScanDelay>3000</classScanDelay>
+            </additionalParams>
+        </appAgent>
+    </configuration>
 </plugin>
 ```
 
