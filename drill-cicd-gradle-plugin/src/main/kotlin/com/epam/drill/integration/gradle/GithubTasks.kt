@@ -27,7 +27,7 @@ import org.gradle.api.Task
 import java.io.File
 
 
-fun Task.drillGithubPullRequestReport(config: DrillExtension) {
+fun Task.drillGithubPullRequestReport(config: DrillPluginExtension) {
     doFirst {
         val github = config.github.required("github")
         val githubApiUrl = github.apiUrl.required("github.apiUrl")

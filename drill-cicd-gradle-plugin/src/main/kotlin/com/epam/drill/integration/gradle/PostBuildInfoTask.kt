@@ -23,7 +23,7 @@ import com.epam.drill.integration.common.util.required
 import kotlinx.coroutines.runBlocking
 import org.gradle.api.Task
 
-fun Task.drillSendBuildInfo(config: DrillExtension) {
+fun Task.drillSendBuildInfo(config: DrillPluginExtension) {
     doFirst {
         val drillApiUrl = config.drillApiUrl.fromEnv("DRILL_API_URL").required("drillApiUrl")
         val drillApiKey = config.drillApiKey.fromEnv("DRILL_API_KEY")

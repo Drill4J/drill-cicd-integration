@@ -29,7 +29,7 @@ import kotlinx.coroutines.runBlocking
 import org.gradle.api.Task
 import java.io.File
 
-fun Task.drillGenerateChangeTestingReport(config: DrillExtension) {
+fun Task.drillGenerateChangeTestingReport(config: DrillPluginExtension) {
     doFirst {
         val drillApiUrl = config.drillApiUrl.fromEnv("DRILL_API_URL").required("drillApiUrl")
         val drillApiKey = config.drillApiKey.fromEnv("DRILL_API_KEY")
