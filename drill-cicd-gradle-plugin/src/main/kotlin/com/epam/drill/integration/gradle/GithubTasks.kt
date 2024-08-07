@@ -32,8 +32,8 @@ fun Task.drillGithubPullRequestReport(config: DrillExtension) {
         val github = config.github.required("github")
         val githubApiUrl = github.apiUrl.required("github.apiUrl")
         val githubToken = github.token.required("github.token")
-        val drillApiUrl = config.drillApiUrl.required("drillApiUrl")
-        val drillApiKey = config.drillApiKey
+        val drillApiUrl = config.drillApiUrl.fromEnv("DRILL_API_URL").required("drillApiUrl")
+        val drillApiKey = config.drillApiKey.fromEnv("DRILL_API_KEY")
         val groupId = config.groupId.required("groupId")
         val appId = config.appId.required("appId")
         val eventFilePath = github.eventFilePath
