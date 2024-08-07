@@ -29,15 +29,15 @@ import kotlinx.coroutines.runBlocking
 import org.gradle.api.Task
 import java.io.File
 
-fun Task.drillGenerateChangeTestingReport(ciCd: DrillCiCdProperties) {
+fun Task.drillGenerateChangeTestingReport(config: DrillExtension) {
     doFirst {
-        val drillApiUrl = ciCd.drillApiUrl.fromEnv("DRILL_API_URL").required("drillApiUrl")
-        val drillApiKey = ciCd.drillApiKey.fromEnv("DRILL_API_KEY")
-        val groupId = ciCd.groupId.required("groupId")
-        val appId = ciCd.appId.required("appId")
-        val baselineSearchStrategy = ciCd.baseline?.searchStrategy ?: SEARCH_BY_TAG
-        val baselineTagPattern = ciCd.baseline?.tagPattern ?: "*"
-        val baselineTargetRef = ciCd.baseline?.targetRef
+        val drillApiUrl = config.drillApiUrl.fromEnv("DRILL_API_URL").required("drillApiUrl")
+        val drillApiKey = config.drillApiKey.fromEnv("DRILL_API_KEY")
+        val groupId = config.groupId.required("groupId")
+        val appId = config.appId.required("appId")
+        val baselineSearchStrategy = config.baseline?.searchStrategy ?: SEARCH_BY_TAG
+        val baselineTagPattern = config.baseline?.tagPattern ?: "*"
+        val baselineTargetRef = config.baseline?.targetRef
 
         val reportService = ReportService(
             metricsClient = MetricsClientImpl(
@@ -59,7 +59,7 @@ fun Task.drillGenerateChangeTestingReport(ciCd: DrillCiCdProperties) {
                 appId = appId,
                 baselineSearchStrategy = baselineSearchStrategy,
                 baselineSearchCriteria = searchCriteria,
-                reportPath = File(project.buildDir, "/reports/drill").absolutePath
+                reportPath = File(project.buildDir, "/drill-reports").absolutePath
             )
         }
     }

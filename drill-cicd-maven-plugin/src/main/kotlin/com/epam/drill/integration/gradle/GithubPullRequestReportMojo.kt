@@ -23,7 +23,6 @@ import com.epam.drill.integration.common.util.required
 import com.epam.drill.integration.github.client.impl.GithubApiClientImpl
 import com.epam.drill.integration.github.service.GithubCiCdService
 import kotlinx.coroutines.runBlocking
-import org.apache.maven.plugin.AbstractMojo
 import org.apache.maven.plugins.annotations.LifecyclePhase
 import org.apache.maven.plugins.annotations.Mojo
 import org.apache.maven.plugins.annotations.Parameter
@@ -32,26 +31,17 @@ import java.io.File
 
 @Mojo(
     name = "githubPullRequestReport",
-    defaultPhase = LifecyclePhase.SITE,
+    defaultPhase = LifecyclePhase.NONE,
     requiresDependencyResolution = ResolutionScope.RUNTIME,
     threadSafe = true
 )
-class GithubPullRequestReportMojo : AbstractMojo() {
-
-    @Parameter(property = "drillApiUrl", required = true)
-    var drillApiUrl: String? = null
-
-    @Parameter(property = "drillApiKey")
-    var drillApiKey: String? = null
-
-    @Parameter(property = "groupId", required = true)
-    var groupId: String? = null
+class GithubPullRequestReportMojo : AbstractDrillMojo() {
 
     @Parameter(property = "appId", required = true)
     var appId: String? = null
 
     @Parameter(property = "github", required = true)
-    var github: DrillGithubProperties? = null
+    var github: GithubConfiguration? = null
 
     override fun execute() {
         val github = github.required("github")

@@ -27,15 +27,15 @@ import org.gradle.api.Task
 import java.io.File
 
 
-fun Task.drillGithubPullRequestReport(ciCd: DrillCiCdProperties) {
+fun Task.drillGithubPullRequestReport(config: DrillExtension) {
     doFirst {
-        val github = ciCd.github.required("github")
+        val github = config.github.required("github")
         val githubApiUrl = github.apiUrl.required("github.apiUrl")
         val githubToken = github.token.required("github.token")
-        val drillApiUrl = ciCd.drillApiUrl.fromEnv("DRILL_API_URL").required("drillApiUrl")
-        val drillApiKey = ciCd.drillApiKey.fromEnv("DRILL_API_KEY")
-        val groupId = ciCd.groupId.required("groupId")
-        val appId = ciCd.appId.required("appId")
+        val drillApiUrl = config.drillApiUrl.fromEnv("DRILL_API_URL").required("drillApiUrl")
+        val drillApiKey = config.drillApiKey.fromEnv("DRILL_API_KEY")
+        val groupId = config.groupId.required("groupId")
+        val appId = config.appId.required("appId")
         val eventFilePath = github.eventFilePath
             .fromEnv("GITHUB_EVENT_PATH")
             .required("github.eventFilePath")

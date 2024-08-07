@@ -23,13 +23,13 @@ import com.epam.drill.integration.common.util.required
 import kotlinx.coroutines.runBlocking
 import org.gradle.api.Task
 
-fun Task.drillSendBuildInfo(ciCd: DrillCiCdProperties) {
+fun Task.drillSendBuildInfo(config: DrillExtension) {
     doFirst {
-        val drillApiUrl = ciCd.drillApiUrl.fromEnv("DRILL_API_URL").required("drillApiUrl")
-        val drillApiKey = ciCd.drillApiKey.fromEnv("DRILL_API_KEY")
-        val groupId = ciCd.groupId.required("groupId")
-        val appId = ciCd.appId.required("appId")
-        val buildVersion = ciCd.buildVersion
+        val drillApiUrl = config.drillApiUrl.fromEnv("DRILL_API_URL").required("drillApiUrl")
+        val drillApiKey = config.drillApiKey.fromEnv("DRILL_API_KEY")
+        val groupId = config.groupId.required("groupId")
+        val appId = config.appId.required("appId")
+        val buildVersion = config.buildVersion
 
         val dataIngestClient = DataIngestClientImpl(
             drillApiUrl = drillApiUrl,

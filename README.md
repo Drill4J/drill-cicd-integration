@@ -5,13 +5,12 @@
 Tools for integration with CI/CD systems such as Gitlab and GitHub.
 
 ## Modules
-
-- **drill-cicd-common**: Common library
-- **drill-cicd-gitlab**: Gitlab integration services
-- **drill-cicd-github**: GitHub integration services
 - **drill-cicd-gradle-plugin**: Gradle plugin for CI/CD integration
-- **drill-cicd-maven-plugin**: Maven plugin for CI/CD integration 
+- **drill-cicd-maven-plugin**: Maven plugin for CI/CD integration
 - **drill-cicd-cli**: CLI Application for CI/CD integration
+- **drill-cicd-gitlab**: Gitlab integration library
+- **drill-cicd-github**: GitHub integration library
+- **drill-cicd-common**: Common library
 
 ## Build
 
@@ -47,7 +46,7 @@ plugins {
 Add general properties to your Gradle build file:
 
 ```kotlin
-drillCiCd {
+drill {
     //Drill4J group ID
     groupId = "realworld"
     //Drill4J application ID
@@ -68,7 +67,7 @@ Add general properties to your Drill4J plugin configuration:
 ```xml
 <plugin>
     <groupId>com.epam.drill.integration</groupId>
-    <artifactId>drill-cicd-maven-plugin</artifactId>
+    <artifactId>drill-maven-plugin</artifactId>
     <version>0.0.1</version>
     <configuration>
         <!-- Drill4J group ID -->
@@ -98,7 +97,7 @@ Add general properties to your Drill4J plugin configuration:
 
 General format of command to run Drill4J CI/CD App is:
 ```shell
-java -jar drill-cicd-0.0.1.jar [command] 
+java -jar drill-cli-0.0.1.jar [command] 
   #Drill4J group ID
   --groupId realworld
   #Drill4J application ID  
@@ -118,7 +117,7 @@ java -jar drill-cicd-0.0.1.jar [command]
 Add Gitlab integration properties to your Kotlin Gradle build file:
 
 ```kotlin
-drillCiCd {
+drill {
     //General properties
     ...
     
@@ -142,7 +141,7 @@ Add Gitlab integration properties to your Maven build file:
 ```xml
 <plugin>
     <groupId>com.epam.drill.integration</groupId>
-    <artifactId>drill-cicd-maven-plugin</artifactId>
+    <artifactId>drill-maven-plugin</artifactId>
     <version>0.0.1</version>
     <configuration>
         <!-- General properties -->
@@ -165,7 +164,7 @@ Set up executable goals:
 ```xml
 <plugin>
     <groupId>com.epam.drill.integration</groupId>
-    <artifactId>drill-cicd-maven-plugin</artifactId>
+    <artifactId>drill-maven-plugin</artifactId>
     <version>0.0.1</version>
     <configuration>
         ...
@@ -182,14 +181,14 @@ Set up executable goals:
 
 Run the Maven command in your merge request pipeline after a test stage:
 ```shell
-mvn drill-cicd:gitlabMergeRequestReport
+mvn drill:gitlabMergeRequestReport
 ```
 
 #### CLI App
 
 Run the CLI command in your merge request pipeline after a test stage:
 ```shell
-java -jar drill-cicd-0.0.1.jar gitlabMergeRequestReport
+java -jar drill-cli-0.0.1.jar gitlabMergeRequestReport
   #General options
   [general options]
   #Gitlab API url
@@ -204,7 +203,7 @@ java -jar drill-cicd-0.0.1.jar gitlabMergeRequestReport
 
 Add GitHub integration properties to your Kotlin Gradle build file:
 ```kotlin
-drillCiCd {
+drill {
     //General properties
     ...
     
@@ -227,7 +226,7 @@ Add GitHub properties to your Maven build file:
 
 <plugin>
     <groupId>com.epam.drill.integration</groupId>
-    <artifactId>drill-cicd-maven-plugin</artifactId>
+    <artifactId>drill-maven-plugin</artifactId>
     <version>0.0.1</version>
     <configuration>
         <!-- General properties -->
@@ -248,7 +247,7 @@ Set up executable goals:
 ```xml
 <plugin>
     <groupId>com.epam.drill.integration</groupId>
-    <artifactId>drill-cicd-maven-plugin</artifactId>
+    <artifactId>drill-maven-plugin</artifactId>
     <version>0.0.1</version>
     <configuration>
         ...
@@ -265,14 +264,14 @@ Set up executable goals:
 
 Run the Maven command in your pull request workflow after a test stage:
 ```shell
-mvn drill-cicd:githubPullRequestReport
+mvn drill:githubPullRequestReport
 ```
 
 #### CLI App
 
 Run the CLI command in your pull request workflow after a test stage:
 ```shell
-java -jar drill-cicd-0.0.1.jar githubPullRequestReport
+java -jar drill-cli-0.0.1.jar githubPullRequestReport
   #General options
   [general options]
   #GitHub Token
@@ -285,7 +284,7 @@ java -jar drill-cicd-0.0.1.jar githubPullRequestReport
 
 Add information about a current build version to your Gradle build file:
 ```kotlin
-drillCiCd {
+drill {
     //General properties
     ...
     //Version of current build (optional)
@@ -304,7 +303,7 @@ Add information about a current build version to your Maven build file:
 ```xml
 <plugin>
     <groupId>com.epam.drill.integration</groupId>
-    <artifactId>drill-cicd-maven-plugin</artifactId>
+    <artifactId>drill-maven-plugin</artifactId>
     <version>0.0.1</version>
     <configuration>
         <!-- General properties -->
@@ -323,7 +322,7 @@ Set up executable goals:
 ```xml
 <plugin>
     <groupId>com.epam.drill.integration</groupId>
-    <artifactId>drill-cicd-maven-plugin</artifactId>
+    <artifactId>drill-maven-plugin</artifactId>
     <version>0.0.1</version>
     <configuration>
         ...
@@ -340,14 +339,14 @@ Set up executable goals:
 
 Run the Maven command at the build stage of your CI/CD pipeline:
 ```shell
-mvn drill-cicd:sendBuildInfo
+mvn drill:sendBuildInfo
 ```
 
 #### CLI App
 
 Run the CLI command at the build stage of your CI/CD pipeline:
 ```shell
-java -jar drill-cicd-0.0.1.jar sendBuildInfo
+java -jar drill-cli-0.0.1.jar sendBuildInfo
   #General options
   [general options]
   #Version of current build (optional)
@@ -362,7 +361,7 @@ Choose a strategy for finding baseline commits to compare.
 
 Search by tags strategy:
 ```kotlin
-drillCiCd {
+drill {
     //General properties
     ...
     
@@ -376,7 +375,7 @@ drillCiCd {
 ```
 Search by merge base strategy:
 ```kotlin
-drillCiCd {
+drill {
     //General properties
     ...
     
@@ -394,7 +393,7 @@ Run the Gradle command after running the tests:
 ./gradlew drillGenerateChangeTestingReport
 ```
 
-Find a report file in `/build/reports/drill/` directory.
+Find a report file in `/build/drill-reports/` directory.
 
 #### Maven plugin
 
@@ -404,7 +403,7 @@ Search by tags strategy:
 ```xml
 <plugin>
     <groupId>com.epam.drill.integration</groupId>
-    <artifactId>drill-cicd-maven-plugin</artifactId>
+    <artifactId>drill-maven-plugin</artifactId>
     <version>0.0.1</version>
     <configuration>
         <!-- General properties -->
@@ -426,7 +425,7 @@ Search by merge base strategy:
 ```xml
 <plugin>
     <groupId>com.epam.drill.integration</groupId>
-    <artifactId>drill-cicd-maven-plugin</artifactId>
+    <artifactId>drill-maven-plugin</artifactId>
     <version>0.0.1</version>
     <configuration>
         <!-- General properties -->
@@ -449,7 +448,7 @@ Set up executable goals:
 ```xml
 <plugin>
     <groupId>com.epam.drill.integration</groupId>
-    <artifactId>drill-cicd-maven-plugin</artifactId>
+    <artifactId>drill-maven-plugin</artifactId>
     <version>0.0.1</version>
     <configuration>
         ...
@@ -466,10 +465,10 @@ Set up executable goals:
 
 Run the Maven command after running the tests:
 ```shell
-mvn drill-cicd:generateChangeTestingReport
+mvn drill:generateChangeTestingReport
 ```
 
-Find a report file in `/target/reports/drill/` directory.
+Find a report file in `/target/drill-reports/` directory.
 
 #### CLI App
 
@@ -478,7 +477,7 @@ run the CLI command after running the tests:
 
 Search by tags strategy:
 ```shell
-java -jar drill-cicd-0.0.1.jar generateChangeTestingReport
+java -jar drill-cli-0.0.1.jar generateChangeTestingReport
   #General options
   [general options]
   #Strategy used to find a baseline commit (optional, 'SEARCH_BY_TAG' by default) 
@@ -489,7 +488,7 @@ java -jar drill-cicd-0.0.1.jar generateChangeTestingReport
 
 Search by merge base strategy:
 ```shell
-java -jar drill-cicd-0.0.1.jar generateChangeTestingReport
+java -jar drill-cli-0.0.1.jar generateChangeTestingReport
   #General options
   [general options]
   #Strategy used to find a baseline commit (optional, 'SEARCH_BY_TAG' by default) 
@@ -499,3 +498,97 @@ java -jar drill-cicd-0.0.1.jar generateChangeTestingReport
 ```
 
 Find a report file in a current directory.
+
+
+### Running tests using Drill4J
+
+Drill4J allows you to run tests by collecting code coverage 
+and linking them to specific tests.
+
+#### Gradle plugin
+
+Enable running Drill4J Agents to your Gradle file:
+```kotlin
+drill {
+    //General properties
+    ...
+    //Prefixes of the Java packages from which the coverage will be collected
+    packagePrefixes = ["some/package"]
+
+    //Enables test executions collection
+    enableTestAgent {
+        //Set the version of the Drill4J Java Autotest Agent you want to use
+        //See all versions here https://github.com/Drill4J/autotest-agent/releases
+        version = "0.23.*"
+    }
+    //Enables code coverage collection
+    enableAppAgent {
+        //Set the version of the Drill4J Java Application Agent you want to use
+        //See all versions here https://github.com/Drill4J/java-agent/releases
+        version = "0.9.*"
+    }
+}
+```
+
+Run Gradle tests:
+```shell
+./gradlew test
+```
+
+#### Maven plugin
+
+Enable running Drill4J Agents to your Maven file:
+```xml
+<plugin>
+    <groupId>com.epam.drill.integration</groupId>
+    <artifactId>drill-maven-plugin</artifactId>
+    <version>0.0.1</version>
+    <configuration>
+        <!-- General properties -->
+        ...
+        <!-- Prefixes of the Java packages from which the coverage will be collected (comma separator) -->
+        <packagePrefixes>com/realworld</packagePrefixes>
+        
+        <!-- Enables test executions collection -->
+        <testAgent>
+            <!-- Set the version of the Drill4J Java Autotest Agent you want to use -->
+            <!-- See all versions here https://github.com/Drill4J/autotest-agent/releases -->
+            <version>0.23.*</version>
+        </testAgent>
+        <!-- Enables code coverage collection -->
+        <appAgent>
+            <!-- Set the version of the Drill4J Java Application Agent you want to use -->
+            <!-- See all versions here https://github.com/Drill4J/java-agent/releases -->
+            <version>0.9.*</version>
+        </appAgent>
+    </configuration>
+    <executions>
+        ...
+    </executions>
+</plugin>
+```
+
+Set up executable goals:
+```xml
+<plugin>
+    <groupId>com.epam.drill.integration</groupId>
+    <artifactId>drill-maven-plugin</artifactId>
+    <version>0.0.1</version>
+    <configuration>
+        ...
+    </configuration>
+    <executions>
+        <execution>
+            <goals>
+                <goal>enableTestAgent</goal>
+                <goal>enableAppAgent</goal>
+            </goals>
+        </execution>
+    </executions>
+</plugin>
+```
+
+Run the Maven tests:
+```shell
+mvn clean test
+```

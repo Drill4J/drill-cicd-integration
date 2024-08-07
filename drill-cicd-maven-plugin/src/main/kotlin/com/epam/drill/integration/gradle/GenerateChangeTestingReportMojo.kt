@@ -25,40 +25,26 @@ import com.epam.drill.integration.common.service.ReportService
 import com.epam.drill.integration.common.util.fromEnv
 import com.epam.drill.integration.common.util.required
 import kotlinx.coroutines.runBlocking
-import org.apache.maven.plugin.AbstractMojo
 import org.apache.maven.plugins.annotations.LifecyclePhase
 import org.apache.maven.plugins.annotations.Mojo
 import org.apache.maven.plugins.annotations.Parameter
 import org.apache.maven.plugins.annotations.ResolutionScope
-import org.apache.maven.project.MavenProject
 import java.io.File
 
 
 @Mojo(
     name = "generateChangeTestingReport",
-    defaultPhase = LifecyclePhase.SITE,
+    defaultPhase = LifecyclePhase.NONE,
     requiresDependencyResolution = ResolutionScope.RUNTIME,
     threadSafe = true
 )
-class GenerateChangeTestingReportMojo : AbstractMojo() {
-
-    @Parameter(property = "drillApiUrl", required = true)
-    var drillApiUrl: String? = null
-
-    @Parameter(property = "drillApiKey")
-    var drillApiKey: String? = null
-
-    @Parameter(property = "groupId", required = true)
-    var groupId: String? = null
+class GenerateChangeTestingReportMojo : AbstractDrillMojo() {
 
     @Parameter(property = "appId", required = true)
     var appId: String? = null
 
     @Parameter(property = "baseline", required = true)
-    var baseline: DrillBaselineProperties? = null
-
-    @Parameter(readonly = true, defaultValue = "\${project}")
-    private val project: MavenProject? = null
+    var baseline: BaselineConfiguration? = null
 
     override fun execute() {
         val drillApiUrl = drillApiUrl.fromEnv("DRILL_API_URL").required("drillApiUrl")
@@ -89,7 +75,7 @@ class GenerateChangeTestingReportMojo : AbstractMojo() {
                 appId = appId,
                 baselineSearchStrategy = baselineSearchStrategy,
                 baselineSearchCriteria = searchCriteria,
-                reportPath = File(project?.build?.directory, "/reports/drill").absolutePath
+                reportPath = File(project.build?.directory, "/drill-reports").absolutePath
             )
         }
     }
