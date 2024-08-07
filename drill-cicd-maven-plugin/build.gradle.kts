@@ -12,7 +12,6 @@ plugins {
 }
 
 group = "com.epam.drill.integration"
-version = rootProject.version
 
 val kotlinVersion: String by parent!!.extra
 val ktorVersion: String by parent!!.extra
@@ -33,8 +32,6 @@ dependencies {
     implementation("org.apache.maven:maven-core:3.8.1")
     implementation("org.apache.maven:maven-plugin-api:3.8.1")
     implementation("org.apache.maven.plugin-tools:maven-plugin-annotations:3.6.1")
-    implementation("org.apache.maven.plugins:maven-surefire-plugin:2.22.2")
-    implementation("org.twdata.maven:mojo-executor:2.3.2")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCoroutinesVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:$kotlinxCoroutinesVersion")

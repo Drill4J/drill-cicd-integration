@@ -23,20 +23,21 @@ import com.epam.drill.integration.common.client.impl.MetricsClientImpl
 import com.epam.drill.integration.common.git.impl.GitClientImpl
 import com.epam.drill.integration.common.report.impl.MarkdownReportGenerator
 import com.epam.drill.integration.common.service.ReportService
+import com.epam.drill.integration.common.util.fromEnv
 import com.epam.drill.integration.common.util.required
 import kotlinx.coroutines.runBlocking
 import org.gradle.api.Task
 import java.io.File
 
-fun Task.drillGenerateChangeTestingReport(config: DrillExtension) {
+fun Task.drillGenerateChangeTestingReport(config: DrillPluginExtension) {
     doFirst {
-        val drillApiUrl = config.drillApiUrl.required("drillApiUrl")
-        val drillApiKey = config.drillApiKey
+        val drillApiUrl = config.drillApiUrl.fromEnv("DRILL_API_URL").required("drillApiUrl")
+        val drillApiKey = config.drillApiKey.fromEnv("DRILL_API_KEY")
         val groupId = config.groupId.required("groupId")
         val appId = config.appId.required("appId")
-        val baselineSearchStrategy = config.baseline.searchStrategy ?: SEARCH_BY_TAG
-        val baselineTagPattern = config.baseline.tagPattern ?: "*"
-        val baselineTargetRef = config.baseline.targetRef
+        val baselineSearchStrategy = config.baseline?.searchStrategy ?: SEARCH_BY_TAG
+        val baselineTagPattern = config.baseline?.tagPattern ?: "*"
+        val baselineTargetRef = config.baseline?.targetRef
 
         val reportService = ReportService(
             metricsClient = MetricsClientImpl(
