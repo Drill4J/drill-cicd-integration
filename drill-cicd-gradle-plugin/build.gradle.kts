@@ -17,7 +17,6 @@ version = rootProject.version
 val kotlinxCoroutinesVersion: String by parent!!.extra
 
 repositories {
-    mavenLocal()
     mavenCentral()
 }
 
@@ -43,11 +42,12 @@ dependencies {
     compileOnly(gradleApi())
     compileOnly((kotlin("stdlib-jdk8")))
     compileOnly((kotlin("gradle-plugin")))
+
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCoroutinesVersion")
+
     implementation(project(":drill-cicd-common"))
     implementation(project(":drill-cicd-gitlab"))
     implementation(project(":drill-cicd-github"))
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCoroutinesVersion")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:$kotlinxCoroutinesVersion")
 }
 
 tasks {

@@ -17,7 +17,6 @@ val jarMainClassName = "com.epam.drill.integration.cli.CliAppKt"
 val logbackClassicVersion: String by parent!!.extra
 
 repositories {
-    mavenLocal()
     mavenCentral()
 }
 
@@ -50,15 +49,16 @@ tasks {
 
 
 dependencies {
+    compileOnly((kotlin("stdlib-jdk8")))
+
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCoroutinesVersion")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:$kotlinxCoroutinesVersion")
     implementation("com.github.ajalt.clikt:clikt:3.5.4")
     implementation("org.slf4j:slf4j-api:2.0.0")
     implementation("ch.qos.logback:logback-classic:$logbackClassicVersion")
+
     implementation(project(":drill-cicd-common"))
     implementation(project(":drill-cicd-gitlab"))
     implementation(project(":drill-cicd-github"))
-    compileOnly((kotlin("stdlib-jdk8")))
 }
 
 @Suppress("UNUSED_VARIABLE")

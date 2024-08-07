@@ -5,14 +5,15 @@
     <groupId>com.epam.drill.integration</groupId>
     <artifactId>drill-maven-plugin</artifactId>
     <packaging>maven-plugin</packaging>
-    <properties>
-        <kotlin.version>1.8.20</kotlin.version>
-        <microutils.logging.version>3.0.5</microutils.logging.version>
-        <ktor.version>1.6.8</ktor.version>
-    </properties>
     <name>Drill cicd integration</name>
     <url>http://maven.apache.org</url>
     <version>${drill.plugin.version}</version>
+    <properties>
+        <kotlin.version>1.8.20</kotlin.version>
+        <ktor.version>1.6.8</ktor.version>
+        <microutils.logging.version>3.0.5</microutils.logging.version>
+        <kotlinx.serialization.version>1.5.1</kotlinx.serialization.version>
+    </properties>
     <build>
         <sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
         <plugins>
@@ -35,9 +36,9 @@
                         </goals>
                         <configuration>
                             <sources>
-                                <source>${project.basedir}/../drill-cicd-common/src/main/kotlin</source>
-                                <source>${project.basedir}/../drill-cicd-github/src/main/kotlin</source>
-                                <source>${project.basedir}/../drill-cicd-gitlab/src/main/kotlin</source>
+                                <source>${project.root.dir}/drill-cicd-common/src/main/kotlin</source>
+                                <source>${project.root.dir}/drill-cicd-github/src/main/kotlin</source>
+                                <source>${project.root.dir}/drill-cicd-gitlab/src/main/kotlin</source>
                             </sources>
                         </configuration>
                     </execution>
@@ -79,9 +80,6 @@
                             <sourceDirs>
                                 <sourceDir>src/main/kotlin</sourceDir>
                             </sourceDirs>
-                            <args>
-                                <arg>-opt-in=kotlinx.serialization.ExperimentalSerializationApi</arg>
-                            </args>
                         </configuration>
                     </execution>
                     <execution>
@@ -189,12 +187,12 @@
         <dependency>
             <groupId>org.jetbrains.kotlinx</groupId>
             <artifactId>kotlinx-serialization-json-jvm</artifactId>
-            <version>1.5.1</version>
+            <version>${kotlinx.serialization.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jetbrains.kotlinx</groupId>
             <artifactId>kotlinx-serialization-core-jvm</artifactId>
-            <version>1.5.1</version>
+            <version>${kotlinx.serialization.version}</version>
         </dependency>
         <dependency>
             <groupId>io.ktor</groupId>

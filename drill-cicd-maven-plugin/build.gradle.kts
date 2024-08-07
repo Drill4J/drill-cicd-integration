@@ -20,7 +20,6 @@ val kotlinxSerializationVersion: String by parent!!.extra
 val microutilsLoggingVersion: String by parent!!.extra
 
 repositories {
-    mavenLocal()
     mavenCentral()
 }
 
@@ -64,7 +63,16 @@ tasks {
     }
     val mvnInstall by registering(Exec::class) {
         val args = if (HostManager.hostIsMingw) arrayOf("cmd", "/c", "mvnw.cmd") else arrayOf("sh", "./mvnw")
-        commandLine(*args, "install", "-Ddrill.plugin.version=$version", "-Dkotlin.version=$kotlinVersion")
+        commandLine(
+            *args, "install",
+            "-Ddrill.plugin.version=$version",
+            "-Dkotlin.version=$kotlinVersion",
+            "-Dproject.root.dir=${project.rootDir}",
+            "-Dkotlinx.coroutines.version=$kotlinxCoroutinesVersion",
+            "-Dktor.version=$ktorVersion",
+            "-Dmicroutils.logging.version=$microutilsLoggingVersion",
+            "-Dkotlinx.serialization.version=$kotlinxSerializationVersion"
+        )
         workingDir(project.projectDir)
         standardOutput = System.out
         outputs.file("target/drill-maven-plugin-$version.jar")
@@ -92,64 +100,6 @@ publishing {
                         appendNode("groupId", "org.jetbrains.kotlin")
                         appendNode("artifactId", "kotlin-stdlib")
                         appendNode("version", kotlinVersion)
-                    }
-                    this.appendNode("dependency").apply {
-                        appendNode("groupId", "org.jetbrains.kotlin")
-                        appendNode("artifactId", "kotlin-reflect")
-                        appendNode("version", kotlinVersion)
-                    }
-                    // Ktor
-                    this.appendNode("dependency").apply {
-                        appendNode("groupId", "io.ktor")
-                        appendNode("artifactId", "ktor-client-cio")
-                        appendNode("version", ktorVersion)
-                    }
-                    this.appendNode("dependency").apply {
-                        appendNode("groupId", "io.ktor")
-                        appendNode("artifactId", "ktor-client-cio-jvm")
-                        appendNode("version", ktorVersion)
-                    }
-                    this.appendNode("dependency").apply {
-                        appendNode("groupId", "io.ktor")
-                        appendNode("artifactId", "ktor-client-json-jvm")
-                        appendNode("version", ktorVersion)
-                    }
-                    this.appendNode("dependency").apply {
-                        appendNode("groupId", "io.ktor")
-                        appendNode("artifactId", "ktor-client-core-jvm")
-                        appendNode("version", ktorVersion)
-                    }
-                    // Logging
-                    this.appendNode("dependency").apply {
-                        appendNode("groupId", "io.ktor")
-                        appendNode("artifactId", "ktor-client-logging-jvm")
-                        appendNode("version", ktorVersion)
-                    }
-                    this.appendNode("dependency").apply {
-                        appendNode("groupId", "io.github.microutils")
-                        appendNode("artifactId", "kotlin-logging-jvm")
-                        appendNode("version", microutilsLoggingVersion)
-                    }
-                    // Serialization
-                    this.appendNode("dependency").apply {
-                        appendNode("groupId", "io.ktor")
-                        appendNode("artifactId", "ktor-client-serialization")
-                        appendNode("version", ktorVersion)
-                    }
-                    this.appendNode("dependency").apply {
-                        appendNode("groupId", "io.ktor")
-                        appendNode("artifactId", "ktor-client-serialization-jvm")
-                        appendNode("version", ktorVersion)
-                    }
-                    this.appendNode("dependency").apply {
-                        appendNode("groupId", "org.jetbrains.kotlinx")
-                        appendNode("artifactId", "kotlinx-serialization-core-jvm")
-                        appendNode("version", "1.5.1")
-                    }
-                    this.appendNode("dependency").apply {
-                        appendNode("groupId", "org.jetbrains.kotlinx")
-                        appendNode("artifactId", "kotlinx-serialization-json-jvm")
-                        appendNode("version", "1.5.1")
                     }
                 }
             }
