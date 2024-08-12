@@ -18,6 +18,8 @@ package com.epam.drill.integration.common.agent.config
 class AppAgentConfiguration : AgentConfiguration() {
     var appId: String? = null
     var packagePrefixes: Array<String> = emptyArray()
+    var buildVersion: String? = null
+    var commitSha: String? = null
 
     override val githubRepository: String = "Drill4J/java-agent"
     override val agentName: String = "appAgent"
@@ -26,6 +28,8 @@ class AppAgentConfiguration : AgentConfiguration() {
         return super.toAgentArguments().apply {
             this[AppAgentConfiguration::appId.name] = appId
             this[AppAgentConfiguration::packagePrefixes.name] = packagePrefixes.joinToString(";")
+            this[AppAgentConfiguration::buildVersion.name] = buildVersion
+            this[AppAgentConfiguration::commitSha.name] = commitSha
         }
     }
 

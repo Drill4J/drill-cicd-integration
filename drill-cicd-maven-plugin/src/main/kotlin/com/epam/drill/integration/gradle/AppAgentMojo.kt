@@ -16,6 +16,7 @@
 package com.epam.drill.integration.gradle
 
 import com.epam.drill.integration.common.agent.config.AppAgentConfiguration
+import com.epam.drill.integration.common.git.impl.GitClientImpl
 import com.epam.drill.integration.common.util.required
 import org.apache.maven.plugins.annotations.LifecyclePhase
 import org.apache.maven.plugins.annotations.Mojo
@@ -36,6 +37,10 @@ class AppAgentMojo : AbstractAgentMojo() {
     @Parameter(property = "packagePrefixes", required = true)
     var packagePrefixes: String? = null
 
+    @Parameter(property = "buildVersion", required = false)
+    var buildVersion: String? = null
+
+    private val gitClient = GitClientImpl()
 
     override fun getAgentConfig() = AppAgentConfiguration().apply {
         val mavenConfig = this@AppAgentMojo
@@ -50,5 +55,11 @@ class AppAgentMojo : AbstractAgentMojo() {
         additionalParams = mapOf(
             "scanClassPath" to "target/classes;target/test-classes"
         ) + (additionalParams ?: emptyMap())
+        buildVersion = mavenConfig.buildVersion
+        commitSha = runCatching {
+            gitClient.getCurrentCommitSha()
+        }.onFailure {
+            log.warn("Cannot get current commit sha, commitSha parameter will be skipped: ${it.message}")
+        }.getOrNull()
     }
 }
