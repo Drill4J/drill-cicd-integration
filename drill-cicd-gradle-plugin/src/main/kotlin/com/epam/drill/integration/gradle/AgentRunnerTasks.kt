@@ -20,6 +20,7 @@ import com.epam.drill.integration.common.agent.config.AgentConfiguration
 import com.epam.drill.integration.common.agent.config.TestAgentConfiguration
 import com.epam.drill.integration.common.agent.config.AppAgentConfiguration
 import com.epam.drill.integration.common.agent.impl.AgentInstallerImpl
+import com.epam.drill.integration.common.git.impl.GitClientImpl
 import com.epam.drill.integration.common.util.fromEnv
 import com.epam.drill.integration.common.util.required
 import kotlinx.coroutines.runBlocking
@@ -34,6 +35,7 @@ fun modifyToRunDrillAgents(
     pluginConfig: DrillPluginExtension
 ) {
     val taskConfig = task.extensions.findByType(DrillTaskExtension::class.java)
+    val gitClient = GitClientImpl()
 
     task.doFirst {
         logger.lifecycle("Task :${task.name} is modified by Drill")
@@ -59,6 +61,12 @@ fun modifyToRunDrillAgents(
                         mapGeneralAgentProperties(it, pluginConfig.appAgent, pluginConfig)
                         this.appId = pluginConfig.appId
                         this.packagePrefixes = pluginConfig.packagePrefixes
+                        this.buildVersion = pluginConfig.buildVersion
+                        this.commitSha = runCatching {
+                            gitClient.getCurrentCommitSha()
+                        }.onFailure {
+                            logger.warn("Unable to retrieve the current commit SHA. The 'commitSha' parameter will not be set. Error: ${it.message}")
+                        }.getOrNull()
                     }
                 }
         ).map { config ->
