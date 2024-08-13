@@ -59,7 +59,7 @@ class AppAgentMojo : AbstractAgentMojo() {
         commitSha = runCatching {
             gitClient.getCurrentCommitSha()
         }.onFailure {
-            log.warn("Cannot get current commit sha, commitSha parameter will be skipped: ${it.message}")
+            log.warn("Unable to retrieve the current commit SHA. The 'commitSha' parameter will not be set. Error: ${it.message}")
         }.getOrNull()
     }
 }

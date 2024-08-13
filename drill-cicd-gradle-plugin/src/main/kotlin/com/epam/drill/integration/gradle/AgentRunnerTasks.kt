@@ -65,7 +65,7 @@ fun modifyToRunDrillAgents(
                         this.commitSha = runCatching {
                             gitClient.getCurrentCommitSha()
                         }.onFailure {
-                            logger.warn("Cannot get current commit sha, commitSha parameter will be skipped: ${it.message}")
+                            logger.warn("Unable to retrieve the current commit SHA. The 'commitSha' parameter will not be set. Error: ${it.message}")
                         }.getOrNull()
                     }
                 }
