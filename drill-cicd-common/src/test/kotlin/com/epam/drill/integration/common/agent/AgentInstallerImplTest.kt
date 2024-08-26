@@ -18,15 +18,10 @@ package com.epam.drill.integration.common.agent
 import com.epam.drill.integration.common.agent.impl.AgentInstallerImpl
 import io.ktor.client.*
 import io.ktor.client.engine.mock.*
-import io.ktor.client.request.*
 import io.ktor.http.*
-import io.ktor.utils.io.*
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
-import java.lang.Thread.sleep
 import java.nio.file.Files
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
@@ -178,7 +173,7 @@ class AgentInstallerImplTest {
     }
 
     @Test
-    fun `given valid zip file, unzip should extract files`() {
+    fun `given valid zip file, unzip should extract files to directory where zip file located`() {
         val unzippedDir = Directory(testDownloadDir, "unzipped").also { it.mkdir() }
         val zipFile = File(unzippedDir, "agent.zip")
         listOf("file1.txt", "file2.so", "file3.jar").createZip(zipFile)
@@ -187,6 +182,19 @@ class AgentInstallerImplTest {
         val result = agentInstaller.unzip(zipFile)
 
         assertEquals(File(unzippedDir, zipFile.nameWithoutExtension), result)
+    }
+
+    @Test
+    fun `given valid zip file and destination directory, unzip should extract files to destination directory`() {
+        val zipDir = Directory(testDownloadDir, "zip").also { it.mkdir() }
+        val zipFile = File(zipDir, "agent.zip")
+        listOf("file1.txt", "file2.so", "file3.jar").createZip(zipFile)
+        val agentInstaller = AgentInstallerImpl()
+        val destinationDir = Directory(testDownloadDir, "unzipped").also { it.mkdir() }
+
+        val result = agentInstaller.unzip(zipFile, destinationDir)
+
+        assertEquals(File(destinationDir, zipFile.nameWithoutExtension), result)
     }
 
     @Test
