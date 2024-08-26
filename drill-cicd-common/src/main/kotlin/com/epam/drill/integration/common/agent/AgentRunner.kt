@@ -33,6 +33,7 @@ class AgentRunner(
         when {
             zipFile != null -> return getJvmOptionsByZipFile(
                 zipFile,
+                distDir,
                 agentArgs
             )
 
@@ -93,9 +94,11 @@ class AgentRunner(
 
     private fun getJvmOptionsByZipFile(
         zipFile: File,
+        destinationDir: Directory,
         agentArgs: Map<String, String?>
     ) = agentInstaller.unzip(
-        zipFile
+        zipFile,
+        destinationDir
     ).let { unzippedDir ->
         getJvmOptionsByUnzippedDir(unzippedDir, agentArgs)
     }

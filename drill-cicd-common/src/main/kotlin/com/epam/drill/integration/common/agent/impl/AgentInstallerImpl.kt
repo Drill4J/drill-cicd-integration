@@ -19,16 +19,11 @@ import com.epam.drill.integration.common.agent.*
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.cio.*
-import io.ktor.client.features.*
 import io.ktor.client.features.json.*
 import io.ktor.client.features.logging.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
-import io.ktor.util.cio.*
 import io.ktor.utils.io.*
-import io.ktor.utils.io.core.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
@@ -98,28 +93,29 @@ class AgentInstallerImpl : AgentInstaller {
         return file
     }
 
-    override fun unzip(zipFile: File): Directory {
+    override fun unzip(zipFile: File, destinationDir: Directory?): Directory {
         if (!zipFile.exists()) {
             throw IllegalStateException("File $zipFile doesn't exist")
         }
-        val destDir = Directory(zipFile.parentFile, zipFile.nameWithoutExtension)
-        if (!destDir.exists()) {
-            destDir.mkdirs()
+        val baseDir = destinationDir ?: zipFile.parentFile
+        val unzippedDir = Directory(baseDir, zipFile.nameWithoutExtension)
+        if (!unzippedDir.exists()) {
+            unzippedDir.mkdirs()
         }
         ZipFile(zipFile).use { zip ->
             zip.entries().asSequence().forEach { entry ->
                 if (entry.isDirectory) {
-                    File(destDir, entry.name).mkdirs()
+                    File(unzippedDir, entry.name).mkdirs()
                 } else {
                     zip.getInputStream(entry).use { input ->
-                        File(destDir, entry.name).outputStream().use { output ->
+                        File(unzippedDir, entry.name).outputStream().use { output ->
                             input.copyTo(output)
                         }
                     }
                 }
             }
         }
-        return destDir
+        return unzippedDir
     }
 
     override fun findAgentFile(unzippedDir: Directory, fileExtension: String): File? {
