@@ -27,10 +27,10 @@ import io.ktor.http.*
 private const val API_KEY_HEADER = "X-Api-Key"
 
 class DataIngestClientImpl(
-    private val drillApiUrl: String,
-    private val drillApiKey: String? = null,
+    private val apiUrl: String,
+    private val apiKey: String? = null,
 ) : DataIngestClient {
-    private val dataIngestUrl = "${drillApiUrl.removeSuffix("/")}/data-ingest"
+    private val dataIngestUrl = "${apiUrl.removeSuffix("/")}/data-ingest"
 
     private val client = HttpClient(CIO) {
         install(JsonFeature)
@@ -43,7 +43,7 @@ class DataIngestClientImpl(
         val url = "$dataIngestUrl/builds"
         client.put<Any?>(url) {
             contentType(ContentType.Application.Json)
-            drillApiKey?.let { apiKey ->
+            apiKey?.let { apiKey ->
                 headers {
                     append(API_KEY_HEADER, apiKey)
                 }

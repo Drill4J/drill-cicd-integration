@@ -42,15 +42,15 @@ class PostBuildInfoMojo : AbstractDrillMojo() {
     var buildVersion: String? = null
 
     override fun execute() {
-        val drillApiUrl = drillApiUrl.fromEnv("DRILL_API_URL").required("drillApiUrl")
-        val drillApiKey = drillApiKey.fromEnv("DRILL_API_KEY")
+        val apiUrl = apiUrl.fromEnv("API_URL").required("apiUrl")
+        val apiKey = apiKey.fromEnv("API_KEY")
         val groupId = groupId.required("groupId")
         val appId = appId.required("appId")
         val buildVersion = buildVersion
 
         val dataIngestClient = DataIngestClientImpl(
-            drillApiUrl = drillApiUrl,
-            drillApiKey = drillApiKey
+            apiUrl = apiUrl,
+            apiKey = apiKey
         )
         val gitClient = GitClientImpl()
 

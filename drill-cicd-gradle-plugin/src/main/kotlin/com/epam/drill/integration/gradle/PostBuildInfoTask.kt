@@ -25,15 +25,15 @@ import org.gradle.api.Task
 
 fun Task.drillSendBuildInfo(config: DrillPluginExtension) {
     doFirst {
-        val drillApiUrl = config.drillApiUrl.fromEnv("DRILL_API_URL").required("drillApiUrl")
-        val drillApiKey = config.drillApiKey.fromEnv("DRILL_API_KEY")
+        val apiUrl = config.apiUrl.fromEnv("API_URL").required("apiUrl")
+        val apiKey = config.apiKey.fromEnv("API_KEY")
         val groupId = config.groupId.required("groupId")
         val appId = config.appId.required("appId")
         val buildVersion = config.buildVersion
 
         val dataIngestClient = DataIngestClientImpl(
-            drillApiUrl = drillApiUrl,
-            drillApiKey = drillApiKey
+            apiUrl = apiUrl,
+            apiKey = apiKey
         )
         val gitClient = GitClientImpl()
 

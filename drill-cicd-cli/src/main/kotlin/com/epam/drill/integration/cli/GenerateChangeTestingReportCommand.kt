@@ -32,8 +32,8 @@ import com.github.ajalt.clikt.parameters.options.required
 import kotlinx.coroutines.runBlocking
 
 class GenerateChangeTestingReportCommand : CliktCommand(name = "generateChangeTestingReport") {
-    private val drillApiUrl by option("-drill-u", "--drillApiUrl", envvar = "DRILL_API_URL").required()
-    private val drillApiKey by option("-drill-k", "--drillApiKey", envvar = "DRILL_API_KEY")
+    private val apiUrl by option("-drill-u", "--apiUrl", envvar = "API_URL").required()
+    private val apiKey by option("-drill-k", "--apiKey", envvar = "API_KEY")
     private val groupId by option("-g", "--groupId", envvar = "DRILL_GROUP_ID").required()
     private val appId by option("-a", "--appId", envvar = "DRILL_APP_ID").required()
 
@@ -44,8 +44,8 @@ class GenerateChangeTestingReportCommand : CliktCommand(name = "generateChangeTe
     override fun run() {
         val reportService = ReportService(
             metricsClient = MetricsClientImpl(
-                drillApiUrl = drillApiUrl,
-                drillApiKey = drillApiKey
+                apiUrl = apiUrl,
+                apiKey = apiKey
             ),
             gitClient = GitClientImpl(),
             reportGenerator = MarkdownReportGenerator()

@@ -28,10 +28,10 @@ import mu.KotlinLogging
 private const val API_KEY_HEADER = "X-Api-Key"
 
 class MetricsClientImpl(
-    private val drillApiUrl: String,
-    private val drillApiKey: String? = null,
+    private val apiUrl: String,
+    private val apiKey: String? = null,
 ) : MetricsClient {
-    private val metricsUrl = "${drillApiUrl.removeSuffix("/")}/metrics"
+    private val metricsUrl = "${apiUrl.removeSuffix("/")}/metrics"
 
     private val client = HttpClient(CIO) {
         install(JsonFeature)
@@ -65,7 +65,7 @@ class MetricsClientImpl(
             parameter("coverageThreshold", coverageThreshold)
 
             contentType(ContentType.Application.Json)
-            drillApiKey?.let { apiKey ->
+            apiKey?.let { apiKey ->
                 headers {
                     append(API_KEY_HEADER, apiKey)
                 }

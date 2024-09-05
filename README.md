@@ -52,9 +52,9 @@ drill {
     //Drill4J application ID
     appId = "realworld-backend"
     //Drill4J API url
-    drillApiUrl = "http://localhost:8090/api"
+    apiUrl = "http://localhost:8090/api"
     //Drill4J Api Key
-    drillApiKey = "your-drill-api-key-here"
+    apiKey = "your-drill-api-key-here"
     //Other settings
     ...
 }
@@ -75,9 +75,9 @@ Add general properties to your Drill4J plugin configuration:
         <!-- Drill4J application ID -->
         <appId>realworld-backend</appId>
         <!-- Drill4J API url -->
-        <drillApiUrl>http://localhost:8090/api</drillApiUrl>
+        <apiUrl>http://localhost:8090/api</apiUrl>
         <!-- Drill4J Api Key -->
-        <drillApiKey>your-drill-api-key-here</drillApiKey>
+        <apiKey>your-drill-api-key-here</apiKey>
         
         <!-- Other settings -->
         ...
@@ -103,9 +103,9 @@ java -jar drill-cli-0.0.1.jar [command]
   #Drill4J application ID  
   --appId realworld-backend 
   #Drill4J API url
-  --drillApiUrl http://localhost:8090/api
+  --apiUrl http://localhost:8090/api
   #Drill4J Api Key
-  --drillApiKey your-drill-api-key-here
+  --apiKey your-drill-api-key-here
   #Other options
   [other options]
 ```

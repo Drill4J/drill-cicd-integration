@@ -18,8 +18,8 @@ package com.epam.drill.integration.common.agent.config
 import java.io.File
 
 abstract class AgentConfiguration {
-    var drillApiUrl: String? = null
-    var drillApiKey: String? = null
+    var apiUrl: String? = null
+    var apiKey: String? = null
     var groupId: String? = null
 
     var logLevel: String? = null
@@ -35,8 +35,8 @@ abstract class AgentConfiguration {
     abstract val agentName: String
 
     open fun toAgentArguments() = mutableMapOf<String, String?>().apply {
-        this[AgentConfiguration::drillApiUrl.name] = drillApiUrl
-        this[AgentConfiguration::drillApiKey.name] = drillApiKey
+        this[AgentConfiguration::apiUrl.name] = apiUrl
+        this[AgentConfiguration::apiKey.name] = apiKey
         this[AgentConfiguration::groupId.name] = groupId
         this[AgentConfiguration::logLevel.name] = logLevel
         this[AgentConfiguration::logFile.name] = logFile?.absolutePath
