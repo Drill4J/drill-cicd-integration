@@ -29,8 +29,8 @@ fun Task.drillGitlabMergeRequestReportTask(config: DrillPluginExtension) {
         val gitlab = config.gitlab.required("gitlab")
         val gitlabApiUrl = gitlab.apiUrl.required("gitlab.apiUrl")
         val gitlabPrivateToken = gitlab.privateToken
-        val drillApiUrl = config.drillApiUrl.fromEnv("DRILL_API_URL").required("drillApiUrl")
-        val drillApiKey = config.drillApiKey.fromEnv("DRILL_API_KEY")
+        val apiUrl = config.apiUrl.fromEnv("DRILL_API_URL").required("apiUrl")
+        val apiKey = config.apiKey.fromEnv("DRILL_API_KEY")
         val groupId = config.groupId.required("groupId")
         val appId = config.appId.required("appId")
         val gitlabProjectId = gitlab.projectId.required("gitlab.projectId")
@@ -50,8 +50,8 @@ fun Task.drillGitlabMergeRequestReportTask(config: DrillPluginExtension) {
                 gitlabPrivateToken
             ),
             MetricsClientImpl(
-                drillApiUrl,
-                drillApiKey
+                apiUrl,
+                apiKey
             ),
             MarkdownReportGenerator()
         )

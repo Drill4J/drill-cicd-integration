@@ -24,8 +24,8 @@ import com.github.ajalt.clikt.parameters.options.required
 import kotlinx.coroutines.runBlocking
 
 class SendBuildInfoCommand : CliktCommand(name = "sendBuildInfo") {
-    private val drillApiUrl by option("-drill-u", "--drillApiUrl", envvar = "DRILL_API_URL").required()
-    private val drillApiKey by option("-drill-k", "--drillApiKey", envvar = "DRILL_API_KEY")
+    private val apiUrl by option("-drill-u", "--apiUrl", envvar = "DRILL_API_URL").required()
+    private val apiKey by option("-drill-k", "--apiKey", envvar = "DRILL_API_KEY")
     private val groupId by option("-g", "--groupId", envvar = "DRILL_GROUP_ID").required()
     private val appId by option("-a", "--appId", envvar = "DRILL_APP_ID").required()
     private val buildVersion by option("-v", "--buildVersion", envvar = "DRILL_BUILD_VERSION")
@@ -33,8 +33,8 @@ class SendBuildInfoCommand : CliktCommand(name = "sendBuildInfo") {
     override fun run() {
         echo("Posting Drill4J Build Info...")
         val drillApiClient = DataIngestClientImpl(
-            drillApiUrl = drillApiUrl,
-            drillApiKey = drillApiKey
+            apiUrl = apiUrl,
+            apiKey = apiKey
         )
         val gitClient = GitClientImpl()
 

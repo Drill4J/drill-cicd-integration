@@ -47,8 +47,8 @@ class GithubPullRequestReportMojo : AbstractDrillMojo() {
         val github = github.required("github")
         val githubApiUrl = github.apiUrl.required("github.apiUrl")
         val githubToken = github.token.required("github.token")
-        val drillApiUrl = drillApiUrl.fromEnv("DRILL_API_URL").required("drillApiUrl")
-        val drillApiKey = drillApiKey.fromEnv("DRILL_API_KEY")
+        val apiUrl = apiUrl.fromEnv("DRILL_API_URL").required("apiUrl")
+        val apiKey = apiKey.fromEnv("DRILL_API_KEY")
         val groupId = groupId.required("groupId")
         val appId = appId.required("appId")
         val eventFilePath = github.eventFilePath
@@ -61,8 +61,8 @@ class GithubPullRequestReportMojo : AbstractDrillMojo() {
                 githubToken,
             ),
             MetricsClientImpl(
-                drillApiUrl,
-                drillApiKey
+                apiUrl,
+                apiKey
             ),
             MarkdownReportGenerator(),
             GitClientImpl()

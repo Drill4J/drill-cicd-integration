@@ -19,8 +19,8 @@ import com.epam.drill.integration.common.baseline.BaselineSearchStrategy
 import org.gradle.api.Action
 
 open class DrillPluginExtension(
-    var drillApiUrl: String? = null,
-    var drillApiKey: String? = null,
+    var apiUrl: String? = null,
+    var apiKey: String? = null,
     var groupId: String? = null,
     var appId: String? = null,
     var buildVersion: String? = null,

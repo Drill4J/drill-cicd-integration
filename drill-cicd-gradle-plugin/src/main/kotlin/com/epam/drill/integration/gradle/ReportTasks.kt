@@ -31,8 +31,8 @@ import java.io.File
 
 fun Task.drillGenerateChangeTestingReport(config: DrillPluginExtension) {
     doFirst {
-        val drillApiUrl = config.drillApiUrl.fromEnv("DRILL_API_URL").required("drillApiUrl")
-        val drillApiKey = config.drillApiKey.fromEnv("DRILL_API_KEY")
+        val apiUrl = config.apiUrl.fromEnv("DRILL_API_URL").required("apiUrl")
+        val apiKey = config.apiKey.fromEnv("DRILL_API_KEY")
         val groupId = config.groupId.required("groupId")
         val appId = config.appId.required("appId")
         val baselineSearchStrategy = config.baseline?.searchStrategy ?: SEARCH_BY_TAG
@@ -41,8 +41,8 @@ fun Task.drillGenerateChangeTestingReport(config: DrillPluginExtension) {
 
         val reportService = ReportService(
             metricsClient = MetricsClientImpl(
-                drillApiUrl = drillApiUrl,
-                drillApiKey = drillApiKey
+                apiUrl = apiUrl,
+                apiKey = apiKey
             ),
             gitClient = GitClientImpl(),
             reportGenerator = MarkdownReportGenerator()

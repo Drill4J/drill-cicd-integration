@@ -23,11 +23,11 @@ abstract class AbstractDrillMojo : AbstractMojo() {
     @Parameter(defaultValue = "\${project}", required = true, readonly = true)
     protected lateinit var project: MavenProject
 
-    @Parameter(property = "drillApiUrl", required = true)
-    var drillApiUrl: String? = null
+    @Parameter(property = "apiUrl", required = true)
+    var apiUrl: String? = null
 
-    @Parameter(property = "drillApiKey")
-    var drillApiKey: String? = null
+    @Parameter(property = "apiKey")
+    var apiKey: String? = null
 
     @Parameter(property = "groupId", required = true)
     var groupId: String? = null

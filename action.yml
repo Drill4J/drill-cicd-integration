@@ -4,10 +4,10 @@ branding:
   icon: info
   color: blue
 inputs:
-  drill_api_url:
+  api_url:
     description: "Drill4J API URL"
     required: true
-  drill_api_key:
+  api_key:
     description: "Drill4J API key"
     required: true
   group_id:

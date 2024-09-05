@@ -19,8 +19,8 @@ To use this action, follow these steps:
    - name: Drill4J Github Action
      uses: Drill4J/drill-cicd-integration@v0.0.1
      with:
-       drill_api_url: ${{ matrix.config.drill-admin-address }}
-       drill_api_key: ${{ secrets.DRILL_API_KEY }}
+       api_url: ${{ matrix.config.drill-admin-address }}
+       api_key: ${{ secrets.DRILL_API_KEY }}
        group_id: ${{ matrix.config.drill-group-id }}
        agent_id: ${{ matrix.config.drill-api-agent-id }}
        github_token: ${{ secrets.TOKEN }}

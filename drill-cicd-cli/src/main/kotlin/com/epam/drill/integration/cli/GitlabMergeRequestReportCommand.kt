@@ -25,8 +25,8 @@ import com.github.ajalt.clikt.parameters.options.required
 import kotlinx.coroutines.runBlocking
 
 class GitlabMergeRequestReportCommand : CliktCommand(name = "gitlabMergeRequestReport") {
-    private val drillApiUrl by option("-drill-u", "--drillApiUrl", envvar = "DRILL_API_URL").required()
-    private val drillApiKey by option("-drill-k", "--drillApiKey", envvar = "DRILL_API_KEY")
+    private val apiUrl by option("-drill-u", "--apiUrl", envvar = "DRILL_API_URL").required()
+    private val apiKey by option("-drill-k", "--apiKey", envvar = "DRILL_API_KEY")
     private val groupId by option("-g", "--groupId", envvar = "DRILL_GROUP_ID").required()
     private val appId by option("-a", "--appId", envvar = "DRILL_APP_ID").required()
     private val commitSha by option("-c", "--commitSha", envvar = "CI_COMMIT_SHA").required()
@@ -40,7 +40,7 @@ class GitlabMergeRequestReportCommand : CliktCommand(name = "gitlabMergeRequestR
         echo("Posting Drill4J Merge Request Report to Gitlab...")
         val gitlabCiCdService = GitlabCiCdService(
             GitlabApiClientV4Impl(gitlabApiUrl, gitlabPrivateToken),
-            MetricsClientImpl(drillApiUrl, drillApiKey),
+            MetricsClientImpl(apiUrl, apiKey),
             MarkdownReportGenerator()
         )
         runBlocking {
