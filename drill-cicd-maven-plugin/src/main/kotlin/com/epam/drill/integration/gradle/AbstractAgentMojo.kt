@@ -60,8 +60,8 @@ fun AgentConfiguration.setGeneralAgentProperties(
     logLevel = mavenAgentConfig.logLevel
     logFile = mavenAgentConfig.logFile?.let { File(it) }
 
-    apiUrl = mavenGeneralConfig.apiUrl.fromEnv("API_URL").required("apiUrl")
-    apiKey = mavenGeneralConfig.apiKey.fromEnv("API_KEY")
+    apiUrl = mavenGeneralConfig.apiUrl.fromEnv("DRILL_API_URL").required("apiUrl")
+    apiKey = mavenGeneralConfig.apiKey.fromEnv("DRILL_API_KEY")
     groupId = mavenGeneralConfig.groupId.required("groupId")
 
     additionalParams = mavenAgentConfig.additionalParams

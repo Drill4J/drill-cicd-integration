@@ -25,8 +25,8 @@ import org.gradle.api.Task
 
 fun Task.drillSendBuildInfo(config: DrillPluginExtension) {
     doFirst {
-        val apiUrl = config.apiUrl.fromEnv("API_URL").required("apiUrl")
-        val apiKey = config.apiKey.fromEnv("API_KEY")
+        val apiUrl = config.apiUrl.fromEnv("DRILL_API_URL").required("apiUrl")
+        val apiKey = config.apiKey.fromEnv("DRILL_API_KEY")
         val groupId = config.groupId.required("groupId")
         val appId = config.appId.required("appId")
         val buildVersion = config.buildVersion

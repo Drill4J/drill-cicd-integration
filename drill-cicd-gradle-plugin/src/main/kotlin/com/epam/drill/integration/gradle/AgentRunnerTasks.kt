@@ -101,8 +101,8 @@ private fun AgentConfiguration.mapGeneralAgentProperties(
     this.logLevel = agentTaskExtension.logLevel ?: agentPluginExtension.logLevel
     this.logFile = (agentTaskExtension.logFile ?: agentPluginExtension.logFile)?.let { File(it) }
 
-    this.apiUrl = pluginExtension.apiUrl.fromEnv("API_URL").required("apiUrl")
-    this.apiKey = pluginExtension.apiKey.fromEnv("API_KEY")
+    this.apiUrl = pluginExtension.apiUrl.fromEnv("DRILL_API_URL").required("apiUrl")
+    this.apiKey = pluginExtension.apiKey.fromEnv("DRILL_API_KEY")
     this.groupId = pluginExtension.groupId.required("groupId")
 
     this.additionalParams = agentPluginExtension.additionalParams + agentTaskExtension.additionalParams

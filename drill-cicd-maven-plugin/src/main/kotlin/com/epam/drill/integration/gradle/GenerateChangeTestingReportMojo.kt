@@ -47,8 +47,8 @@ class GenerateChangeTestingReportMojo : AbstractDrillMojo() {
     var baseline: BaselineConfiguration? = null
 
     override fun execute() {
-        val apiUrl = apiUrl.fromEnv("API_URL").required("apiUrl")
-        val apiKey = apiKey.fromEnv("API_KEY")
+        val apiUrl = apiUrl.fromEnv("DRILL_API_URL").required("apiUrl")
+        val apiKey = apiKey.fromEnv("DRILL_API_KEY")
         val groupId = groupId.required("groupId")
         val appId = appId.required("appId")
         val baselineSearchStrategy = baseline?.searchStrategy ?: BaselineSearchStrategy.SEARCH_BY_TAG

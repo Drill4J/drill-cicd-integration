@@ -42,8 +42,8 @@ class PostBuildInfoMojo : AbstractDrillMojo() {
     var buildVersion: String? = null
 
     override fun execute() {
-        val apiUrl = apiUrl.fromEnv("API_URL").required("apiUrl")
-        val apiKey = apiKey.fromEnv("API_KEY")
+        val apiUrl = apiUrl.fromEnv("DRILL_API_URL").required("apiUrl")
+        val apiKey = apiKey.fromEnv("DRILL_API_KEY")
         val groupId = groupId.required("groupId")
         val appId = appId.required("appId")
         val buildVersion = buildVersion

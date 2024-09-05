@@ -45,8 +45,8 @@ class GitlabMergeRequestReportMojo : AbstractDrillMojo() {
         val gitlab = gitlab.required("gitlab")
         val gitlabApiUrl = gitlab.apiUrl.required("gitlab.apiUrl")
         val gitlabPrivateToken = gitlab.privateToken
-        val apiUrl = apiUrl.fromEnv("API_URL").required("apiUrl")
-        val apiKey = apiKey.fromEnv("API_KEY")
+        val apiUrl = apiUrl.fromEnv("DRILL_API_URL").required("apiUrl")
+        val apiKey = apiKey.fromEnv("DRILL_API_KEY")
         val groupId = groupId.required("groupId")
         val appId = appId.required("appId")
         val gitlabProjectId = gitlab.projectId.required("gitlab.projectId")
