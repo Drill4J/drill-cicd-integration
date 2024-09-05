@@ -24,8 +24,8 @@ import com.github.ajalt.clikt.parameters.options.required
 import kotlinx.coroutines.runBlocking
 
 class SendBuildInfoCommand : CliktCommand(name = "sendBuildInfo") {
-    private val apiUrl by option("-drill-u", "--apiUrl", envvar = "API_URL").required()
-    private val apiKey by option("-drill-k", "--apiKey", envvar = "API_KEY")
+    private val apiUrl by option("-drill-u", "--apiUrl", envvar = "DRILL_API_URL").required()
+    private val apiKey by option("-drill-k", "--apiKey", envvar = "DRILL_API_KEY")
     private val groupId by option("-g", "--groupId", envvar = "DRILL_GROUP_ID").required()
     private val appId by option("-a", "--appId", envvar = "DRILL_APP_ID").required()
     private val buildVersion by option("-v", "--buildVersion", envvar = "DRILL_BUILD_VERSION")
