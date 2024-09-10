@@ -12,6 +12,7 @@ plugins {
 }
 
 group = "com.epam.drill.integration"
+version = rootProject.version
 
 val kotlinVersion: String by parent!!.extra
 val ktorVersion: String by parent!!.extra
