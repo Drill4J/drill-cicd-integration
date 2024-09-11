@@ -87,7 +87,8 @@ tasks {
 }
 
 publishing {
-    publications.withType<MavenPublication> {
+    publications.create<MavenPublication>("drill-maven-plugin") {
+        artifactId = "drill-maven-plugin"
         artifact(tasks["sourcesJar"])
         artifact(tasks["javadocJar"])
         artifact(tasks["mvnInstall"].outputs.files.singleFile).builtBy(tasks["mvnInstall"])
@@ -101,6 +102,64 @@ publishing {
                         appendNode("groupId", "org.jetbrains.kotlin")
                         appendNode("artifactId", "kotlin-stdlib")
                         appendNode("version", kotlinVersion)
+                    }
+                    this.appendNode("dependency").apply {
+                        appendNode("groupId", "org.jetbrains.kotlin")
+                        appendNode("artifactId", "kotlin-reflect")
+                        appendNode("version", kotlinVersion)
+                    }
+                    // Ktor
+                    this.appendNode("dependency").apply {
+                        appendNode("groupId", "io.ktor")
+                        appendNode("artifactId", "ktor-client-cio")
+                        appendNode("version", ktorVersion)
+                    }
+                    this.appendNode("dependency").apply {
+                        appendNode("groupId", "io.ktor")
+                        appendNode("artifactId", "ktor-client-cio-jvm")
+                        appendNode("version", ktorVersion)
+                    }
+                    this.appendNode("dependency").apply {
+                        appendNode("groupId", "io.ktor")
+                        appendNode("artifactId", "ktor-client-json-jvm")
+                        appendNode("version", ktorVersion)
+                    }
+                    this.appendNode("dependency").apply {
+                        appendNode("groupId", "io.ktor")
+                        appendNode("artifactId", "ktor-client-core-jvm")
+                        appendNode("version", ktorVersion)
+                    }
+                    // Logging
+                    this.appendNode("dependency").apply {
+                        appendNode("groupId", "io.ktor")
+                        appendNode("artifactId", "ktor-client-logging-jvm")
+                        appendNode("version", ktorVersion)
+                    }
+                    this.appendNode("dependency").apply {
+                        appendNode("groupId", "io.github.microutils")
+                        appendNode("artifactId", "kotlin-logging-jvm")
+                        appendNode("version", microutilsLoggingVersion)
+                    }
+                    // Serialization
+                    this.appendNode("dependency").apply {
+                        appendNode("groupId", "io.ktor")
+                        appendNode("artifactId", "ktor-client-serialization")
+                        appendNode("version", ktorVersion)
+                    }
+                    this.appendNode("dependency").apply {
+                        appendNode("groupId", "io.ktor")
+                        appendNode("artifactId", "ktor-client-serialization-jvm")
+                        appendNode("version", ktorVersion)
+                    }
+                    this.appendNode("dependency").apply {
+                        appendNode("groupId", "org.jetbrains.kotlinx")
+                        appendNode("artifactId", "kotlinx-serialization-core-jvm")
+                        appendNode("version", "1.5.1")
+                    }
+                    this.appendNode("dependency").apply {
+                        appendNode("groupId", "org.jetbrains.kotlinx")
+                        appendNode("artifactId", "kotlinx-serialization-json-jvm")
+                        appendNode("version", "1.5.1")
                     }
                 }
             }
