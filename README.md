@@ -546,7 +546,7 @@ drill {
     }
     enableAppAgent {
         //Any additional parameters for App Agent
-        additionalParams = [classScanDelay: "3000"]
+        additionalParams = [scanClassDelay: "3000"]
     }
 }
 ```
@@ -625,7 +625,7 @@ To add additional parameters to Drill agents, use the `additionalParams` propert
         <appAgent>
             <additionalParams>
                 <!-- Any additional parameters for App Agent-->
-                <classScanDelay>3000</classScanDelay>
+                <scanClassDelay>3000</scanClassDelay>
             </additionalParams>
         </appAgent>
     </configuration>
