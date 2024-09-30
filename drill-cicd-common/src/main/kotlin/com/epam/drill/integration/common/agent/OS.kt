@@ -23,8 +23,8 @@ private var CURRENT_OS_ARCH: String = System.getProperty("os.arch").lowercase(Lo
 enum class OS(val family: String, val arch: String, val preset: String, val libExt: String) {
     MAC_X64(family = "mac", arch = "x86_64", preset = "macosX64", libExt = "dylib"),
     MAC_ARM64(family = "mac", arch = "aarch64", preset = "macosArm64", libExt = "dylib"),
-    WINDOWS(family = "windows",arch= "amd64", preset = "mingwX64", libExt = "dll"),
-    LINUX(family = "linux",arch="amd64", preset = "linuxX64", libExt = "so"),
+    WINDOWS(family = "windows", arch = "amd64", preset = "mingwX64", libExt = "dll"),
+    LINUX(family = "linux", arch = "amd64", preset = "linuxX64", libExt = "so"),
 }
 
 private fun isFamily(os: OS): Boolean {
@@ -37,12 +37,12 @@ private fun isArch(os: OS): Boolean {
 
 val currentOsPreset: String
     get() = OS.values()
-    .firstOrNull() { isFamily(it) && isArch(it) }
-    ?.preset
-    ?: throw IllegalStateException("No preset for OS: $CURRENT_OS_NAME and arch: $CURRENT_OS_ARCH")
+        .firstOrNull() { isFamily(it) && isArch(it) }
+        ?.preset
+        ?: throw IllegalStateException("No preset for OS: $CURRENT_OS_NAME and arch: $CURRENT_OS_ARCH")
 
 val currentOsLibExt: String
     get() = OS.values()
-    .firstOrNull() { isFamily(it) && isArch(it) }
-    ?.libExt
-    ?: throw IllegalStateException("No library extension for OS: $CURRENT_OS_NAME and arch: $CURRENT_OS_ARCH")
+        .firstOrNull() { isFamily(it) && isArch(it) }
+        ?.libExt
+        ?: throw IllegalStateException("No library extension for OS: $CURRENT_OS_NAME and arch: $CURRENT_OS_ARCH")
