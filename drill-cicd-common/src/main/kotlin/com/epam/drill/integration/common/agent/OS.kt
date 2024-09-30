@@ -18,25 +18,31 @@ package com.epam.drill.integration.common.agent
 import java.util.*
 
 private var CURRENT_OS_NAME: String = System.getProperty("os.name").lowercase(Locale.ENGLISH)
+private var CURRENT_OS_ARCH: String = System.getProperty("os.arch").lowercase(Locale.ENGLISH)
 
-enum class OS(val family: String, val preset: String, val libExt: String) {
-    MAC("mac", "macosX64", "so"),
-    WINDOWS("windows", "mingwX64", "dll"),
-    LINUX("linux", "linuxX64", "so"),
+enum class OS(val family: String, val arch: String, val preset: String, val libExt: String) {
+    MAC_X64(family = "mac", arch = "x86_64", preset = "macosX64", libExt = "dylib"),
+    MAC_ARM64(family = "mac", arch = "aarch64", preset = "macosArm64", libExt = "dylib"),
+    WINDOWS(family = "windows", arch = "amd64", preset = "mingwX64", libExt = "dll"),
+    LINUX(family = "linux", arch = "amd64", preset = "linuxX64", libExt = "so"),
 }
 
 private fun isFamily(os: OS): Boolean {
     return CURRENT_OS_NAME.contains(os.family)
 }
 
+private fun isArch(os: OS): Boolean {
+    return CURRENT_OS_ARCH.contains(os.arch)
+}
+
 val currentOsPreset: String
     get() = OS.values()
-    .firstOrNull() { isFamily(it) }
-    ?.preset
-    ?: throw IllegalStateException("No preset for OS: $CURRENT_OS_NAME")
+        .firstOrNull() { isFamily(it) && isArch(it) }
+        ?.preset
+        ?: throw IllegalStateException("No preset for OS: $CURRENT_OS_NAME and arch: $CURRENT_OS_ARCH")
 
 val currentOsLibExt: String
     get() = OS.values()
-    .firstOrNull() { isFamily(it) }
-    ?.libExt
-    ?: throw IllegalStateException("No library extension for OS: $CURRENT_OS_NAME")
+        .firstOrNull() { isFamily(it) && isArch(it) }
+        ?.libExt
+        ?: throw IllegalStateException("No library extension for OS: $CURRENT_OS_NAME and arch: $CURRENT_OS_ARCH")
