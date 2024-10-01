@@ -24,5 +24,5 @@ interface AgentInstaller {
     fun findAgentFile(unzippedDir: Directory, fileExtension: String): File?
 }
 
-class FileUrl(val url: String, val filename: String)
+data class FileUrl(val url: String, val filename: String)
 typealias Directory = File
