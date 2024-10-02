@@ -19,12 +19,13 @@ class AgentRunnerTest {
     private val agentInstaller = mock<AgentInstaller>()
     private lateinit var agentCache: AgentCache
     private lateinit var agentRunner: AgentRunner
+    private lateinit var cacheDir: Directory
 
     @BeforeEach
     fun setup() {
-        val cacheDir = Directory(tempFolder, "drillCache").apply {
-            mkdir()
+        cacheDir = Directory(tempFolder, "drillCache").apply {
             deleteRecursively()
+            mkdir()
         }
         agentCache = AgentCacheImpl(cacheDir)
         agentRunner = AgentRunner(agentInstaller, agentCache)
@@ -82,6 +83,34 @@ class AgentRunnerTest {
     }
 
     @Test
+    fun `given downloadUrl that is in cache, getJvmOptionsToRun should get agent from cache and return agentpath and other expected options`() {
+        val agentDownloadUrl = "http://example.com/agent.zip"
+        val configuration = TestAgentConfiguration().apply {
+            downloadUrl = agentDownloadUrl
+            additionalParams = mapOf("arg1" to "value1")
+        }
+        val cachedFile = File(cacheDir, "${configuration.agentName}-${currentOsPreset}-${agentDownloadUrl.hashCode()}.zip")
+        cachedFile.createNewFile()
+        cachedFile.writeBytes(anyContent())
+        val distDir = Directory(tempFolder, "distDir")
+        val agentDir = Directory(distDir, "agent")
+        val agentLibFile = File(agentDir, "agent.$currentOsLibExt")
+        whenever(agentInstaller.unzip(eq(cachedFile), eq(distDir))).thenReturn(agentDir)
+        whenever(agentInstaller.findAgentFile(agentDir, currentOsLibExt)).thenReturn(agentLibFile)
+
+        val result = runBlocking {
+            agentRunner.getJvmOptionsToRun(distDir, configuration)
+        }
+
+        assertEquals(
+            "-agentpath:$agentLibFile=drillInstallationDir=$agentDir,arg1=value1",
+            result.first { it.startsWith("-agentpath:") })
+        verifyBlocking(agentInstaller, never()) { download(any(), any()) }
+        verify(agentInstaller).unzip(any(), eq(distDir))
+        verify(agentInstaller).findAgentFile(agentDir, currentOsLibExt)
+    }
+
+    @Test
     fun `given version that is not in cache, getJvmOptionsToRun should download agent by version and return agentpath and other expected options`() {
         val agentVersion = "1.0.0"
         val configuration = TestAgentConfiguration().apply {
@@ -114,6 +143,36 @@ class AgentRunnerTest {
     }
 
     @Test
+    fun `given version that is in cache, getJvmOptionsToRun should get agent from cache and return agentpath and other expected options`() {
+        val agentVersion = "1.0.0"
+        val configuration = TestAgentConfiguration().apply {
+            version = agentVersion
+            additionalParams = mapOf("arg1" to "value1")
+        }
+        val cachedFile = File(cacheDir, "${configuration.agentName}-${currentOsPreset}-${agentVersion}.zip")
+        cachedFile.createNewFile()
+        cachedFile.writeBytes(anyContent())
+        val distDir = Directory(tempFolder, "distDir")
+        val agentDir = Directory(distDir, "agent")
+        val agentLibFile = File(agentDir, "agent.so")
+        whenever(agentInstaller.unzip(eq(cachedFile), eq(distDir))).thenReturn(agentDir)
+        whenever(agentInstaller.findAgentFile(any(), eq(currentOsLibExt))).thenReturn(agentLibFile)
+
+        val result = runBlocking {
+            agentRunner.getJvmOptionsToRun(distDir, configuration)
+        }
+
+        assertEquals(
+            "-agentpath:$agentLibFile=drillInstallationDir=$agentDir,arg1=value1",
+            result.first()
+        )
+        verifyBlocking(agentInstaller, never()) { getDownloadUrl(any(), any(), any()) }
+        verifyBlocking(agentInstaller, never()) { download(any(), any()) }
+        verify(agentInstaller).unzip(any(), eq(distDir))
+        verify(agentInstaller).findAgentFile(any(), eq(currentOsLibExt))
+    }
+
+    @Test
     fun `given configuration without required fields, getJvmOptionsToRun should throw IllegalStateException`() {
         val distDir = mock<Directory>()
         val configuration = TestAgentConfiguration().apply {
@@ -136,3 +195,5 @@ private fun <M, T> wheneverBlocking(mock: M, methodCall: suspend M.() -> T): Ong
 }
 
 private fun anyFile() = File("agent.zip")
+
+private fun anyContent() = byteArrayOf(1, 2, 3)

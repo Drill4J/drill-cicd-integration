@@ -47,7 +47,7 @@ class AgentCacheImplTest {
         val agentName = "agent"
         val version = "1.0.0"
         val preset = "preset"
-        val fileContent = getSomeFileContent()
+        val fileContent = anyContent()
 
         val result = runBlocking {
             agentCache.get(agentName, version, preset) { filename, downloadDir ->
@@ -79,11 +79,11 @@ class AgentCacheImplTest {
     private fun createSomeFile(filename: String): File {
         val file = cacheDir.resolve(filename)
         file.createNewFile()
-        file.writeBytes(getSomeFileContent())
+        file.writeBytes(anyContent())
         return file
     }
 
-    private fun getSomeFileContent() = byteArrayOf(1, 2, 3)
+    private fun anyContent() = byteArrayOf(1, 2, 3)
 
     private fun assertEquals(expected: ByteArray, actual: ByteArray) {
         assertEquals(expected.toList(), actual.toList())
