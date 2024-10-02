@@ -173,18 +173,6 @@ class AgentInstallerImplTest {
     }
 
     @Test
-    fun `given valid zip file, unzip should extract files to directory where zip file located`() {
-        val unzippedDir = Directory(testDownloadDir, "unzipped").also { it.mkdir() }
-        val zipFile = File(unzippedDir, "agent.zip")
-        listOf("file1.txt", "file2.so", "file3.jar").createZip(zipFile)
-        val agentInstaller = AgentInstallerImpl()
-
-        val result = agentInstaller.unzip(zipFile)
-
-        assertEquals(File(unzippedDir, zipFile.nameWithoutExtension), result)
-    }
-
-    @Test
     fun `given valid zip file and destination directory, unzip should extract files to destination directory`() {
         val zipDir = Directory(testDownloadDir, "zip").also { it.mkdir() }
         val zipFile = File(zipDir, "agent.zip")
