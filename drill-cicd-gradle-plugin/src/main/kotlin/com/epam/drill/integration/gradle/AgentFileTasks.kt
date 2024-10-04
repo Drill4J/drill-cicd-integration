@@ -13,16 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.epam.drill.integration.common.agent
+package com.epam.drill.integration.gradle
 
+import com.epam.drill.integration.common.agent.impl.AgentCacheImpl
+import org.gradle.api.Task
 import java.io.File
 
-interface AgentInstaller {
-    suspend fun getDownloadUrl(githubRepository: String, versionMatching: String, osPreset: String): FileUrl?
-    suspend fun download(downloadUrl: FileUrl, downloadDir: Directory): File
-    fun unzip(zipFile: File, destinationDir: Directory): Directory
-    fun findAgentFile(unzippedDir: Directory, fileExtension: String): File?
-}
+val drillAgentFilesDir = File(System.getProperty("user.home"), ".drill/agents")
 
-data class FileUrl(val url: String, val filename: String)
-typealias Directory = File
+fun Task.drillClearAgentFileCache(config: DrillPluginExtension) {
+    doFirst {
+        val agentCache = AgentCacheImpl(drillAgentFilesDir)
+        agentCache.clearAll()
+        logger.lifecycle("Agent file cache has been cleared")
+    }
+}

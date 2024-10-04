@@ -20,6 +20,7 @@ val ktorVersion: String by parent!!.extra
 val microutilsLoggingVersion: String by parent!!.extra
 val kotlinVersion: String by parent!!.extra
 val mockitoKotlinVersion: String by parent!!.extra
+val junitVersion: String by parent!!.extra
 val logbackClassicVersion: String by parent!!.extra
 
 repositories {
@@ -48,6 +49,7 @@ dependencies {
     testImplementation("io.ktor:ktor-client-mock:$ktorVersion")
     testImplementation("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
     testImplementation("org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion")
+    testImplementation("org.junit.jupiter:junit-jupiter:$junitVersion")
     testImplementation("ch.qos.logback:logback-classic:$logbackClassicVersion")
 }
 
@@ -60,6 +62,7 @@ tasks {
         kotlinOptions.jvmTarget = "1.8"
     }
     test {
+        useJUnitPlatform()
         // Enable all test events to be logged
         testLogging {
             // Show the standard output and error for every test
