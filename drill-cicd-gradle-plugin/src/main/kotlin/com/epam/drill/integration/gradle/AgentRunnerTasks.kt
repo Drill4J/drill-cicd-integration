@@ -40,7 +40,7 @@ fun modifyToRunDrillAgents(
         logger.lifecycle("Task :${task.name} is modified by Drill")
 
         val agentInstaller = AgentInstallerImpl()
-        val agentCache = AgentCacheImpl(drillAgentsDir)
+        val agentCache = AgentCacheImpl(drillAgentFilesDir)
         val agentRunner = AgentRunner(agentInstaller, agentCache)
         val distDir = File(project.buildDir, "/drill")
 
@@ -101,9 +101,9 @@ private fun AgentConfiguration.mapGeneralAgentProperties(
     this.logLevel = agentTaskExtension.logLevel ?: agentPluginExtension.logLevel
     this.logFile = (agentTaskExtension.logFile ?: agentPluginExtension.logFile)?.let { File(it) }
 
-    this.apiUrl = pluginExtension.apiUrl.fromEnv("DRILL_API_URL").required("apiUrl")
-    this.apiKey = pluginExtension.apiKey.fromEnv("DRILL_API_KEY")
-    this.groupId = pluginExtension.groupId.required("groupId")
+    this.apiUrl = pluginExtension.apiUrl
+    this.apiKey = pluginExtension.apiKey
+    this.groupId = pluginExtension.groupId
 
     this.additionalParams = agentPluginExtension.additionalParams + agentTaskExtension.additionalParams
 }
