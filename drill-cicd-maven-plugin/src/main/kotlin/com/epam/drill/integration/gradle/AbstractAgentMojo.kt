@@ -25,12 +25,13 @@ import kotlinx.coroutines.runBlocking
 import java.io.File
 
 
+val drillAgentFilesDir = File(System.getProperty("user.home"), ".drill/agents")
 private const val ARG_LINE = "argLine"
 
 abstract class AbstractAgentMojo: AbstractDrillMojo() {
-    private val agentFileDir = File(System.getProperty("user.home"), ".drill/agents")
+
     private val agentInstaller = AgentInstallerImpl()
-    private val agentCache = AgentCacheImpl(agentFileDir)
+    private val agentCache = AgentCacheImpl(drillAgentFilesDir)
     private val agentRunner = AgentRunner(agentInstaller, agentCache)
 
     abstract fun getAgentConfig(): AgentConfiguration
