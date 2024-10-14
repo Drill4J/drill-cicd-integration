@@ -47,7 +47,7 @@ class AgentInstallerImpl : AgentInstaller {
         }
     }
 
-    override suspend fun getDownloadUrl(githubRepository: String, versionMatching: String, osPreset: String): FileUrl? {
+    override suspend fun getDownloadUrl(githubRepository: String, version: String, osPreset: String): FileUrl? {
         val releasesUrl = "$GITHUB_API_URL/repos/$githubRepository/releases"
 
         return httpClient.get<HttpResponse>(releasesUrl) {
@@ -59,10 +59,7 @@ class AgentInstallerImpl : AgentInstaller {
             json.parseToJsonElement(response.readText())
         }.jsonArray.firstOrNull { release ->
             val tag = release.jsonObject["tag_name"]?.jsonPrimitive?.content
-            tag
-                ?.removePrefix("v")
-                ?.matches(versionMatching.toRegex())
-                ?: false
+            tag?.removePrefix("v") == version
         }?.jsonObject?.get("assets")?.jsonArray?.firstOrNull { asset ->
             val fileName = asset.jsonObject["name"]?.jsonPrimitive?.content
             fileName

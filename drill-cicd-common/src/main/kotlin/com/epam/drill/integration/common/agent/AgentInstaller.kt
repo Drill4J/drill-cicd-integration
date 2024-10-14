@@ -18,7 +18,7 @@ package com.epam.drill.integration.common.agent
 import java.io.File
 
 interface AgentInstaller {
-    suspend fun getDownloadUrl(githubRepository: String, versionMatching: String, osPreset: String): FileUrl?
+    suspend fun getDownloadUrl(githubRepository: String, version: String, osPreset: String): FileUrl?
     suspend fun download(downloadUrl: FileUrl, downloadDir: Directory): File
     fun unzip(zipFile: File, destinationDir: Directory): Directory
     fun findAgentFile(unzippedDir: Directory, fileExtension: String): File?

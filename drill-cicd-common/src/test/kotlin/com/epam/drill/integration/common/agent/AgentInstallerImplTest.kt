@@ -68,37 +68,6 @@ class AgentInstallerImplTest {
     }
 
     @Test
-    fun `given correct version matching, getDownloadUrl should return download url`() = runBlocking {
-        val testRepository = "test/repository"
-        val testVersion = "1.0.9"
-        val testOsPreset = "linuxX64"
-        val testFilename = "$testOsPreset-$testVersion.zip"
-        val testDownloadUrl = "https://example.com/$testFilename"
-        val mockHttpClient = mockHttpClient(
-            "/repos/$testRepository/releases" shouldRespond """
-                [
-                    {
-                        "tag_name": "v$testVersion",
-                        "assets": [
-                            {
-                                "name": "$testFilename",
-                                "browser_download_url": "$testDownloadUrl"
-                            }
-                        ]
-                    }
-                ]
-                """.trimIndent()
-        )
-        val agentInstaller = AgentInstallerImpl().also { it.httpClient = mockHttpClient }
-
-        val result = agentInstaller.getDownloadUrl(testRepository, "1.0.+", testOsPreset)
-
-        assertNotNull(result)
-        assertEquals(testDownloadUrl, result.url)
-        assertEquals(testFilename, result.filename)
-    }
-
-    @Test
     fun `given non-existing version, getDownloadUrl should return null`() = runBlocking {
         val testRepository = "test/repository"
         val testVersion = "2.0.0"
