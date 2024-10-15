@@ -76,44 +76,22 @@ class AgentInstallerImpl(
         }
     }
 
-    override suspend fun install(
+    override suspend fun downloadAndUnzip(
         downloadUrl: String,
         agentName: String,
         version: String,
         installationDir: Directory
-    ): Directory =
-        agentCache.get(agentName, version, currentOsPreset) { filename, downloadDir ->
-            download(FileUrl(downloadUrl, filename), downloadDir)
-        }.let { zipFile ->
-            return unzip(zipFile, installationDir)
-        }
-
-
-    private suspend fun download(downloadUrl: FileUrl, downloadDir: Directory): File {
-        if (!downloadDir.exists()) {
-            downloadDir.mkdirs()
-        }
-        val file = File(downloadDir, downloadUrl.filename)
-        if (!file.exists()) {
-            val response: HttpResponse = httpClient.get(downloadUrl.url) {
-                headers {
-                    token?.let { append(HttpHeaders.Authorization, "Bearer $it") }
-                }
-            }
-            val channel: ByteReadChannel = response.receive()
-
-            file.outputStream().use { fileStream ->
-                val buffer = ByteArray(4096)
-                while (!channel.isClosedForRead) {
-                    val bytesRead = channel.readAvailable(buffer)
-                    if (bytesRead > 0) {
-                        fileStream.write(buffer, 0, bytesRead)
-                    }
-                }
-            }
-        }
-        return file
+    ): Directory = run {
+        download(downloadUrl, agentName, version)
+    }.let { zipFile ->
+        unzip(zipFile, installationDir)
     }
+
+    override suspend fun download(downloadUrl: String, agentName: String, version: String): File =
+        agentCache.get(agentName, version, currentOsPreset) { filename, downloadDir ->
+            downloadFile(FileUrl(downloadUrl, filename), downloadDir)
+        }
+
 
     override fun unzip(zipFile: File, destinationDir: Directory): Directory {
         if (!zipFile.exists()) {
@@ -141,6 +119,32 @@ class AgentInstallerImpl(
 
     override fun findAgentFile(unzippedDir: Directory, fileExtension: String): File? {
         return findFile(unzippedDir, fileExtension)
+    }
+
+    private suspend fun downloadFile(downloadUrl: FileUrl, downloadDir: Directory): File {
+        if (!downloadDir.exists()) {
+            downloadDir.mkdirs()
+        }
+        val file = File(downloadDir, downloadUrl.filename)
+        if (!file.exists()) {
+            val response: HttpResponse = httpClient.get(downloadUrl.url) {
+                headers {
+                    token?.let { append(HttpHeaders.Authorization, "Bearer $it") }
+                }
+            }
+            val channel: ByteReadChannel = response.receive()
+
+            file.outputStream().use { fileStream ->
+                val buffer = ByteArray(4096)
+                while (!channel.isClosedForRead) {
+                    val bytesRead = channel.readAvailable(buffer)
+                    if (bytesRead > 0) {
+                        fileStream.write(buffer, 0, bytesRead)
+                    }
+                }
+            }
+        }
+        return file
     }
 
     private fun findFile(directory: Directory, fileExtension: String): File? {

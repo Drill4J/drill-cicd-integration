@@ -72,7 +72,7 @@ class AgentRunnerTest {
         }
         val agentDir = Directory(installationDir, "agent")
         val agentLibFile = File(agentDir, "agent.$currentOsLibExt")
-        wheneverBlocking(agentInstaller) { install(any(), any(), any(), any()) }.thenReturn(agentDir)
+        wheneverBlocking(agentInstaller) { downloadAndUnzip(any(), any(), any(), any()) }.thenReturn(agentDir)
         whenever(agentInstaller.findAgentFile(agentDir, currentOsLibExt)).thenReturn(agentLibFile)
 
         val result = runBlocking {
@@ -80,7 +80,7 @@ class AgentRunnerTest {
         }
 
         assertEquals("-agentpath:$agentLibFile=drillInstallationDir=$agentDir,arg1=value1", result.first())
-        verifyBlocking(agentInstaller) { install(eq(agentDownloadUrl), eq(configuration.agentName), any(), any()) }
+        verifyBlocking(agentInstaller) { downloadAndUnzip(eq(agentDownloadUrl), eq(configuration.agentName), any(), any()) }
         verify(agentInstaller).findAgentFile(agentDir, currentOsLibExt)
     }
 
@@ -97,7 +97,7 @@ class AgentRunnerTest {
         wheneverBlocking(agentInstaller) { getDownloadUrl(any(), any(), any()) }.thenReturn(
             FileUrl(filename = "agent.zip", url = downloadUrl)
         )
-        wheneverBlocking(agentInstaller) { install(any(), any(), any(), any()) }.thenReturn(agentDir)
+        wheneverBlocking(agentInstaller) { downloadAndUnzip(any(), any(), any(), any()) }.thenReturn(agentDir)
         whenever(agentInstaller.unzip(any(), any())).thenReturn(agentDir)
         whenever(agentInstaller.findAgentFile(any(), eq(currentOsLibExt))).thenReturn(agentLibFile)
 
@@ -110,7 +110,7 @@ class AgentRunnerTest {
             result.first()
         )
         verifyBlocking(agentInstaller) { getDownloadUrl(configuration.githubRepository, agentVersion, currentOsPreset) }
-        verifyBlocking(agentInstaller) { install(any(), any(), any(), any()) }
+        verifyBlocking(agentInstaller) { downloadAndUnzip(any(), any(), any(), any()) }
         verify(agentInstaller).findAgentFile(any(), eq(currentOsLibExt))
     }
 

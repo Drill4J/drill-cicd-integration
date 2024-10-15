@@ -129,7 +129,7 @@ class AgentInstallerImplTest {
 
 
     @Test
-    fun `given valid download URL, install should download and unzip file`() = runBlocking {
+    fun `given valid download URL, downloadAndUnzip should download and unzip file`() = runBlocking {
         val downloadUrl = "https://example.com/agent.zip"
         val agentName = "agent"
         val version = "1.0.0"
@@ -140,7 +140,7 @@ class AgentInstallerImplTest {
         )
         val agentInstaller = AgentInstallerImpl(agentCache).also { it.httpClient = mockHttpClient }
 
-        val agentFiles = agentInstaller.install(downloadUrl, agentName, version, testInstallationDir)
+        val agentFiles = agentInstaller.downloadAndUnzip(downloadUrl, agentName, version, testInstallationDir)
 
         assertTrue(agentFiles.containsFiles(agentFilenames))
     }

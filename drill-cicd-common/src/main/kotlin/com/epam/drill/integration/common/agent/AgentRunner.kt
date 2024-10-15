@@ -78,7 +78,7 @@ class AgentRunner(
         version,
         currentOsPreset
     )?.let { downloadFile ->
-        agentInstaller.install(
+        agentInstaller.downloadAndUnzip(
             downloadFile.url,
             agentName,
             version,
@@ -93,7 +93,7 @@ class AgentRunner(
         downloadUrl: String,
         distDir: Directory,
         agentArgs: Map<String, String?>
-    ): List<String> = agentInstaller.install(
+    ): List<String> = agentInstaller.downloadAndUnzip(
         downloadUrl,
         agentName,
         downloadUrl.hashCode().toString(),
