@@ -28,12 +28,16 @@ import java.util.zip.ZipOutputStream
 import kotlin.test.*
 
 class AgentInstallerImplTest {
-
-    private var testDownloadDir = Files.createTempDirectory("drill").toFile()
+    private val testDownloadDir = Files.createTempDirectory("drill-download").toFile()
+    private val testInstallationDir = Files.createTempDirectory("drill-installation").toFile()
+    private val testZipDir = Files.createTempDirectory("drill-zip").toFile()
+    private val agentCache = AgentCacheStub(testDownloadDir)
 
     @AfterTest
-    fun clearDownloadDir() {
+    fun clearTempDirs() {
         testDownloadDir.deleteRecursively()
+        testInstallationDir.deleteRecursively()
+        testZipDir.deleteRecursively()
     }
 
     @Test
@@ -58,7 +62,7 @@ class AgentInstallerImplTest {
                 ]
                 """.trimIndent()
         )
-        val agentInstaller = AgentInstallerImpl().also { it.httpClient = mockHttpClient }
+        val agentInstaller = AgentInstallerImpl(agentCache).also { it.httpClient = mockHttpClient }
 
         val result = agentInstaller.getDownloadUrl(testRepository, testVersion, testOsPreset)
 
@@ -88,7 +92,7 @@ class AgentInstallerImplTest {
             ]
             """.trimIndent()
         )
-        val agentInstaller = AgentInstallerImpl().also { it.httpClient = mockHttpClient }
+        val agentInstaller = AgentInstallerImpl(agentCache).also { it.httpClient = mockHttpClient }
 
         val result = agentInstaller.getDownloadUrl(testRepository, testVersion, testOsPreset)
 
@@ -116,7 +120,7 @@ class AgentInstallerImplTest {
             ]
             """.trimIndent()
         )
-        val agentInstaller = AgentInstallerImpl().also { it.httpClient = mockHttpClient }
+        val agentInstaller = AgentInstallerImpl(agentCache).also { it.httpClient = mockHttpClient }
 
         val result = agentInstaller.getDownloadUrl(testRepository, testVersion, testOsPreset)
 
@@ -125,33 +129,32 @@ class AgentInstallerImplTest {
 
 
     @Test
-    fun `given valid download URL, download should save the file`() = runBlocking {
-        val testDownloadUrl = FileUrl("https://example.com/file.txt", "file.txt")
-
+    fun `given valid download URL, install should download and unzip file`() = runBlocking {
+        val downloadUrl = "https://example.com/agent.zip"
+        val agentName = "agent"
+        val version = "1.0.0"
+        val agentFilenames = listOf("file1.txt", "file2.so", "file3.jar")
+        val zipFile = File(testZipDir, "agent.zip").apply { zipFiles(agentFilenames) }
         val mockHttpClient = mockHttpClient(
-            "/file.txt" shouldRespond """
-             Some text content
-            """.trimIndent()
+            "/agent.zip" shouldRespondBytes zipFile.readBytes()
         )
-        val agentInstaller = AgentInstallerImpl().also { it.httpClient = mockHttpClient }
+        val agentInstaller = AgentInstallerImpl(agentCache).also { it.httpClient = mockHttpClient }
 
-        val result = agentInstaller.download(testDownloadUrl, testDownloadDir)
+        val agentFiles = agentInstaller.install(downloadUrl, agentName, version, testInstallationDir)
 
-        assertEquals(testDownloadUrl.filename, result.name)
-        assertEquals("Some text content", result.readText())
+        assertTrue(agentFiles.containsFiles(agentFilenames))
     }
 
     @Test
     fun `given valid zip file and destination directory, unzip should extract files to destination directory`() {
-        val zipDir = Directory(testDownloadDir, "zip").also { it.mkdir() }
-        val zipFile = File(zipDir, "agent.zip")
-        listOf("file1.txt", "file2.so", "file3.jar").createZip(zipFile)
-        val agentInstaller = AgentInstallerImpl()
+        val agentFilenames = listOf("file1.txt", "file2.so", "file3.jar")
+        val zipFile = File(testZipDir, "agent.zip").apply { zipFiles(agentFilenames) }
+        val agentInstaller = AgentInstallerImpl(agentCache)
         val destinationDir = Directory(testDownloadDir, "unzipped").also { it.mkdir() }
 
         val result = agentInstaller.unzip(zipFile, destinationDir)
 
-        assertEquals(File(destinationDir, zipFile.nameWithoutExtension), result)
+        assertTrue(result.containsFiles(agentFilenames))
     }
 
     @Test
@@ -160,7 +163,7 @@ class AgentInstallerImplTest {
         val unzippedDir = Directory(testDownloadDir, "unzipped").also { it.mkdir() }
         val dirInsideUnzippedDir = Directory(unzippedDir, "subdir").also { it.mkdir() }
         listOf("file1.txt", testAgentFile, "file3.jar").createFiles(dirInsideUnzippedDir)
-        val agentInstaller = AgentInstallerImpl()
+        val agentInstaller = AgentInstallerImpl(agentCache)
 
         val result = agentInstaller.findAgentFile(unzippedDir, "so")
 
@@ -172,40 +175,66 @@ class AgentInstallerImplTest {
         val unzippedDir = Directory(testDownloadDir, "unzipped").also { it.mkdir() }
         val dirInsideUnzippedDir = Directory(unzippedDir, "subdir").also { it.mkdir() }
         listOf("file1.txt", "file2.so", "file3.jar").createFiles(dirInsideUnzippedDir)
-        val agentInstaller = AgentInstallerImpl()
+        val agentInstaller = AgentInstallerImpl(agentCache)
 
         val result = agentInstaller.findAgentFile(unzippedDir, "dll")
 
         assertNull(result)
     }
 
-
 }
 
-infix fun String.shouldRespond(content: String) = Pair(this, content)
+infix fun String.shouldRespond(content: String) = Pair(this, content.toByteArray())
+infix fun String.shouldRespondBytes(content: ByteArray) = Pair(this, content)
 
-fun mockHttpClient(vararg requestHandlers: Pair<String, String>) = HttpClient(MockEngine { request ->
+private fun File.zipFiles(filenames: List<String>) {
+    if (!this.exists()) {
+        this.createNewFile()
+    }
+    ZipOutputStream(FileOutputStream(this)).use { zos ->
+        for (fileName in filenames) {
+            val entry = ZipEntry(fileName)
+            zos.putNextEntry(entry)
+            zos.closeEntry()
+        }
+    }
+}
+
+private fun mockHttpClient(vararg requestHandlers: Pair<String, ByteArray>) = HttpClient(MockEngine { request ->
     requestHandlers
         .also { println(request.url.encodedPath) }
         .find { request.url.encodedPath.contains(it.first, ignoreCase = true) }
-        ?.run { respondOk(this.second) }
+        ?.run { respond(this.second) }
         ?: respondError(HttpStatusCode.NotFound, "There is no handler for request: $request")
 }) {
     expectSuccess = true
 }
 
-fun List<String>.createFiles(dir: Directory) {
+private fun List<String>.createFiles(dir: Directory) {
     forEach { file ->
         File(dir, file).createNewFile()
     }
 }
 
-fun List<String>.createZip(zipFile: File) {
-    ZipOutputStream(FileOutputStream(zipFile)).use { zos ->
-        for (fileName in this) {
-            val entry = ZipEntry(fileName)
-            zos.putNextEntry(entry)
-            zos.closeEntry()
-        }
+
+private fun File.containsFiles(filenames: List<String>) = filenames.all { File(this, it).exists() }
+
+private class AgentCacheStub(private val tempDir: Directory) : AgentCache {
+    override fun clearAll() {
+    }
+
+    override fun clear(agentName: String, version: String, preset: String) {
+    }
+
+    override suspend fun get(
+        agentName: String,
+        version: String,
+        preset: String,
+        download: suspend (filename: String, downloadDir: Directory) -> Unit
+    ): File {
+        val filename = "$agentName-$preset-$version.zip"
+        val file = File(tempDir, filename)
+        download(filename, tempDir)
+        return file
     }
 }

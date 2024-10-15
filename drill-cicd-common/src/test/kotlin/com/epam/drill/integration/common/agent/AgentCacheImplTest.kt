@@ -22,22 +22,23 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 import java.io.File
+import java.nio.file.Files
+import kotlin.test.AfterTest
 
 class AgentCacheImplTest {
 
-    @field:TempDir
-    lateinit var cacheDir: Directory
-    lateinit var agentCache: AgentCacheImpl
+    private val cacheDir = Files.createTempDirectory("agent-cache").toFile()
+    private var agentCache = AgentCacheImpl(cacheDir)
 
-    @BeforeEach
-    fun setup() {
-        agentCache = AgentCacheImpl(cacheDir)
+    @AfterTest
+    fun clearTempDirs() {
+        cacheDir.deleteRecursively()
     }
 
     @Test
-    fun clearAll_deletesCacheDir() {
-        val file1 = createSomeFile("agent1-preset-1.0.0.zip")
-        val file2 = createSomeFile("agent2-preset-2.0.0.zip")
+    fun `clearAll should delete all files in cache directory`() {
+        val file1 = createSomeFile(cacheDir, "agent1-preset-1.0.0.zip")
+        val file2 = createSomeFile(cacheDir, "agent2-preset-2.0.0.zip")
 
         agentCache.clearAll()
 
@@ -46,11 +47,11 @@ class AgentCacheImplTest {
     }
 
     @Test
-    fun clear_deletesSpecificAgentFile() {
+    fun `given agent file, clear should delete it in cache directory`() {
         val agentName = "agent"
         val version = "1.0.0"
         val preset = "preset"
-        val file = createSomeFile("agent-preset-1.0.0.zip")
+        val file = createSomeFile(cacheDir, "agent-preset-1.0.0.zip")
 
         agentCache.clear(agentName, version, preset)
 
@@ -58,7 +59,7 @@ class AgentCacheImplTest {
     }
 
     @Test
-    fun get_downloadsFileIfNotExists() {
+    fun `given agent file that is not in cache, get should download it`() {
         val agentName = "agent"
         val version = "1.0.0"
         val preset = "preset"
@@ -76,11 +77,11 @@ class AgentCacheImplTest {
     }
 
     @Test
-    fun get_returnsFileIfExists() {
+    fun `given agent file that is in cache, get should return it from cache directory`() {
         val agentName = "agent"
         val version = "1.0.0"
         val preset = "preset"
-        val file = createSomeFile("agent-preset-1.0.0.zip")
+        val file = createSomeFile(cacheDir, "agent-preset-1.0.0.zip")
 
         val result = runBlocking {
             agentCache.get(agentName, version, preset) { _, _ ->
@@ -90,17 +91,17 @@ class AgentCacheImplTest {
 
         assertEquals(file.readBytes(), result.readBytes())
     }
+}
 
-    private fun createSomeFile(filename: String): File {
-        val file = cacheDir.resolve(filename)
-        file.createNewFile()
-        file.writeBytes(anyContent())
-        return file
-    }
+private fun createSomeFile(dir: Directory, filename: String): File {
+    val file = dir.resolve(filename)
+    file.createNewFile()
+    file.writeBytes(anyContent())
+    return file
+}
 
-    private fun anyContent() = byteArrayOf(1, 2, 3)
+private fun anyContent() = byteArrayOf(1, 2, 3)
 
-    private fun assertEquals(expected: ByteArray, actual: ByteArray) {
-        assertEquals(expected.toList(), actual.toList())
-    }
+private fun assertEquals(expected: ByteArray, actual: ByteArray) {
+    assertEquals(expected.toList(), actual.toList())
 }

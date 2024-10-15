@@ -19,8 +19,7 @@ import com.epam.drill.integration.common.agent.config.AgentConfiguration
 import java.io.File
 
 class AgentRunner(
-    private val agentInstaller: AgentInstaller,
-    private val agentCache: AgentCache
+    private val agentInstaller: AgentInstaller
 ) {
     suspend fun getJvmOptionsToRun(
         distDir: Directory,
@@ -71,48 +70,37 @@ class AgentRunner(
     private suspend fun getJvmOptionsByVersion(
         agentName: String,
         repositoryName: String,
-        releaseVersion: String,
+        version: String,
         distDir: Directory,
         agentArgs: Map<String, String?>
-    ): List<String> = agentCache.get(agentName, releaseVersion, currentOsPreset) { filename, downloadDir ->
-        agentInstaller.getDownloadUrl(
-            repositoryName,
-            releaseVersion,
-            currentOsPreset
-        )?.let {
-            agentInstaller.download(
-                FileUrl(it.url, filename),
-                downloadDir
-            )
-        } ?: throw IllegalStateException("Can't find the agent release for repository $repositoryName and version $releaseVersion")
-    }.let { zipFile ->
-        agentInstaller.unzip(
-            zipFile,
+    ): List<String> = agentInstaller.getDownloadUrl(
+        repositoryName,
+        version,
+        currentOsPreset
+    )?.let { downloadFile ->
+        agentInstaller.install(
+            downloadFile.url,
+            agentName,
+            version,
             distDir
         )
-    }.let { unzippedDir ->
+    }?.let { unzippedDir ->
         getJvmOptionsByUnzippedDir(unzippedDir, agentArgs)
-    }
+    } ?: throw IllegalStateException("Can't find the agent release for repository $repositoryName and version $version")
 
     private suspend fun getJvmOptionsByDownloadUrl(
         agentName: String,
         downloadUrl: String,
         distDir: Directory,
         agentArgs: Map<String, String?>
-    ): List<String> =
-        agentCache.get(agentName, downloadUrl.hashCode().toString(), currentOsPreset) { filename, downloadDir ->
-            agentInstaller.download(
-                FileUrl(downloadUrl, filename),
-                downloadDir
-            )
-        }.let { zipFile ->
-            agentInstaller.unzip(
-                zipFile,
-                distDir
-            )
-        }.let { unzippedDir ->
-            getJvmOptionsByUnzippedDir(unzippedDir, agentArgs)
-        }
+    ): List<String> = agentInstaller.install(
+        downloadUrl,
+        agentName,
+        downloadUrl.hashCode().toString(),
+        distDir
+    ).let { unzippedDir ->
+        getJvmOptionsByUnzippedDir(unzippedDir, agentArgs)
+    }
 
     private fun getJvmOptionsByZipFile(
         zipFile: File,

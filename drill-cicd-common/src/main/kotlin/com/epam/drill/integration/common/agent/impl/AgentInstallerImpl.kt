@@ -36,7 +36,9 @@ import kotlin.io.use
 private const val GITHUB_API_URL = "https://api.github.com"
 private const val GITHUB_USER_TOKEN = "GH_USER_TOKEN"
 
-class AgentInstallerImpl : AgentInstaller {
+class AgentInstallerImpl(
+    private val agentCache: AgentCache
+) : AgentInstaller {
     private val json = Json { ignoreUnknownKeys = true }
     private val token: String? = System.getenv(GITHUB_USER_TOKEN)
 
@@ -74,7 +76,20 @@ class AgentInstallerImpl : AgentInstaller {
         }
     }
 
-    override suspend fun download(downloadUrl: FileUrl, downloadDir: Directory): File {
+    override suspend fun install(
+        downloadUrl: String,
+        agentName: String,
+        version: String,
+        installationDir: Directory
+    ): Directory =
+        agentCache.get(agentName, version, currentOsPreset) { filename, downloadDir ->
+            download(FileUrl(downloadUrl, filename), downloadDir)
+        }.let { zipFile ->
+            return unzip(zipFile, installationDir)
+        }
+
+
+    private suspend fun download(downloadUrl: FileUrl, downloadDir: Directory): File {
         if (!downloadDir.exists()) {
             downloadDir.mkdirs()
         }
