@@ -18,11 +18,14 @@ package com.epam.drill.integration.common.agent.impl
 import com.epam.drill.integration.common.agent.AgentCache
 import com.epam.drill.integration.common.agent.Directory
 import com.epam.drill.integration.common.agent.FileUrl
+import mu.KotlinLogging
 import java.io.File
 
 class AgentCacheImpl(
     private val cacheDir: Directory
 ) : AgentCache {
+
+    private val logger = KotlinLogging.logger {}
 
     override fun clearAll() {
         cacheDir.deleteRecursively()
@@ -43,7 +46,10 @@ class AgentCacheImpl(
     ): File {
         val file = File(cacheDir, getAgentFilename(agentName, preset, version))
         if (!file.exists()) {
+            logger.debug { "Agent $agentName-$preset-$version is not found in cache. Downloading..." }
             download(file.name, cacheDir)
+        } else {
+            logger.debug { "Agent $agentName-$preset-$version is found in cache." }
         }
         return file
     }

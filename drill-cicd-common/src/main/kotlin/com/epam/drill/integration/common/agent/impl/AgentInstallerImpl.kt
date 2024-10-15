@@ -76,13 +76,14 @@ class AgentInstallerImpl(
         }
     }
 
-    override suspend fun downloadByVersion(githubRepository: String, agentName: String, version: String): File = run {
-        getDownloadUrl(githubRepository, version, currentOsPreset)
-    }?.let { (url, _) ->
+    override suspend fun downloadByVersion(githubRepository: String, agentName: String, version: String): File =
         agentCache.get(agentName, version, currentOsPreset) { filename, downloadDir ->
-            downloadFile(FileUrl(url, filename), downloadDir)
+            run {
+                getDownloadUrl(githubRepository, version, currentOsPreset)
+            }?.let { (url, _) ->
+                downloadFile(FileUrl(url, filename), downloadDir)
+            }
         }
-    } ?: throw IllegalStateException("Agent version $version not found")
 
 
     override suspend fun downloadByUrl(downloadUrl: String, agentName: String): File =
