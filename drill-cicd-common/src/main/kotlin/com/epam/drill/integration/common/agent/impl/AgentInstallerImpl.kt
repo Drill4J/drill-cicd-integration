@@ -29,6 +29,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import mu.KotlinLogging
 import java.io.File
 import java.util.zip.ZipFile
 import kotlin.io.use
@@ -41,6 +42,7 @@ class AgentInstallerImpl(
 ) : AgentInstaller {
     private val json = Json { ignoreUnknownKeys = true }
     private val token: String? = System.getenv(GITHUB_USER_TOKEN)
+    private val logger = KotlinLogging.logger {}
 
     var httpClient: HttpClient = HttpClient(CIO) {
         install(JsonFeature)
@@ -82,7 +84,9 @@ class AgentInstallerImpl(
                 getDownloadUrl(githubRepository, version, currentOsPreset)
             }?.let { (url, _) ->
                 downloadFile(FileUrl(url, filename), downloadDir)
-            }
+            }?.also { file ->
+                logger.info { "Agent ${file.name} has been downloaded" }
+            } ?: throw IllegalStateException("Can't get download url for $agentName")
         }
 
 
