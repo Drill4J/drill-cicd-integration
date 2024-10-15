@@ -28,9 +28,9 @@ import org.apache.maven.plugins.annotations.ResolutionScope
     threadSafe = true
 )
 class ClearAgentFileCacheMojo : AbstractDrillMojo() {
+    private val agentCache = AgentCacheImpl(drillAgentFilesDir)
 
     override fun execute() {
-        val agentCache = AgentCacheImpl(drillAgentFilesDir)
         agentCache.clearAll()
         log.info("Agent file cache has been cleared")
     }

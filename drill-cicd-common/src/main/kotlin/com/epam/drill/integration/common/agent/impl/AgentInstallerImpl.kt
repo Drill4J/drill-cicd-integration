@@ -76,22 +76,19 @@ class AgentInstallerImpl(
         }
     }
 
-    override suspend fun downloadAndUnzip(
-        downloadUrl: String,
-        agentName: String,
-        version: String,
-        installationDir: Directory
-    ): Directory = run {
-        download(downloadUrl, agentName, version)
-    }.let { zipFile ->
-        unzip(zipFile, installationDir)
-    }
-
-    override suspend fun download(downloadUrl: String, agentName: String, version: String): File =
+    override suspend fun downloadByVersion(githubRepository: String, agentName: String, version: String): File = run {
+        getDownloadUrl(githubRepository, version, currentOsPreset)
+    }?.let { (url, _) ->
         agentCache.get(agentName, version, currentOsPreset) { filename, downloadDir ->
+            downloadFile(FileUrl(url, filename), downloadDir)
+        }
+    } ?: throw IllegalStateException("Agent version $version not found")
+
+
+    override suspend fun downloadByUrl(downloadUrl: String, agentName: String): File =
+        agentCache.get(agentName, downloadUrl.hashCode().toString(), currentOsPreset) { filename, downloadDir ->
             downloadFile(FileUrl(downloadUrl, filename), downloadDir)
         }
-
 
     override fun unzip(zipFile: File, destinationDir: Directory): Directory {
         if (!zipFile.exists()) {

@@ -19,8 +19,8 @@ import java.io.File
 
 interface AgentInstaller {
     suspend fun getDownloadUrl(githubRepository: String, version: String, osPreset: String): FileUrl?
-    suspend fun downloadAndUnzip(downloadUrl: String, agentName: String, version: String, installationDir: Directory): Directory
-    suspend fun download(downloadUrl: String, agentName: String, version: String): File
+    suspend fun downloadByVersion(githubRepository: String, agentName: String, version: String): File
+    suspend fun downloadByUrl(downloadUrl: String, agentName: String): File
     fun unzip(zipFile: File, destinationDir: Directory): Directory
     fun findAgentFile(unzippedDir: Directory, fileExtension: String): File?
 }

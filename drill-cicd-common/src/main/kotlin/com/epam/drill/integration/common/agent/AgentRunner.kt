@@ -73,32 +73,37 @@ class AgentRunner(
         version: String,
         distDir: Directory,
         agentArgs: Map<String, String?>
-    ): List<String> = agentInstaller.getDownloadUrl(
-        repositoryName,
-        version,
-        currentOsPreset
-    )?.let { downloadFile ->
-        agentInstaller.downloadAndUnzip(
-            downloadFile.url,
+    ): List<String> = run {
+        agentInstaller.downloadByVersion(
+            repositoryName,
             agentName,
             version,
+        )
+    }.let { zipFile ->
+        agentInstaller.unzip(
+            zipFile,
             distDir
         )
-    }?.let { unzippedDir ->
+    }.let { unzippedDir ->
         getJvmOptionsByUnzippedDir(unzippedDir, agentArgs)
-    } ?: throw IllegalStateException("Can't find the agent release for repository $repositoryName and version $version")
+    }
 
     private suspend fun getJvmOptionsByDownloadUrl(
         agentName: String,
         downloadUrl: String,
         distDir: Directory,
         agentArgs: Map<String, String?>
-    ): List<String> = agentInstaller.downloadAndUnzip(
-        downloadUrl,
-        agentName,
-        downloadUrl.hashCode().toString(),
-        distDir
-    ).let { unzippedDir ->
+    ): List<String> = run {
+        agentInstaller.downloadByUrl(
+            downloadUrl,
+            agentName
+        )
+    }.let { zipFile ->
+        agentInstaller.unzip(
+            zipFile,
+            distDir
+        )
+    }.let { unzippedDir ->
         getJvmOptionsByUnzippedDir(unzippedDir, agentArgs)
     }
 

@@ -24,7 +24,6 @@ class AgentCacheImpl(
     private val cacheDir: Directory
 ) : AgentCache {
 
-
     override fun clearAll() {
         cacheDir.deleteRecursively()
     }

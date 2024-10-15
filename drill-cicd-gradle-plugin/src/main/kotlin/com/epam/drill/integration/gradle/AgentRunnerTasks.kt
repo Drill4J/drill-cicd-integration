@@ -39,9 +39,9 @@ fun modifyToRunDrillAgents(
     task.doFirst {
         logger.lifecycle("Task :${task.name} is modified by Drill")
 
-        val agentInstaller = AgentInstallerImpl()
         val agentCache = AgentCacheImpl(drillAgentFilesDir)
-        val agentRunner = AgentRunner(agentInstaller, agentCache)
+        val agentInstaller = AgentInstallerImpl(agentCache)
+        val agentRunner = AgentRunner(agentInstaller)
         val distDir = File(project.buildDir, "/drill")
 
 

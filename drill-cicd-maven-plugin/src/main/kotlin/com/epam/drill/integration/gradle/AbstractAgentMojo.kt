@@ -30,9 +30,9 @@ private const val ARG_LINE = "argLine"
 
 abstract class AbstractAgentMojo: AbstractDrillMojo() {
 
-    private val agentInstaller = AgentInstallerImpl()
     private val agentCache = AgentCacheImpl(drillAgentFilesDir)
-    private val agentRunner = AgentRunner(agentInstaller, agentCache)
+    private val agentInstaller = AgentInstallerImpl(agentCache)
+    private val agentRunner = AgentRunner(agentInstaller)
 
     abstract fun getAgentConfig(): AgentConfiguration
 

@@ -59,6 +59,12 @@ class DrillCiCdIntegrationGradlePlugin : Plugin<Project> {
             it.group = TASK_GROUP
         }
 
+        project.task("drillDownloadAgents") {
+            drillDownloadAgents(config)
+        }.also {
+            it.group = TASK_GROUP
+        }
+
         project.tasks.withType(Test::class.java) {
             extensions.create("drill", DrillTaskExtension::class.java)
         }

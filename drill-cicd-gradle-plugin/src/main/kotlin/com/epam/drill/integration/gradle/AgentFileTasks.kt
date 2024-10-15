@@ -15,16 +15,68 @@
  */
 package com.epam.drill.integration.gradle
 
+import com.epam.drill.integration.common.agent.config.AppAgentConfiguration
+import com.epam.drill.integration.common.agent.config.TestAgentConfiguration
 import com.epam.drill.integration.common.agent.impl.AgentCacheImpl
+import com.epam.drill.integration.common.agent.impl.AgentInstallerImpl
+import kotlinx.coroutines.runBlocking
 import org.gradle.api.Task
 import java.io.File
 
 val drillAgentFilesDir = File(System.getProperty("user.home"), ".drill/agents")
 
 fun Task.drillClearAgentFileCache(config: DrillPluginExtension) {
+    val agentCache = AgentCacheImpl(drillAgentFilesDir)
+
     doFirst {
-        val agentCache = AgentCacheImpl(drillAgentFilesDir)
         agentCache.clearAll()
         logger.lifecycle("Agent file cache has been cleared")
+    }
+}
+
+fun Task.drillDownloadAgents(config: DrillPluginExtension) {
+    val agentCache = AgentCacheImpl(drillAgentFilesDir)
+    val agentInstaller = AgentInstallerImpl(agentCache)
+
+    fun download(
+        agentConfig: AgentExtension,
+        agentName: String,
+        githubRepository: String
+    ) {
+        val downloadUrl = agentConfig.downloadUrl
+        val version = agentConfig.version
+
+        when {
+            downloadUrl != null -> runBlocking {
+                agentInstaller.downloadByUrl(
+                    downloadUrl, agentName
+                ).also {
+                    logger.lifecycle("Agent ${it.name} has been downloaded")
+                }
+            }
+
+            version != null -> runBlocking {
+                agentInstaller.downloadByVersion(
+                    githubRepository, agentName, version
+                )
+            }.also {
+                logger.lifecycle("Agent ${it.name} has been downloaded")
+            }
+        }
+    }
+
+    doFirst {
+        config.appAgent.enabled?.takeIf { it }?.let {
+            val agentConfig = AppAgentConfiguration()
+            val agentName = agentConfig.agentName
+            val githubRepository = agentConfig.githubRepository
+            download(config.appAgent, agentName, githubRepository)
+        }
+        config.testAgent.enabled?.takeIf { it }?.let {
+            val agentConfig = TestAgentConfiguration()
+            val agentName = agentConfig.agentName
+            val githubRepository = agentConfig.githubRepository
+            download(config.testAgent, agentName, githubRepository)
+        }
     }
 }

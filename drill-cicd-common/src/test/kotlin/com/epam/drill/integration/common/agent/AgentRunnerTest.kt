@@ -70,9 +70,11 @@ class AgentRunnerTest {
             downloadUrl = agentDownloadUrl
             additionalParams = mapOf("arg1" to "value1")
         }
+        val agentZipFile = File(cacheDir, "agent.zip")
         val agentDir = Directory(installationDir, "agent")
         val agentLibFile = File(agentDir, "agent.$currentOsLibExt")
-        wheneverBlocking(agentInstaller) { downloadAndUnzip(any(), any(), any(), any()) }.thenReturn(agentDir)
+        wheneverBlocking(agentInstaller) { downloadByUrl(any(), any()) }.thenReturn(agentZipFile)
+        whenever(agentInstaller.unzip(any(), any())).thenReturn(agentDir)
         whenever(agentInstaller.findAgentFile(agentDir, currentOsLibExt)).thenReturn(agentLibFile)
 
         val result = runBlocking {
@@ -80,7 +82,8 @@ class AgentRunnerTest {
         }
 
         assertEquals("-agentpath:$agentLibFile=drillInstallationDir=$agentDir,arg1=value1", result.first())
-        verifyBlocking(agentInstaller) { downloadAndUnzip(eq(agentDownloadUrl), eq(configuration.agentName), any(), any()) }
+        verifyBlocking(agentInstaller) { downloadByUrl(eq(agentDownloadUrl), eq(configuration.agentName)) }
+        verify(agentInstaller).unzip(agentZipFile, installationDir)
         verify(agentInstaller).findAgentFile(agentDir, currentOsLibExt)
     }
 
@@ -91,13 +94,14 @@ class AgentRunnerTest {
             version = agentVersion
             additionalParams = mapOf("arg1" to "value1")
         }
+        val agentZipFile = File(cacheDir, "agent.zip")
         val agentDir = Directory(installationDir, "agent")
         val agentLibFile = File(agentDir, "agent.so")
         val downloadUrl = "http://example.com/agent.zip"
         wheneverBlocking(agentInstaller) { getDownloadUrl(any(), any(), any()) }.thenReturn(
             FileUrl(filename = "agent.zip", url = downloadUrl)
         )
-        wheneverBlocking(agentInstaller) { downloadAndUnzip(any(), any(), any(), any()) }.thenReturn(agentDir)
+        wheneverBlocking(agentInstaller) { downloadByVersion(any(), any(), any()) }.thenReturn(agentZipFile)
         whenever(agentInstaller.unzip(any(), any())).thenReturn(agentDir)
         whenever(agentInstaller.findAgentFile(any(), eq(currentOsLibExt))).thenReturn(agentLibFile)
 
@@ -109,8 +113,7 @@ class AgentRunnerTest {
             "-agentpath:$agentLibFile=drillInstallationDir=$agentDir,arg1=value1",
             result.first()
         )
-        verifyBlocking(agentInstaller) { getDownloadUrl(configuration.githubRepository, agentVersion, currentOsPreset) }
-        verifyBlocking(agentInstaller) { downloadAndUnzip(any(), any(), any(), any()) }
+        verifyBlocking(agentInstaller) { downloadByVersion(eq(configuration.githubRepository), eq(configuration.agentName), eq(agentVersion)) }
         verify(agentInstaller).findAgentFile(any(), eq(currentOsLibExt))
     }
 
