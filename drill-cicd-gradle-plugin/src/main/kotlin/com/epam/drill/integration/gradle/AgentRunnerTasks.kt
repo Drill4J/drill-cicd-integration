@@ -19,10 +19,9 @@ import com.epam.drill.integration.common.agent.AgentRunner
 import com.epam.drill.integration.common.agent.config.AgentConfiguration
 import com.epam.drill.integration.common.agent.config.TestAgentConfiguration
 import com.epam.drill.integration.common.agent.config.AppAgentConfiguration
+import com.epam.drill.integration.common.agent.impl.AgentCacheImpl
 import com.epam.drill.integration.common.agent.impl.AgentInstallerImpl
 import com.epam.drill.integration.common.git.impl.GitClientImpl
-import com.epam.drill.integration.common.util.fromEnv
-import com.epam.drill.integration.common.util.required
 import kotlinx.coroutines.runBlocking
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -40,7 +39,8 @@ fun modifyToRunDrillAgents(
     task.doFirst {
         logger.lifecycle("Task :${task.name} is modified by Drill")
 
-        val agentInstaller = AgentInstallerImpl()
+        val agentCache = AgentCacheImpl(drillAgentFilesDir)
+        val agentInstaller = AgentInstallerImpl(agentCache)
         val agentRunner = AgentRunner(agentInstaller)
         val distDir = File(project.buildDir, "/drill")
 
@@ -101,9 +101,9 @@ private fun AgentConfiguration.mapGeneralAgentProperties(
     this.logLevel = agentTaskExtension.logLevel ?: agentPluginExtension.logLevel
     this.logFile = (agentTaskExtension.logFile ?: agentPluginExtension.logFile)?.let { File(it) }
 
-    this.apiUrl = pluginExtension.apiUrl.fromEnv("DRILL_API_URL").required("apiUrl")
-    this.apiKey = pluginExtension.apiKey.fromEnv("DRILL_API_KEY")
-    this.groupId = pluginExtension.groupId.required("groupId")
+    this.apiUrl = pluginExtension.apiUrl
+    this.apiKey = pluginExtension.apiKey
+    this.groupId = pluginExtension.groupId
 
     this.additionalParams = agentPluginExtension.additionalParams + agentTaskExtension.additionalParams
 }

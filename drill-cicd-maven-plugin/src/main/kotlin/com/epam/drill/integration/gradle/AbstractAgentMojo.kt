@@ -17,6 +17,7 @@ package com.epam.drill.integration.gradle
 
 import com.epam.drill.integration.common.agent.AgentRunner
 import com.epam.drill.integration.common.agent.config.AgentConfiguration
+import com.epam.drill.integration.common.agent.impl.AgentCacheImpl
 import com.epam.drill.integration.common.agent.impl.AgentInstallerImpl
 import com.epam.drill.integration.common.util.fromEnv
 import com.epam.drill.integration.common.util.required
@@ -24,10 +25,13 @@ import kotlinx.coroutines.runBlocking
 import java.io.File
 
 
+val drillAgentFilesDir = File(System.getProperty("user.home"), ".drill/agents")
 private const val ARG_LINE = "argLine"
 
 abstract class AbstractAgentMojo: AbstractDrillMojo() {
-    private val agentInstaller = AgentInstallerImpl()
+
+    private val agentCache = AgentCacheImpl(drillAgentFilesDir)
+    private val agentInstaller = AgentInstallerImpl(agentCache)
     private val agentRunner = AgentRunner(agentInstaller)
 
     abstract fun getAgentConfig(): AgentConfiguration

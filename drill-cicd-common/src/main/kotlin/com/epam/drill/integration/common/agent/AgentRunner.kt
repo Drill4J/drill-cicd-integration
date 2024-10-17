@@ -38,12 +38,14 @@ class AgentRunner(
             )
 
             downloadUrl != null -> return getJvmOptionsByDownloadUrl(
-                FileUrl(downloadUrl, "$currentOsPreset.zip"),
+                configuration.agentName,
+                downloadUrl,
                 distDir,
                 agentArgs
             )
 
             version != null -> return getJvmOptionsByVersion(
+                configuration.agentName,
                 configuration.githubRepository,
                 version,
                 distDir,
@@ -53,21 +55,6 @@ class AgentRunner(
             else -> throw IllegalStateException("You must specify either the agent version, or the downloadUrl, or the zipPath")
         }
     }
-
-    private suspend fun getJvmOptionsByVersion(
-        repositoryName: String,
-        releaseVersion: String,
-        distDir: Directory,
-        agentArgs: Map<String, String?>
-    ): List<String> = agentInstaller.getDownloadUrl(
-        repositoryName,
-        releaseVersion,
-        currentOsPreset
-    )?.let { fileUrl ->
-        getJvmOptionsByDownloadUrl(fileUrl, distDir, agentArgs)
-    }
-        ?: throw IllegalStateException("Can't find the agent release for repository $repositoryName and version $releaseVersion")
-
 
     private fun getJvmOptionsByUnzippedDir(
         unzippedDir: Directory,
@@ -79,26 +66,54 @@ class AgentRunner(
         getJvmOptionsByAgentFile(agentFile, agentArgs)
     } ?: throw IllegalStateException("Could not find agent .$currentOsLibExt file in $unzippedDir.")
 
-    private suspend fun getJvmOptionsByDownloadUrl(
-        archiveFileUrl: FileUrl,
+
+    private suspend fun getJvmOptionsByVersion(
+        agentName: String,
+        repositoryName: String,
+        version: String,
         distDir: Directory,
         agentArgs: Map<String, String?>
-    ): List<String> = agentInstaller.download(
-        archiveFileUrl,
-        distDir
-    ).let { archiveFile ->
-        agentInstaller.unzip(archiveFile)
+    ): List<String> = run {
+        agentInstaller.downloadByVersion(
+            repositoryName,
+            agentName,
+            version,
+        )
+    }.let { zipFile ->
+        agentInstaller.unzip(
+            zipFile,
+            distDir
+        )
+    }.let { unzippedDir ->
+        getJvmOptionsByUnzippedDir(unzippedDir, agentArgs)
+    }
+
+    private suspend fun getJvmOptionsByDownloadUrl(
+        agentName: String,
+        downloadUrl: String,
+        distDir: Directory,
+        agentArgs: Map<String, String?>
+    ): List<String> = run {
+        agentInstaller.downloadByUrl(
+            downloadUrl,
+            agentName
+        )
+    }.let { zipFile ->
+        agentInstaller.unzip(
+            zipFile,
+            distDir
+        )
     }.let { unzippedDir ->
         getJvmOptionsByUnzippedDir(unzippedDir, agentArgs)
     }
 
     private fun getJvmOptionsByZipFile(
         zipFile: File,
-        destinationDir: Directory,
+        distDir: Directory,
         agentArgs: Map<String, String?>
     ) = agentInstaller.unzip(
         zipFile,
-        destinationDir
+        distDir
     ).let { unzippedDir ->
         getJvmOptionsByUnzippedDir(unzippedDir, agentArgs)
     }
