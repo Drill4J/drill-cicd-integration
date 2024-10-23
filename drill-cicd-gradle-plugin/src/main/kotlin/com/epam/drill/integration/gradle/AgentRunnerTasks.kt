@@ -77,7 +77,13 @@ fun modifyToRunDrillAgents(
                 )
             }
         }.flatten().run {
-            (task as JavaForkOptions).jvmArgs = this
+            (task as JavaForkOptions).jvmArgs.let { previousJvmArgs ->
+                if (previousJvmArgs != null) {
+                    (task as JavaForkOptions).jvmArgs = this + previousJvmArgs
+                } else {
+                    (task as JavaForkOptions).jvmArgs = this.toMutableList()
+                }
+            }
             logger.info("JVM args $this have been added to :${task.name} task")
         }
     }
