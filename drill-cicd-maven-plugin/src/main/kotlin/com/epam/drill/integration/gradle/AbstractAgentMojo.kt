@@ -48,7 +48,7 @@ abstract class AbstractAgentMojo: AbstractDrillMojo() {
         }
 
         val oldArgLine = project.properties.getProperty(ARG_LINE) ?: ""
-        val javaAddOpensOptions = getJavaAddOpensOptions().joinToString { " " }
+        val javaAddOpensOptions = getJavaAddOpensOptions().joinToString(separator = " ")
         val newArgLine = "$oldArgLine ${jvmOptions.joinToString(" ")} $javaAddOpensOptions".trim()
         project.properties.setProperty(ARG_LINE, newArgLine)
         log.info("JVM args $jvmOptions have been added to the goal")
