@@ -22,6 +22,7 @@ import com.epam.drill.integration.common.agent.config.AppAgentConfiguration
 import com.epam.drill.integration.common.agent.impl.AgentCacheImpl
 import com.epam.drill.integration.common.agent.impl.AgentInstallerImpl
 import com.epam.drill.integration.common.git.impl.GitClientImpl
+import com.epam.drill.integration.common.util.getJavaAddOpensOptions
 import kotlinx.coroutines.runBlocking
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -76,7 +77,9 @@ fun modifyToRunDrillAgents(
                     config
                 )
             }
-        }.flatten().run {
+        }.flatten().let {
+            getJavaAddOpensOptions() + it
+        }.run {
             (task as JavaForkOptions).jvmArgs.let { previousJvmArgs ->
                 if (previousJvmArgs != null) {
                     (task as JavaForkOptions).jvmArgs = this + previousJvmArgs

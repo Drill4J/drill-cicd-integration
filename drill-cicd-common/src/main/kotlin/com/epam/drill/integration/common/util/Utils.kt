@@ -20,3 +20,20 @@ fun <T> T?.required(name: String): T =
 
 fun <T> T?.fromEnv(envVar: String): String? =
     this?.toString() ?: System.getenv(envVar)
+
+/**
+ * Adds `--add-opens` options for Java 17 and higher to avoid java.lang.reflect.InaccessibleObjectException
+ */
+fun getJavaAddOpensOptions(): List<String> {
+    val javaVersion = getCurrentJavaVersion()
+    return if (javaVersion != null && javaVersion >= 17) {
+        listOf(
+            "--add-opens=java.base/java.util=ALL-UNNAMED",
+            "--add-opens=java.base/java.lang=ALL-UNNAMED"
+        )
+    } else {
+        emptyList()
+    }
+}
+
+private fun getCurrentJavaVersion() = System.getProperty("java.version").split(".")[0].toIntOrNull()
