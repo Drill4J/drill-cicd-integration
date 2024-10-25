@@ -25,6 +25,7 @@ import com.epam.drill.integration.common.git.impl.GitClientImpl
 import kotlinx.coroutines.runBlocking
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.tasks.testing.Test
 import org.gradle.process.JavaForkOptions
 import java.io.File
 
@@ -67,6 +68,12 @@ fun modifyToRunDrillAgents(
                         }.onFailure {
                             logger.warn("Unable to retrieve the current commit SHA. The 'commitSha' parameter will not be set. Error: ${it.message}")
                         }.getOrNull()
+                        (task as Test).testClassesDirs.joinToString(separator = ";") { "!" + it.absolutePath }
+                            .let { excludePaths ->
+                            this.additionalParams = mapOf(
+                                "scanClassPath" to excludePaths
+                            ) + (additionalParams ?: emptyMap())
+                        }
                     }
                 }
         ).map { config ->
