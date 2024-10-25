@@ -20,6 +20,7 @@ import com.epam.drill.integration.common.agent.config.AgentConfiguration
 import com.epam.drill.integration.common.agent.impl.AgentCacheImpl
 import com.epam.drill.integration.common.agent.impl.AgentInstallerImpl
 import com.epam.drill.integration.common.util.fromEnv
+import com.epam.drill.integration.common.util.getJavaAddOpensOptions
 import com.epam.drill.integration.common.util.required
 import kotlinx.coroutines.runBlocking
 import java.io.File
@@ -47,7 +48,8 @@ abstract class AbstractAgentMojo: AbstractDrillMojo() {
         }
 
         val oldArgLine = project.properties.getProperty(ARG_LINE) ?: ""
-        val newArgLine = "$oldArgLine ${jvmOptions.joinToString(" ")}".trim()
+        val javaAddOpensOptions = getJavaAddOpensOptions().joinToString(separator = " ")
+        val newArgLine = "$oldArgLine ${jvmOptions.joinToString(" ")} $javaAddOpensOptions".trim()
         project.properties.setProperty(ARG_LINE, newArgLine)
         log.info("JVM args $jvmOptions have been added to the goal")
     }
