@@ -64,6 +64,7 @@ fun modifyToRunDrillAgents(
                         this.appId = pluginConfig.appId
                         this.packagePrefixes = pluginConfig.packagePrefixes
                         this.buildVersion = pluginConfig.buildVersion
+                        this.envId = pluginConfig.envId
                         this.commitSha = runCatching {
                             gitClient.getCurrentCommitSha()
                         }.onFailure {
