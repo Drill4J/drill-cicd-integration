@@ -104,7 +104,9 @@ open class TestAgentExtension(
     var testTaskId: String? = null
 ) : AgentExtension()
 
-open class AppAgentExtension : AgentExtension()
+open class AppAgentExtension(
+    var envId: String? = null
+) : AgentExtension()
 
 open class DrillTaskExtension(
     var testAgent: TestAgentExtension = TestAgentExtension(),
