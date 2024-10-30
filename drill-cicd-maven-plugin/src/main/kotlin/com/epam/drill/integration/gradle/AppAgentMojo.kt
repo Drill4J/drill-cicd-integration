@@ -40,9 +40,6 @@ class AppAgentMojo : AbstractAgentMojo() {
     @Parameter(property = "buildVersion", required = false)
     var buildVersion: String? = null
 
-    @Parameter(property = "envId", required = false)
-    var envId: String? = null
-
     private val gitClient = GitClientImpl()
 
     override fun getAgentConfig() = AppAgentConfiguration().apply {
@@ -59,7 +56,7 @@ class AppAgentMojo : AbstractAgentMojo() {
             "scanClassPath" to "${project.build.outputDirectory};!${project.build.testOutputDirectory}"
         ) + (additionalParams ?: emptyMap())
         buildVersion = mavenConfig.buildVersion
-        envId = mavenConfig.envId
+        envId = mavenConfig.appAgent?.envId
         commitSha = runCatching {
             gitClient.getCurrentCommitSha()
         }.onFailure {

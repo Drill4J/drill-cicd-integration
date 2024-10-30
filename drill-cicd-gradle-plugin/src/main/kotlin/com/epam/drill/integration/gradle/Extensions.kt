@@ -24,7 +24,6 @@ open class DrillPluginExtension(
     var groupId: String? = null,
     var appId: String? = null,
     var buildVersion: String? = null,
-    var envId: String? = null,
     var packagePrefixes: Array<String> = emptyArray(),
 
     var baseline: BaselineExtension = BaselineExtension(),
