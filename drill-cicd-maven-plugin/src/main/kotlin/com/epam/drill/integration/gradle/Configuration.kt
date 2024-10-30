@@ -61,4 +61,6 @@ open class TestAgentMavenConfiguration(
     var testTaskId: String? = null
 ) : AgentMavenConfiguration()
 
-open class AppAgentMavenConfiguration() : AgentMavenConfiguration()
+open class AppAgentMavenConfiguration(
+    var envId: String? = null
+) : AgentMavenConfiguration()
