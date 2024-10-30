@@ -21,7 +21,6 @@ abstract class AgentConfiguration {
     var apiUrl: String? = null
     var apiKey: String? = null
     var groupId: String? = null
-    var envId: String? = null
 
     var logLevel: String? = null
     var logFile: File? = null
@@ -38,7 +37,6 @@ abstract class AgentConfiguration {
     open fun toAgentArguments() = mutableMapOf<String, String?>().apply {
         this[AgentConfiguration::apiUrl.name] = apiUrl
         this[AgentConfiguration::apiKey.name] = apiKey
-        this[AgentConfiguration::envId.name] = envId
         this[AgentConfiguration::groupId.name] = groupId
         this[AgentConfiguration::logLevel.name] = logLevel
         this[AgentConfiguration::logFile.name] = logFile?.absolutePath
