@@ -56,6 +56,7 @@ class AppAgentMojo : AbstractAgentMojo() {
             "scanClassPath" to "${project.build.outputDirectory};!${project.build.testOutputDirectory}"
         ) + (additionalParams ?: emptyMap())
         buildVersion = mavenConfig.buildVersion
+        envId = mavenConfig.appAgent?.envId
         commitSha = runCatching {
             gitClient.getCurrentCommitSha()
         }.onFailure {
