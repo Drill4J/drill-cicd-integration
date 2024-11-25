@@ -29,6 +29,7 @@ open class DrillPluginExtension(
     var baseline: BaselineExtension = BaselineExtension(),
     var gitlab: GitlabExtension = GitlabExtension(),
     var github: GithubExtension = GithubExtension(),
+    var recommendedTests: RecommendedTestsExtension = RecommendedTestsExtension(),
 
     internal var testAgent: TestAgentExtension = TestAgentExtension(),
     internal var appAgent: AppAgentExtension = AppAgentExtension(),
@@ -53,6 +54,11 @@ open class DrillPluginExtension(
     fun enableAppAgent(action: Action<AppAgentExtension>) {
         appAgent.enabled = true
         action.execute(appAgent)
+    }
+
+    fun enableTestRecommendations(action: Action<RecommendedTestsExtension>) {
+        recommendedTests.enabled = true
+        action.execute(recommendedTests)
     }
 }
 
@@ -85,6 +91,11 @@ open class BaselineExtension(
     var searchStrategy: BaselineSearchStrategy? = null,
     var tagPattern: String? = null,
     var targetRef: String? = null,
+)
+
+open class RecommendedTestsExtension(
+    var enabled: Boolean? = null,
+    var coveragePeriodDays: Int? = null
 )
 
 open class AgentExtension(

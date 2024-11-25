@@ -54,6 +54,8 @@ fun modifyToRunDrillAgents(
                     TestAgentConfiguration().apply {
                         mapGeneralAgentProperties(it, pluginConfig.testAgent, pluginConfig)
                         this.testTaskId = it.testTaskId ?: generateTestTaskId(project)
+                        this.recommendedTestsEnabled = pluginConfig.recommendedTests.enabled
+                        this.recommendedTestsCoveragePeriodDays = pluginConfig.recommendedTests.coveragePeriodDays
                     }
                 },
             taskConfig?.appAgent
