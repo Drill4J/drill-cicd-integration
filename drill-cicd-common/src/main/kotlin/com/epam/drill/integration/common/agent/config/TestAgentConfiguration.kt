@@ -18,6 +18,8 @@ package com.epam.drill.integration.common.agent.config
 class TestAgentConfiguration : AgentConfiguration() {
     var testTaskId: String? = null
     var labels: Map<String, String>? = null
+    var recommendedTestsEnabled: Boolean? = null
+    var recommendedTestsCoveragePeriodDays: Int? = null
 
     override val githubRepository: String = "Drill4J/autotest-agent"
     override val agentName: String = "testAgent"
@@ -28,6 +30,10 @@ class TestAgentConfiguration : AgentConfiguration() {
             testTaskId?.let { this[TestAgentConfiguration::testTaskId.name] = it }
             labels?.let {
                 this[TestAgentConfiguration::labels.name] = it.map { (k, v) -> "$k:$v" }.joinToString(";")
+            }
+            recommendedTestsEnabled?.let { enabled ->
+                this[TestAgentConfiguration::recommendedTestsEnabled.name] = enabled.toString().lowercase()
+                recommendedTestsCoveragePeriodDays?.let { this[TestAgentConfiguration::recommendedTestsCoveragePeriodDays.name] = it.toString() }
             }
         }
     }

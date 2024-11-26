@@ -46,6 +46,11 @@ open class BaselineConfiguration(
     var targetRef: String? = null,
 )
 
+open class RecommendedTestsConfiguration(
+    var enabled: Boolean = true,
+    var coveragePeriodDays: Int? = null,
+)
+
 abstract class AgentMavenConfiguration(
     var version: String? = null,
     var downloadUrl: String? = null,

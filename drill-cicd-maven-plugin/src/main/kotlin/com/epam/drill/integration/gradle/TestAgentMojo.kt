@@ -37,6 +37,8 @@ class TestAgentMojo : AbstractAgentMojo() {
 
         setGeneralAgentProperties(testAgent, mavenConfig)
         testTaskId = testAgent.testTaskId ?: generateTestTaskId()
+        recommendedTestsEnabled = mavenConfig.useTestRecommendations?.enabled ?: false
+        recommendedTestsCoveragePeriodDays = mavenConfig.useTestRecommendations?.coveragePeriodDays
         log.info("testTaskId: $testTaskId")
     }
 
