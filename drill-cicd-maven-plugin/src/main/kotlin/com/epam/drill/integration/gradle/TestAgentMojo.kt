@@ -16,6 +16,11 @@
 package com.epam.drill.integration.gradle
 
 import com.epam.drill.integration.common.agent.config.TestAgentConfiguration
+import com.epam.drill.integration.common.baseline.BaselineFactory
+import com.epam.drill.integration.common.baseline.BaselineSearchStrategy
+import com.epam.drill.integration.common.baseline.MergeBaseCriteria
+import com.epam.drill.integration.common.baseline.TagCriteria
+import com.epam.drill.integration.common.git.impl.GitClientImpl
 import com.epam.drill.integration.common.util.required
 import org.apache.maven.execution.MavenSession
 import org.apache.maven.plugins.annotations.*
@@ -25,11 +30,26 @@ import org.apache.maven.plugins.annotations.*
     defaultPhase = LifecyclePhase.INITIALIZE, requiresDependencyResolution = ResolutionScope.RUNTIME, threadSafe = true
 )
 class TestAgentMojo : AbstractAgentMojo() {
+    @Parameter(property = "appId", required = true)
+    var appId: String? = null
+
+    @Parameter(property = "buildVersion", required = false)
+    var buildVersion: String? = null
+
     @Parameter(property = "testAgent", required = true)
     var testAgent: TestAgentMavenConfiguration? = null
 
+    @Parameter(property = "baseline", required = true)
+    var baseline: BaselineConfiguration? = null
+
+    @Parameter(property = "testRecommendations")
+    var testRecommendations: RecommendedTestsConfiguration? = null
+
     @Component
     var session: MavenSession? = null
+
+    private val gitClient = GitClientImpl()
+    private val baselineFactory = BaselineFactory(gitClient)
 
     override fun getAgentConfig() = TestAgentConfiguration().apply {
         val mavenConfig = this@TestAgentMojo
@@ -37,8 +57,28 @@ class TestAgentMojo : AbstractAgentMojo() {
 
         setGeneralAgentProperties(testAgent, mavenConfig)
         testTaskId = testAgent.testTaskId ?: generateTestTaskId()
-        recommendedTestsEnabled = mavenConfig.useTestRecommendations?.enabled ?: false
-        recommendedTestsCoveragePeriodDays = mavenConfig.useTestRecommendations?.coveragePeriodDays
+        recommendedTestsEnabled = mavenConfig.testRecommendations?.enabled ?: false
+        mavenConfig.testRecommendations.takeIf { recommendedTestsEnabled == true }?.let { recommendedTests ->
+            recommendedTestsCoveragePeriodDays = recommendedTests.coveragePeriodDays
+            recommendedTestsTargetAppId = mavenConfig.appId
+            recommendedTestsTargetCommitSha = runCatching {
+                gitClient.getCurrentCommitSha()
+            }.onFailure {
+                log.warn("Unable to retrieve the current commit SHA. The 'recommendedTestsTargetCommitSha' parameter will not be set. Error: ${it.message}")
+            }.getOrNull()
+            recommendedTestsTargetBuildVersion = mavenConfig.buildVersion
+            mavenConfig.baseline?.takeIf { it.searchStrategy != null }?.let { baseline ->
+                val baselineTagPattern = baseline.tagPattern ?: "*"
+                val baselineTargetRef = baseline.targetRef
+                baseline.searchStrategy?.let { searchStrategy ->
+                    val searchCriteria = when (searchStrategy) {
+                        BaselineSearchStrategy.SEARCH_BY_TAG -> TagCriteria(baselineTagPattern)
+                        BaselineSearchStrategy.SEARCH_BY_MERGE_BASE -> MergeBaseCriteria(baselineTargetRef.required("baselineTargetRef"))
+                    }
+                    recommendedTestsBaselineCommitSha = baselineFactory.produce(searchStrategy).findBaseline(searchCriteria)
+                }
+            }
+        }
         log.info("testTaskId: $testTaskId")
     }
 

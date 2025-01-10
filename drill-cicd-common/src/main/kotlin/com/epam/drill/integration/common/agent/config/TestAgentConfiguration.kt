@@ -20,6 +20,10 @@ class TestAgentConfiguration : AgentConfiguration() {
     var labels: Map<String, String>? = null
     var recommendedTestsEnabled: Boolean? = null
     var recommendedTestsCoveragePeriodDays: Int? = null
+    var recommendedTestsTargetAppId: String? = null
+    var recommendedTestsTargetCommitSha: String? = null
+    var recommendedTestsTargetBuildVersion: String? = null
+    var recommendedTestsBaselineCommitSha: String? = null
 
     override val githubRepository: String = "Drill4J/autotest-agent"
     override val agentName: String = "testAgent"
@@ -34,6 +38,11 @@ class TestAgentConfiguration : AgentConfiguration() {
             recommendedTestsEnabled?.let { enabled ->
                 this[TestAgentConfiguration::recommendedTestsEnabled.name] = enabled.toString().lowercase()
                 recommendedTestsCoveragePeriodDays?.let { this[TestAgentConfiguration::recommendedTestsCoveragePeriodDays.name] = it.toString() }
+                recommendedTestsCoveragePeriodDays?.let { this[TestAgentConfiguration::recommendedTestsCoveragePeriodDays.name] = it.toString() }
+                recommendedTestsTargetAppId?.let { this[TestAgentConfiguration::recommendedTestsTargetAppId.name] = it }
+                recommendedTestsTargetCommitSha?.let { this[TestAgentConfiguration::recommendedTestsTargetCommitSha.name] = it }
+                recommendedTestsTargetBuildVersion?.let { this[TestAgentConfiguration::recommendedTestsTargetBuildVersion.name] = it }
+                recommendedTestsBaselineCommitSha?.let { this[TestAgentConfiguration::recommendedTestsBaselineCommitSha.name] = it }
             }
         }
     }

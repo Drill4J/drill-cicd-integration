@@ -35,9 +35,9 @@ fun Task.drillGenerateChangeTestingReport(config: DrillPluginExtension) {
         val apiKey = config.apiKey.fromEnv("DRILL_API_KEY")
         val groupId = config.groupId.required("groupId")
         val appId = config.appId.required("appId")
-        val baselineSearchStrategy = config.baseline?.searchStrategy ?: SEARCH_BY_TAG
-        val baselineTagPattern = config.baseline?.tagPattern ?: "*"
-        val baselineTargetRef = config.baseline?.targetRef
+        val baselineSearchStrategy = config.baseline.searchStrategy ?: SEARCH_BY_TAG
+        val baselineTagPattern = config.baseline.tagPattern ?: "*"
+        val baselineTargetRef = config.baseline.targetRef
 
         val reportService = ReportService(
             metricsClient = MetricsClientImpl(
