@@ -21,8 +21,13 @@ import com.epam.drill.integration.common.agent.config.TestAgentConfiguration
 import com.epam.drill.integration.common.agent.config.AppAgentConfiguration
 import com.epam.drill.integration.common.agent.impl.AgentCacheImpl
 import com.epam.drill.integration.common.agent.impl.AgentInstallerImpl
+import com.epam.drill.integration.common.baseline.BaselineFactory
+import com.epam.drill.integration.common.baseline.BaselineSearchStrategy
+import com.epam.drill.integration.common.baseline.MergeBaseCriteria
+import com.epam.drill.integration.common.baseline.TagCriteria
 import com.epam.drill.integration.common.git.impl.GitClientImpl
 import com.epam.drill.integration.common.util.getJavaAddOpensOptions
+import com.epam.drill.integration.common.util.required
 import kotlinx.coroutines.runBlocking
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -37,6 +42,7 @@ fun modifyToRunDrillAgents(
 ) {
     val taskConfig = task.extensions.findByType(DrillTaskExtension::class.java)
     val gitClient = GitClientImpl()
+    val baselineFactory = BaselineFactory(gitClient)
 
     task.doFirst {
         logger.lifecycle("Task :${task.name} is modified by Drill")
@@ -54,6 +60,26 @@ fun modifyToRunDrillAgents(
                     TestAgentConfiguration().apply {
                         mapGeneralAgentProperties(it, pluginConfig.testAgent, pluginConfig)
                         this.testTaskId = it.testTaskId ?: generateTestTaskId(project)
+                        this.recommendedTestsEnabled = pluginConfig.recommendedTests.enabled
+                        if (this.recommendedTestsEnabled == true) {
+                            this.recommendedTestsCoveragePeriodDays = pluginConfig.recommendedTests.coveragePeriodDays
+                            this.recommendedTestsTargetAppId = pluginConfig.appId
+                            this.recommendedTestsTargetCommitSha = runCatching {
+                                gitClient.getCurrentCommitSha()
+                            }.onFailure {
+                                logger.warn("Unable to retrieve the current commit SHA. The 'recommendedTestsTargetCommitSha' parameter will not be set. Error: ${it.message}")
+                            }.getOrNull()
+                            this.recommendedTestsTargetBuildVersion = pluginConfig.buildVersion
+                            pluginConfig.baseline.searchStrategy?.let { searchStrategy ->
+                                val baselineTagPattern = pluginConfig.baseline.tagPattern ?: "*"
+                                val baselineTargetRef = pluginConfig.baseline.targetRef
+                                val searchCriteria = when (searchStrategy) {
+                                    BaselineSearchStrategy.SEARCH_BY_TAG -> TagCriteria(baselineTagPattern)
+                                    BaselineSearchStrategy.SEARCH_BY_MERGE_BASE -> MergeBaseCriteria(baselineTargetRef.required("baselineTargetRef"))
+                                }
+                                this.recommendedTestsBaselineCommitSha = baselineFactory.produce(searchStrategy).findBaseline(searchCriteria)
+                            }
+                        }
                     }
                 },
             taskConfig?.appAgent

@@ -29,13 +29,7 @@ class ReportService(
     private val metricsClient: MetricsClient,
     private val gitClient: GitClient,
     private val reportGenerator: ReportGenerator,
-    private val baselineFinders: (BaselineSearchStrategy) -> BaselineFinder<BaselineSearchCriteria> = { strategy ->
-        @Suppress("UNCHECKED_CAST")
-        when (strategy) {
-            SEARCH_BY_TAG -> BaselineFinderByTag(gitClient)
-            SEARCH_BY_MERGE_BASE -> BaselineFinderByMergeBase(gitClient)
-        } as BaselineFinder<BaselineSearchCriteria>
-    }
+    private val baselineFactory: BaselineFactory = BaselineFactory(gitClient)
 ) {
     private val logger = KotlinLogging.logger {}
 
@@ -47,7 +41,7 @@ class ReportService(
         reportPath: String = ""
     ) {
         val commitSha = gitClient.getCurrentCommitSha()
-        val baselineCommitSha = baselineFinders(baselineSearchStrategy).findBaseline(baselineSearchCriteria)
+        val baselineCommitSha = baselineFactory.produce(baselineSearchStrategy).findBaseline(baselineSearchCriteria)
 
         logger.info { "Requesting metrics for $groupId/$appId to compare $commitSha with $baselineCommitSha..." }
         val data = metricsClient.getBuildComparison(
