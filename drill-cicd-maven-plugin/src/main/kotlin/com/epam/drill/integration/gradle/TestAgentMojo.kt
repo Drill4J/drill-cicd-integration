@@ -76,8 +76,9 @@ class TestAgentMojo : AbstractAgentMojo() {
                         BaselineSearchStrategy.SEARCH_BY_MERGE_BASE -> MergeBaseCriteria(baselineTargetRef.required("baselineTargetRef"))
                     }
                     recommendedTestsBaselineCommitSha = baselineFactory.produce(searchStrategy).findBaseline(searchCriteria)
-                }
+                }                
             }
+            recommendedTestsUseMaterializedViews = useMaterializedViews
         }
         log.info("testTaskId: $testTaskId")
     }

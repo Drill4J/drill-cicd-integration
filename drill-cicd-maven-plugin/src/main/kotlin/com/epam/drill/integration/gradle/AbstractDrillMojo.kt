@@ -31,4 +31,7 @@ abstract class AbstractDrillMojo : AbstractMojo() {
 
     @Parameter(property = "groupId", required = true)
     var groupId: String? = null
+
+    @Parameter(property = "useMaterializedViews", required = false)
+    var useMaterializedViews: Boolean? = null
 }

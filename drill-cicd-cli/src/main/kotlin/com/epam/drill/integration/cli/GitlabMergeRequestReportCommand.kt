@@ -35,6 +35,7 @@ class GitlabMergeRequestReportCommand : CliktCommand(name = "gitlabMergeRequestR
     private val gitlabPrivateToken by option("-gl-t", "--gitlabPrivateToken", envvar = "GITLAB_PRIVATE_TOKEN").required()
     private val gitlabProjectId by option("-p", "--gitlabProjectId", envvar = "CI_PROJECT_ID").required()
     private val gitlabMergeRequestId by option("-mr", "--gitlabMergeRequestId", envvar = "CI_MERGE_REQUEST_IID").required()
+    private val useMaterializedViews by option("-m", "--useMaterializedViews", envvar = "DRILL_USE_MATERIALIZED_VIEWS")
 
     override fun run() {
         echo("Posting Drill4J Merge Request Report to Gitlab...")
@@ -50,7 +51,8 @@ class GitlabMergeRequestReportCommand : CliktCommand(name = "gitlabMergeRequestR
                 groupId = groupId,
                 appId = appId,
                 headCommitSha = commitSha,
-                mergeBaseCommitSha = mergeBaseCommitSha
+                mergeBaseCommitSha = mergeBaseCommitSha,
+                useMaterializedViews = useMaterializedViews?.let { java.lang.Boolean.parseBoolean(it) },
             )
         }
         echo("Done.")
