@@ -65,6 +65,8 @@ class DrillCiCdIntegrationGradlePlugin : Plugin<Project> {
             it.group = TASK_GROUP
         }
 
+        // project.task("drillDownloadAppArchiveScanner") {
+
         project.tasks.withType(Test::class.java) {
             extensions.create("drill", DrillTaskExtension::class.java)
         }
@@ -74,11 +76,25 @@ class DrillCiCdIntegrationGradlePlugin : Plugin<Project> {
         }
 
         project.afterEvaluate {
+            // run agents
             tasks
                 .filter { taskType.any { taskType -> taskType.java.isInstance(it) } }
                 .filter { it is JavaForkOptions }
                 .forEach { task ->
                     modifyToRunDrillAgents(task, project, config)
+                }
+
+            // run app archive scanner
+            tasks
+                .filter { it.name in listOf("jar", "war", "ear", "rar") }
+                .forEach { archiveTask ->
+                    archiveTask.doLast {
+                        val archive = archiveTask.outputs.files.singleFile
+                        if (state.didWork) {
+                            println("Analyzing ${archiveTask.name}: ${archive.absolutePath}")
+
+                        }
+                    }
                 }
         }
     }
