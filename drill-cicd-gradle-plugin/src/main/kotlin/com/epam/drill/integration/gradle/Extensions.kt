@@ -33,6 +33,7 @@ open class DrillPluginExtension(
 
     internal var testAgent: TestAgentExtension = TestAgentExtension(),
     internal var appAgent: AppAgentExtension = AppAgentExtension(),
+    internal var appArchiveScanner: AppArchiveScannerExtension = AppArchiveScannerExtension(),
 ) {
     fun baseline(action: Action<BaselineExtension>) {
         action.execute(baseline)
@@ -59,6 +60,11 @@ open class DrillPluginExtension(
     fun enableTestRecommendations(action: Action<RecommendedTestsExtension>) {
         recommendedTests.enabled = true
         action.execute(recommendedTests)
+    }
+
+    fun enableAppArchiveScanner(action: Action<AppArchiveScannerExtension>) {
+        appArchiveScanner.enabled = true
+        action.execute(appArchiveScanner)
     }
 }
 
@@ -119,9 +125,12 @@ open class AppAgentExtension(
     var envId: String? = null
 ) : AgentExtension()
 
+open class AppArchiveScannerExtension() : AgentExtension()
+
 open class DrillTaskExtension(
     var testAgent: TestAgentExtension = TestAgentExtension(),
     var appAgent: AppAgentExtension = AppAgentExtension(),
+    var appArchiveScanner: AppArchiveScannerExtension = AppArchiveScannerExtension(),
 ) {
     fun testAgent(action: Action<TestAgentExtension>) {
         testAgent.enabled = true
@@ -130,6 +139,11 @@ open class DrillTaskExtension(
 
     fun appAgent(action: Action<AppAgentExtension>) {
         appAgent.enabled = true
+        action.execute(appAgent)
+    }
+
+    fun appArchiveScanner(action: Action<AppAgentExtension>) {
+        appArchiveScanner.enabled = true
         action.execute(appAgent)
     }
 }

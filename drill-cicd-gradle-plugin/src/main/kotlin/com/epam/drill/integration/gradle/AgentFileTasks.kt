@@ -16,6 +16,7 @@
 package com.epam.drill.integration.gradle
 
 import com.epam.drill.integration.common.agent.config.AppAgentConfiguration
+import com.epam.drill.integration.common.agent.config.AppArchiveScannerConfiguration
 import com.epam.drill.integration.common.agent.config.TestAgentConfiguration
 import com.epam.drill.integration.common.agent.impl.AgentCacheImpl
 import com.epam.drill.integration.common.agent.impl.AgentInstallerImpl
@@ -74,6 +75,12 @@ fun Task.drillDownloadAgents(config: DrillPluginExtension) {
         }
         config.testAgent.enabled?.takeIf { it }?.let {
             val agentConfig = TestAgentConfiguration()
+            val agentName = agentConfig.agentName
+            val githubRepository = agentConfig.githubRepository
+            download(config.testAgent, agentName, githubRepository)
+        }
+        config.appArchiveScanner.enabled?.takeIf { it }?.let {
+            val agentConfig = AppArchiveScannerConfiguration()
             val agentName = agentConfig.agentName
             val githubRepository = agentConfig.githubRepository
             download(config.testAgent, agentName, githubRepository)
