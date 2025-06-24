@@ -30,7 +30,7 @@ class ExecutableRunnerTest {
     private val archive = File.createTempFile("archive", ".zip")
     private val agentInstaller = mock<AgentInstaller>()
 
-    private val mockScannerRunner: suspend (List<String>, File, suspend (String) -> Unit) -> Int = { _, _, output ->
+    private val mockScannerRunner: suspend (List<String>, String, suspend (String) -> Unit) -> Int = { _, _, output ->
         output("mocked output line 1")
         output("mocked output line 2")
         42
@@ -60,7 +60,7 @@ class ExecutableRunnerTest {
 
         val outputLines = mutableListOf<String>()
 
-        val exitCode = executableRunner.runScan(config, distDir, archive) { line ->
+        val exitCode = executableRunner.runScan(config, distDir, archive.absolutePath) { line ->
             outputLines.add(line)
         }
 
@@ -74,7 +74,7 @@ class ExecutableRunnerTest {
         val config = AppArchiveScannerConfiguration()
 
         assertFailsWith<IllegalStateException> {
-            executableRunner.runScan(config, distDir, archive) {}
+            executableRunner.runScan(config, distDir, archive.absolutePath) {}
         }
     }
 
@@ -95,7 +95,7 @@ class ExecutableRunnerTest {
         })
 
         val outputLines = mutableListOf<String>()
-        val exitCode = executableRunner.runScan(config, distDir, archive) { line -> outputLines.add(line) }
+        val exitCode = executableRunner.runScan(config, distDir, archive.absolutePath) { line -> outputLines.add(line) }
 
         assertEquals(42, exitCode)
         verifyBlocking(agentInstaller) { downloadByUrl(url, config.agentName) }
@@ -122,7 +122,7 @@ class ExecutableRunnerTest {
         })
 
         val outputLines = mutableListOf<String>()
-        val exitCode = executableRunner.runScan(config, distDir, archive) { line -> outputLines.add(line) }
+        val exitCode = executableRunner.runScan(config, distDir, archive.absolutePath) { line -> outputLines.add(line) }
 
         assertEquals(42, exitCode)
         verifyBlocking(agentInstaller) { downloadByVersion(config.githubRepository, config.agentName, version) }
@@ -148,7 +148,7 @@ class ExecutableRunnerTest {
         })
 
         val outputLines = mutableListOf<String>()
-        val exitCode = executableRunner.runScan(config, distDir, archive) { line -> outputLines.add(line) }
+        val exitCode = executableRunner.runScan(config, distDir, archive.absolutePath) { line -> outputLines.add(line) }
 
         assertEquals(42, exitCode)
         verify(agentInstaller).unzip(zipFile, distDir)
