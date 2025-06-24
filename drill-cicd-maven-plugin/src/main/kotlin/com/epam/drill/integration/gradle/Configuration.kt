@@ -16,8 +16,6 @@
 package com.epam.drill.integration.gradle
 
 import com.epam.drill.integration.common.baseline.BaselineSearchStrategy
-import org.apache.maven.plugins.annotations.Parameter
-
 
 open class GitlabConfiguration(
     var apiUrl: String? = null,
@@ -68,4 +66,7 @@ open class TestAgentMavenConfiguration(
 
 open class AppAgentMavenConfiguration(
     var envId: String? = null
+) : AgentMavenConfiguration()
+
+open class AppArchiveScannerMavenConfiguration(
 ) : AgentMavenConfiguration()
