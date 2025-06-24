@@ -53,7 +53,7 @@ class AppArchiveScannerMojo : AbstractDrillMojo() {
     private val executableRunner = ExecutableRunner(agentInstaller)
 
     override fun execute() {
-        println("executing AppArchiveScannerMojo...")
+        println("App archive scanner running...")
         val distDir = File(project.build?.directory, "/drill")
         val config = getConfig()
         val appArchive = project.artifact.file
@@ -61,7 +61,7 @@ class AppArchiveScannerMojo : AbstractDrillMojo() {
             val exitCode = executableRunner.runScan(
                 config,
                 distDir,
-                appArchive
+                appArchive.absolutePath
             ) { line ->
                 println(line)
             }

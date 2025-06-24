@@ -78,7 +78,8 @@ fun modifyToRunAppArchiveScanner(
             }
             ?.let { config ->
                 runBlocking {
-                    val exitCode = executableRunner.runScan(config, distDir, archive) { line ->
+                    println("App archive scanner running...")
+                    val exitCode = executableRunner.runScan(config, distDir, archive.absolutePath) { line ->
                         println(line)
                     }
                     println("App archive scanner exited with code $exitCode")

@@ -22,7 +22,7 @@ import java.io.File
 
 class ExecutableRunner(
     private val agentInstaller: AgentInstaller,
-    scannerRunnerParam: (suspend (List<String>, File, suspend (String) -> Unit) -> Int)? = null
+    scannerRunnerParam: (suspend (List<String>, String, suspend (String) -> Unit) -> Int)? = null
 ) {
 
     private val scannerRunner = scannerRunnerParam ?: ::runScannerAsync
@@ -67,11 +67,11 @@ class ExecutableRunner(
 
     suspend fun runScannerAsync(
         argLine: List<String>,
-        archive: File,
+        archive: String,
         onOutputLine: suspend (String) -> Unit
     ): Int = withContext(Dispatchers.IO) {
         val process = ProcessBuilder(
-            *(argLine + listOf("--appArchivePath", archive.absolutePath)).toTypedArray()
+            *(argLine + listOf("--scanClassPath", archive)).toTypedArray()
         )
             .redirectErrorStream(true)
             .start()
@@ -92,7 +92,7 @@ class ExecutableRunner(
     suspend fun runScan(
         config: AppArchiveScannerConfiguration,
         distDir: Directory,
-        archive: File,
+        archive: String,
         onOutputLine: suspend (String) -> Unit
     ): Int {
         val zipFile = resolveZipFile(config)
