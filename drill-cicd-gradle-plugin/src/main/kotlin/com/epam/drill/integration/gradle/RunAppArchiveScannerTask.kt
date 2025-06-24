@@ -64,16 +64,6 @@ fun modifyToRunAppArchiveScanner(
                     }.onFailure {
                         logger.warn("Unable to retrieve the current commit SHA. The 'commitSha' parameter will not be set. Error: ${it.message}")
                     }.getOrNull()
-
-                    // TODO additional params - scanClassPath
-//                    if (task is Test) {
-//                        task.testClassesDirs.joinToString(separator = ";") { "!" + it.absolutePath }
-//                            .let { excludePaths ->
-//                                this.additionalParams = mapOf(
-//                                    "scanClassPath" to excludePaths
-//                                ) + (additionalParams ?: emptyMap())
-//                            }
-//                    }
                 }
             }
             ?.let { config ->

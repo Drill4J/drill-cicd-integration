@@ -76,11 +76,6 @@ class AppArchiveScannerMojo : AbstractDrillMojo() {
         setGeneralAgentProperties(appArchiveScanner, mavenConfig)
         appId = mavenConfig.appId.required("appId")
         packagePrefixes = mavenConfig.packagePrefixes.required("packagePrefixes")
-
-        // TODO additional params - scanClassPath
-//        additionalParams = mapOf(
-//            "scanClassPath" to "${project.build.outputDirectory};!${project.build.testOutputDirectory}"
-//        ) + (additionalParams ?: emptyMap())
         buildVersion = mavenConfig.buildVersion
         commitSha = runCatching {
             gitClient.getCurrentCommitSha()
@@ -102,7 +97,4 @@ fun AppArchiveScannerConfiguration.setGeneralAgentProperties(
     apiUrl = mavenGeneralConfig.apiUrl.fromEnv("DRILL_API_URL").required("apiUrl")
     apiKey = mavenGeneralConfig.apiKey.fromEnv("DRILL_API_KEY")
     groupId = mavenGeneralConfig.groupId.required("groupId")
-
-    // TODO additional params - scanClassPath
-//    additionalParams = appArchiveScannerMavenConfiguration.additionalParams
 }
