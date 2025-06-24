@@ -130,7 +130,7 @@ fun modifyToRunDrillAgents(
 
 private fun Task.generateTestTaskId(project: Project) = "${project.group}:${project.name}:${this.name}"
 
-private fun AgentConfiguration.mapGeneralAgentProperties(
+internal fun AgentConfiguration.mapGeneralAgentProperties(
     agentTaskExtension: AgentExtension,
     agentPluginExtension: AgentExtension,
     pluginExtension: DrillPluginExtension
