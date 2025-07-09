@@ -29,7 +29,7 @@ fun Task.drillSendBuildInfo(config: DrillPluginExtension) {
         val apiKey = config.apiKey.fromEnv("DRILL_API_KEY")
         val groupId = config.groupId.required("groupId")
         val appId = config.appId.required("appId")
-        val buildVersion = config.buildVersion
+        val buildVersion = config.buildVersion.fromEnv("DRILL_BUILD_VERSION")
 
         val dataIngestClient = DataIngestClientImpl(
             apiUrl = apiUrl,
