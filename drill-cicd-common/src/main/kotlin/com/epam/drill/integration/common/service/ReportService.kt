@@ -38,7 +38,8 @@ class ReportService(
         appId: String,
         baselineSearchStrategy: BaselineSearchStrategy,
         baselineSearchCriteria: BaselineSearchCriteria,
-        reportPath: String = ""
+        reportPath: String = "",
+        useMaterializedViews: Boolean? = null
     ) {
         val commitSha = gitClient.getCurrentCommitSha()
         val baselineCommitSha = baselineFactory.produce(baselineSearchStrategy).findBaseline(baselineSearchCriteria)
@@ -48,7 +49,8 @@ class ReportService(
             groupId = groupId,
             appId = appId,
             commitSha = commitSha,
-            baselineCommitSha = baselineCommitSha
+            baselineCommitSha = baselineCommitSha,
+            useMaterializedViews = useMaterializedViews,
         )
         val report = reportGenerator.getBuildComparisonReport(data)
         val fileExt = when (report.format) {

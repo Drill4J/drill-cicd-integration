@@ -72,7 +72,8 @@ class GithubPullRequestReportMojo : AbstractDrillMojo() {
             githubCiCdService.postPullRequestReportByEvent(
                 groupId = groupId,
                 appId = appId,
-                githubEventFile = File(eventFilePath)
+                githubEventFile = File(eventFilePath),
+                useMaterializedViews = useMaterializedViews,
             )
         }
     }

@@ -43,6 +43,8 @@ fun Task.drillGitlabMergeRequestReportTask(config: DrillPluginExtension) {
         val mergeBaseCommitSha = gitlab.mergeRequest.mergeBaseCommitSha
             .fromEnv("CI_MERGE_REQUEST_DIFF_BASE_SHA")
             .required("gitlab.mergeRequest.mergeBaseCommitSha")
+        val useMaterializedViews = config.useMaterializedViews
+            .fromEnv("DRILL_USE_MATERIALIZED_VIEWS")
 
         val gitlabCiCdService = GitlabCiCdService(
             GitlabApiClientV4Impl(
@@ -64,6 +66,7 @@ fun Task.drillGitlabMergeRequestReportTask(config: DrillPluginExtension) {
                 appId = appId,
                 headCommitSha = commitSha,
                 mergeBaseCommitSha = mergeBaseCommitSha,
+                useMaterializedViews = useMaterializedViews?.let { java.lang.Boolean.parseBoolean(it) }
             )
         }
     }

@@ -36,6 +36,7 @@ class GithubPullRequestReportByEventCommand: CliktCommand(name = "githubPullRequ
     private val githubApiUrl by option("-gh-u", "--githubApiUrl", envvar = "GITHUB_API_URL").default("https://api.github.com")
     private val githubToken by option("-gh-t", "--githubToken", envvar = "INPUT_GITHUB_TOKEN").required()
     private val eventFilePath by option("-ef", "--eventFilePath", envvar = "GITHUB_EVENT_PATH").required()
+    private val useMaterializedViews by option("-mv", "--useMaterializedViews", envvar = "INPUT_USE_MATERIALIZED_VIEWS")
 
     override fun run() {
         echo("Posting Drill4J Pull Request Report to GitHub by GitHub Event...")
@@ -49,7 +50,8 @@ class GithubPullRequestReportByEventCommand: CliktCommand(name = "githubPullRequ
             githubCiCdService.postPullRequestReportByEvent(
                 File(eventFilePath),
                 groupId,
-                appId
+                appId,
+                useMaterializedViews?.let { java.lang.Boolean.parseBoolean(it) }
             )
         }
         echo("Done.")
