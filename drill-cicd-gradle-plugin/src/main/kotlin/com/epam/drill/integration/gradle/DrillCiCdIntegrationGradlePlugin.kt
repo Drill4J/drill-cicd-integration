@@ -53,6 +53,12 @@ class DrillCiCdIntegrationGradlePlugin : Plugin<Project> {
             it.group = TASK_GROUP
         }
 
+        project.task("drillGenerateImpactedTestsReport") {
+            drillGenerateImpactedTestsReport(config)
+        }.also {
+            it.group = TASK_GROUP
+        }
+
         project.task("drillClearAgentFileCache") {
             drillClearAgentFileCache(config)
         }.also {

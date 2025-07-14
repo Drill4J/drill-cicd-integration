@@ -31,4 +31,15 @@ interface MetricsClient {
         coverageThreshold: Double? = null,
         useMaterializedViews: Boolean? = null,
     ): JsonObject
+
+    suspend fun getImpactedTests(
+        groupId: String,
+        appId: String,
+        instanceId: String? = null,
+        commitSha: String? = null,
+        buildVersion: String? = null,
+        baselineInstanceId: String? = null,
+        baselineCommitSha: String? = null,
+        baselineBuildVersion: String? = null,
+    ): JsonObject
 }

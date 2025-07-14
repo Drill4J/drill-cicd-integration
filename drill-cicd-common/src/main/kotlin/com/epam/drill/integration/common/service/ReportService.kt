@@ -70,4 +70,37 @@ class ReportService(
         logger.info { "Saving a report to the file ${file.absolutePath} ..." }
         file.writeText(report.content)
     }
+
+    suspend fun generateTestImpactReport(
+        groupId: String,
+        appId: String,
+        baselineSearchStrategy: BaselineSearchStrategy,
+        baselineSearchCriteria: BaselineSearchCriteria,
+        reportPath: String = "",
+    ) {
+        val commitSha = gitClient.getCurrentCommitSha()
+        val baselineCommitSha = baselineFactory.produce(baselineSearchStrategy).findBaseline(baselineSearchCriteria)
+
+        logger.info { "Requesting metrics for $groupId/$appId to get impacted tests between commit $commitSha and $baselineCommitSha..." }
+        val data = metricsClient.getImpactedTests(
+            groupId = groupId,
+            appId = appId,
+            commitSha = commitSha,
+            baselineCommitSha = baselineCommitSha
+        )
+
+        val fileName = "drill4j-impacted-tests-report.json"
+        val file = if (reportPath.isNotEmpty()) {
+            val directory = File(reportPath)
+            if (!directory.exists()) {
+                directory.mkdirs()
+            }
+            File(directory, fileName)
+        } else {
+            File(fileName)
+        }
+
+        logger.info { "Saving impacted tests report to the file ${file.absolutePath} ..." }
+        file.writeText(data.toString())
+    }
 }

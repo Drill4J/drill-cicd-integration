@@ -75,5 +75,36 @@ class MetricsClientImpl(
         }
         return response
     }
+
+    override suspend fun getImpactedTests(
+        groupId: String,
+        appId: String,
+        instanceId: String?,
+        commitSha: String?,
+        buildVersion: String?,
+        baselineInstanceId: String?,
+        baselineCommitSha: String?,
+        baselineBuildVersion: String?,
+    ): JsonObject {
+        val url = "$metricsUrl/impacted-tests"
+        val response = client.request<JsonObject>(url) {
+            parameter("groupId", groupId)
+            parameter("appId", appId)
+            parameter("instanceId", instanceId)
+            parameter("commitSha", commitSha)
+            parameter("buildVersion", buildVersion)
+            parameter("baselineInstanceId", baselineInstanceId)
+            parameter("baselineCommitSha", baselineCommitSha)
+            parameter("baselineBuildVersion", baselineBuildVersion)
+
+            contentType(ContentType.Application.Json)
+            apiKey?.let { apiKey ->
+                headers {
+                    append(API_KEY_HEADER, apiKey)
+                }
+            }
+        }
+        return response
+    }
 }
 
