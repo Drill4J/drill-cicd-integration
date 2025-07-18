@@ -18,10 +18,8 @@ package com.epam.drill.integration.gradle
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.JavaExec
-import org.gradle.api.tasks.bundling.War
-import org.gradle.api.tasks.bundling.Jar
+import org.gradle.api.tasks.bundling.AbstractArchiveTask
 import org.gradle.api.tasks.testing.Test
-import org.gradle.plugins.ear.Ear
 import org.gradle.process.JavaForkOptions
 import kotlin.reflect.KClass
 
@@ -46,6 +44,12 @@ class DrillCiCdIntegrationGradlePlugin : Plugin<Project> {
 
         project.task("drillSendBuildInfo") {
             drillSendBuildInfo(config)
+        }.also {
+            it.group = TASK_GROUP
+        }
+
+        project.task("drillScanAppArchive") {
+            drillScanAppArchive(config)
         }.also {
             it.group = TASK_GROUP
         }
@@ -76,11 +80,8 @@ class DrillCiCdIntegrationGradlePlugin : Plugin<Project> {
             extensions.create("drill", DrillTaskExtension::class.java)
         }
 
-        // TODO test with WAR & EAR, think about TAR & ZIP
-        listOf(Jar::class.java, War::class.java, Ear::class.java).forEach {
-            project.tasks.withType(it) {
-                extensions.create("drill", DrillTaskExtension::class.java)
-            }
+        project.tasks.withType(AbstractArchiveTask::class.java) {
+            extensions.create("drill", DrillTaskExtension::class.java)
         }
 
         project.afterEvaluate {
@@ -92,7 +93,7 @@ class DrillCiCdIntegrationGradlePlugin : Plugin<Project> {
                 }
 
             tasks
-                .filter { it.name in listOf("jar", "war", "ear", "rar") }
+                .filter { it is AbstractArchiveTask }
                 .forEach { task ->
                     modifyToRunAppArchiveScanner(task, project, config)
                 }

@@ -15,16 +15,43 @@
  */
 package com.epam.drill.integration.gradle
 
-import com.epam.drill.integration.common.agent.ExecutableRunner
-import com.epam.drill.integration.common.agent.config.AppArchiveScannerConfiguration
+import com.epam.drill.integration.common.agent.CommandExecutor
+import com.epam.drill.integration.common.agent.config.AppAgentConfiguration
 import com.epam.drill.integration.common.agent.impl.AgentCacheImpl
 import com.epam.drill.integration.common.agent.impl.AgentInstallerImpl
+import com.epam.drill.integration.common.agent.impl.JarCommandLineBuilder
+import com.epam.drill.integration.common.agent.javaExecutable
 import com.epam.drill.integration.common.git.impl.GitClientImpl
 import kotlinx.coroutines.runBlocking
 import org.gradle.api.Project
 import org.gradle.api.Task
-import org.gradle.api.tasks.testing.Test
+import org.gradle.api.tasks.bundling.AbstractArchiveTask
 import java.io.File
+
+fun Task.drillScanAppArchive(config: DrillPluginExtension) {
+    doFirst {
+        val archiveFiles = collectArchiveFiles(project)
+        if (archiveFiles.isEmpty()) {
+            logger.error("No archive files found in the project. " +
+                    "Please ensure that your build produces an archive (e.g., JAR, WAR, etc.).")
+            return@doFirst
+        }
+        scanAppArchive(
+            archiveFiles = archiveFiles,
+            project = project,
+            pluginConfig = config
+        )
+    }
+}
+
+private fun collectArchiveFiles(project: Project): List<File> {
+    return project.tasks
+        .withType(AbstractArchiveTask::class.java)
+        .mapNotNull { task ->
+            task.archiveFile.orNull?.asFile?.takeIf { it.exists() }
+        }
+}
+
 
 fun modifyToRunAppArchiveScanner(
     task: Task,
@@ -32,49 +59,69 @@ fun modifyToRunAppArchiveScanner(
     pluginConfig: DrillPluginExtension
 ) {
     val taskConfig = task.extensions.findByType(DrillTaskExtension::class.java)
-    val gitClient = GitClientImpl()
 
     task.doLast {
-        logger.lifecycle("Task :${task.name} is modified to scan application archive by Drill4J")
-
-        val archive = task.outputs.files.singleFile
-        if (state.didWork) {
-            println("Analyzing ${task.name}: ${archive.absolutePath}")
-        } else {
-            println("Skipping ${task.name}: up-to-date or no work required")
+        taskConfig?.appAgent?.takeIf {
+            it.archiveScannerEnabled ?: pluginConfig.appAgent.archiveScannerEnabled ?: false
+        }?.let {
+            logger.lifecycle("Task :${task.name} is modified to scan application archive by Drill4J")
+            if (!state.didWork) {
+                logger.lifecycle("Skipping ${task.name}: up-to-date or no work required")
+            }
+            scanAppArchive(
+                archiveFiles = outputs.files.files,
+                project = project,
+                pluginConfig = pluginConfig,
+                taskConfig = taskConfig
+            )
         }
-
-        val agentCache = AgentCacheImpl(drillAgentFilesDir)
-        val agentInstaller = AgentInstallerImpl(agentCache)
-        val executableRunner = ExecutableRunner(agentInstaller)
-        val distDir = File(project.buildDir, "/drill")
-        taskConfig?.appArchiveScanner
-            ?.takeIf {
-                it.enabled ?: pluginConfig.appArchiveScanner.enabled ?: false
-            }
-            ?.let {
-                AppArchiveScannerConfiguration().apply {
-                    mapGeneralAgentProperties(it, pluginConfig.appArchiveScanner, pluginConfig)
-                    this.appId = pluginConfig.appId
-
-                    this.packagePrefixes = pluginConfig.packagePrefixes
-                    this.buildVersion = pluginConfig.buildVersion
-                    this.commitSha = runCatching {
-                        gitClient.getCurrentCommitSha()
-                    }.onFailure {
-                        logger.warn("Unable to retrieve the current commit SHA. The 'commitSha' parameter will not be set. Error: ${it.message}")
-                    }.getOrNull()
-                }
-            }
-            ?.let { config ->
-                runBlocking {
-                    println("App archive scanner running...")
-                    val exitCode = executableRunner.runScan(config, distDir, archive.absolutePath) { line ->
-                        println(line)
-                    }
-                    println("App archive scanner exited with code $exitCode")
-                }
-            }
     }
+}
 
+fun Task.scanAppArchive(
+    archiveFiles: Collection<File>,
+    project: Project,
+    pluginConfig: DrillPluginExtension,
+    taskConfig: DrillTaskExtension? = null,
+) {
+    val gitClient = GitClientImpl()
+
+    val agentCache = AgentCacheImpl(drillAgentFilesDir)
+    val agentInstaller = AgentInstallerImpl(agentCache)
+    val argumentsBuilder = JarCommandLineBuilder()
+    val commandExecutor = CommandExecutor(javaExecutable.absolutePath)
+    val distDir = File(project.buildDir, "/drill")
+
+    AppAgentConfiguration().apply {
+        mapGeneralAgentProperties(
+            agentTaskExtension = taskConfig?.appAgent ?: AppAgentExtension(),
+            agentPluginExtension = pluginConfig.appAgent,
+            pluginExtension = pluginConfig
+        )
+        this.appId = pluginConfig.appId
+
+        this.packagePrefixes = pluginConfig.packagePrefixes
+        this.buildVersion = pluginConfig.buildVersion
+        this.commitSha = runCatching {
+            gitClient.getCurrentCommitSha()
+        }.onFailure {
+            logger.warn("Unable to retrieve the current commit SHA. The 'commitSha' parameter will not be set. Error: ${it.message}")
+        }.getOrNull()
+        this.scanClassPath = archiveFiles.joinToString(";") { it.absolutePath }
+    }.let { config ->
+        runBlocking {
+            logger.lifecycle("App archive scanner running for files ${archiveFiles.joinToString(", ") { it.absolutePath }} ...")
+            run {
+                agentInstaller.installAgent(distDir, config)
+            }.let { agentDir ->
+                argumentsBuilder.build(agentDir, config)
+            }.let { args ->
+                commandExecutor.execute(args) { line ->
+                    logger.lifecycle(line)
+                }
+            }.also { exitCode ->
+                logger.lifecycle("App archive scanner exited with code $exitCode")
+            }
+        }
+    }
 }

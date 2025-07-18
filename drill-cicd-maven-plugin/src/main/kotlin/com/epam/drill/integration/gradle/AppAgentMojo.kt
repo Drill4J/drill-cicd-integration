@@ -52,9 +52,7 @@ class AppAgentMojo : AbstractAgentMojo() {
             .split(*arrayOf(",", ";"))
             .map(String::trim)
             .toTypedArray()
-        additionalParams = mapOf(
-            "scanClassPath" to "${project.build.outputDirectory};!${project.build.testOutputDirectory}"
-        ) + (additionalParams ?: emptyMap())
+        scanClassPath = "${project.build.outputDirectory};!${project.build.testOutputDirectory}"
         buildVersion = mavenConfig.buildVersion
         envId = mavenConfig.appAgent?.envId
         commitSha = runCatching {
