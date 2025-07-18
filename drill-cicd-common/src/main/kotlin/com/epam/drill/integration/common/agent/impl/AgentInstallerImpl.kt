@@ -16,6 +16,7 @@
 package com.epam.drill.integration.common.agent.impl
 
 import com.epam.drill.integration.common.agent.*
+import com.epam.drill.integration.common.agent.config.AgentConfiguration
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.cio.*
@@ -31,17 +32,18 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import mu.KotlinLogging
 import java.io.File
-import java.util.zip.ZipFile
 import kotlin.io.use
 
 private const val GITHUB_API_URL = "https://api.github.com"
 private const val GITHUB_USER_TOKEN = "GH_USER_TOKEN"
 
 class AgentInstallerImpl(
-    private val agentCache: AgentCache
+    private val agentCache: AgentCache,
+    private val repoApiUrl: String = GITHUB_API_URL,
+    repoTokenName: String = GITHUB_USER_TOKEN,
 ) : AgentInstaller {
     private val json = Json { ignoreUnknownKeys = true }
-    private val token: String? = System.getenv(GITHUB_USER_TOKEN)
+    private val token: String? = System.getenv(repoTokenName)
     private val logger = KotlinLogging.logger {}
 
     var httpClient: HttpClient = HttpClient(CIO) {
@@ -52,7 +54,7 @@ class AgentInstallerImpl(
     }
 
     override suspend fun getDownloadUrl(githubRepository: String, version: String, osPreset: String): FileUrl? {
-        val releasesUrl = "$GITHUB_API_URL/repos/$githubRepository/releases"
+        val releasesUrl = "$repoApiUrl/repos/$githubRepository/releases"
 
         return httpClient.get<HttpResponse>(releasesUrl) {
             parameter("prerelease", true)
@@ -95,32 +97,35 @@ class AgentInstallerImpl(
             downloadFile(FileUrl(downloadUrl, filename), downloadDir)
         }
 
-    override fun unzip(zipFile: File, destinationDir: Directory): Directory {
-        if (!zipFile.exists()) {
-            throw IllegalStateException("File $zipFile doesn't exist")
-        }
-        val unzippedDir = Directory(destinationDir, zipFile.nameWithoutExtension)
-        if (!unzippedDir.exists()) {
-            unzippedDir.mkdirs()
-        }
-        ZipFile(zipFile).use { zip ->
-            zip.entries().asSequence().forEach { entry ->
-                if (entry.isDirectory) {
-                    File(unzippedDir, entry.name).mkdirs()
-                } else {
-                    zip.getInputStream(entry).use { input ->
-                        File(unzippedDir, entry.name).outputStream().use { output ->
-                            input.copyTo(output)
-                        }
-                    }
-                }
-            }
-        }
-        return unzippedDir
-    }
+    override suspend fun installAgent(
+        distDir: Directory,
+        configuration: AgentConfiguration
+    ): Directory {
+        val zipFile = configuration.zipPath
+        val downloadUrl = configuration.downloadUrl
+        val version = configuration.version
 
-    override fun findAgentFile(unzippedDir: Directory, fileExtension: String): File? {
-        return findFile(unzippedDir, fileExtension)
+        when {
+            zipFile != null -> return unzip(zipFile, distDir)
+
+            downloadUrl != null -> return downloadByUrlAndUnzip(
+                configuration.agentName,
+                downloadUrl,
+                distDir
+            )
+
+            version != null -> return downloadByVersionAndUnzip(
+                configuration.agentName,
+                configuration.githubRepository,
+                version,
+                distDir
+            )
+
+            else -> throw IllegalStateException(
+                "Could not download or find ${configuration.agentName} zip. " +
+                        "Specify either of parameters: version, downloadUrl, zipPath"
+            )
+        }
     }
 
     private suspend fun downloadFile(downloadUrl: FileUrl, downloadDir: Directory): File {
@@ -164,5 +169,33 @@ class AgentInstallerImpl(
         }
 
         return null
+    }
+
+    private suspend fun downloadByVersionAndUnzip(
+        agentName: String,
+        repositoryName: String,
+        version: String,
+        distDir: Directory
+    ): File = run {
+        downloadByVersion(
+            repositoryName,
+            agentName,
+            version,
+        )
+    }.let { zipFile ->
+        unzip(zipFile, distDir)
+    }
+
+    private suspend fun downloadByUrlAndUnzip(
+        agentName: String,
+        downloadUrl: String,
+        distDir: Directory
+    ): File = run {
+        downloadByUrl(
+            downloadUrl,
+            agentName
+        )
+    }.let { zipFile ->
+        unzip(zipFile, distDir)
     }
 }
