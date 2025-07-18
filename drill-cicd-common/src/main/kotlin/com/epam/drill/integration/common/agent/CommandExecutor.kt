@@ -17,16 +17,20 @@ package com.epam.drill.integration.common.agent
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import mu.KotlinLogging
 
 class CommandExecutor(
     private val command: String,
     private val workingDir: String? = null,
     private val env: Map<String, String>? = null
 ) {
+    private val logger = KotlinLogging.logger {}
+
     suspend fun execute(
         args: List<String>,
         onOutputLine: suspend (String) -> Unit
     ): Int = withContext(Dispatchers.IO) {
+        logger.debug("Executing command: $command ${args.joinToString(" ")}")
         val processBuilder = ProcessBuilder(listOf(command) + args)
         if (workingDir != null) {
             processBuilder.directory(java.io.File(workingDir))
