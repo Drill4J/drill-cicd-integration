@@ -18,15 +18,16 @@ package com.epam.drill.integration.common.agent.impl
 import com.epam.drill.integration.common.agent.CommandLineBuilder
 import com.epam.drill.integration.common.agent.Directory
 import com.epam.drill.integration.common.agent.config.AgentConfiguration
+import java.io.File
 
 class JarCommandLineBuilder : CommandLineBuilder {
     override fun build(
         agentDir: Directory,
         configuration: AgentConfiguration
-    ): List<String> = listOf("-jar") + findJarFile(agentDir) + getArgsMap(configuration).map { (key, value) -> "--$key=$value" }
+    ): List<String> = listOf("-jar") + findJarFile(agentDir).absolutePath + getArgsMap(configuration).map { (key, value) -> "--$key=$value" }
 
-    private fun findJarFile(agentDir: Directory): String {
-        return findFile(agentDir, "jar")?.absolutePath
+    private fun findJarFile(agentDir: Directory): File {
+        return findFile(agentDir, "jar")
             ?: throw IllegalStateException("No jar file found in the agent directory: ${agentDir.path}")
     }
 
