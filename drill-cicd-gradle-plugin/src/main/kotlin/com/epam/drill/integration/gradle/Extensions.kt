@@ -95,7 +95,7 @@ open class BaselineExtension(
 
 open class RecommendedTestsExtension(
     var enabled: Boolean? = null,
-    var coveragePeriodDays: Int? = null
+    var coveragePeriodDays: Int? = null,
 )
 
 open class AgentExtension(

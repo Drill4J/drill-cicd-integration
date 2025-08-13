@@ -49,7 +49,7 @@ class GithubPullRequestReportByEventCommand: CliktCommand(name = "githubPullRequ
             githubCiCdService.postPullRequestReportByEvent(
                 File(eventFilePath),
                 groupId,
-                appId
+                appId,
             )
         }
         echo("Done.")

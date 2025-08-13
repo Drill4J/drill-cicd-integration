@@ -12,7 +12,6 @@ jobs:
         with:
           java-version: 8.0
           distribution: corretto
-      - uses: gradle/wrapper-validation-action@v1
       - run: chmod +x ${{ github.workspace }}/gradlew
       - run: git config --global user.email "test@test.test"
       - run: git config --global user.name "test"
@@ -20,7 +19,7 @@ jobs:
         with:
           arguments: check --stacktrace
       - if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: test-reports-${{ matrix.config.preset }}
           path: ${{ github.workspace }}/*/build/reports/*
@@ -35,7 +34,6 @@ jobs:
         with:
           java-version: 8.0
           distribution: corretto
-      - uses: gradle/wrapper-validation-action@v1
       - run: chmod +x ${{ github.workspace }}/gradlew
       - uses: gradle/gradle-build-action@v2
         with:

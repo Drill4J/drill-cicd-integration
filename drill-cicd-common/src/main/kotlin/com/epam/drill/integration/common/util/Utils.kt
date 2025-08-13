@@ -19,7 +19,7 @@ fun <T> T?.required(name: String): T =
     this ?: throw IllegalArgumentException("Property '$name' is not set or null")
 
 fun <T> T?.fromEnv(envVar: String): String? =
-    this?.toString() ?: System.getenv(envVar)
+     System.getenv(envVar) ?: this?.toString()
 
 /**
  * Adds `--add-opens` options for Java 17 and higher to avoid java.lang.reflect.InaccessibleObjectException

@@ -50,7 +50,7 @@ class GitlabMergeRequestReportCommand : CliktCommand(name = "gitlabMergeRequestR
                 groupId = groupId,
                 appId = appId,
                 headCommitSha = commitSha,
-                mergeBaseCommitSha = mergeBaseCommitSha
+                mergeBaseCommitSha = mergeBaseCommitSha,
             )
         }
         echo("Done.")

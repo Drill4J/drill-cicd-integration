@@ -59,7 +59,7 @@ fun Task.drillGenerateChangeTestingReport(config: DrillPluginExtension) {
                 appId = appId,
                 baselineSearchStrategy = baselineSearchStrategy,
                 baselineSearchCriteria = searchCriteria,
-                reportPath = File(project.buildDir, "/drill-reports").absolutePath
+                reportPath = File(project.buildDir, "/drill-reports").absolutePath,
             )
         }
     }

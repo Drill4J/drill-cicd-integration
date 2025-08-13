@@ -46,7 +46,7 @@ class PostBuildInfoMojo : AbstractDrillMojo() {
         val apiKey = apiKey.fromEnv("DRILL_API_KEY")
         val groupId = groupId.required("groupId")
         val appId = appId.required("appId")
-        val buildVersion = buildVersion
+        val buildVersion = buildVersion.fromEnv("DRILL_BUILD_VERSION")
 
         val dataIngestClient = DataIngestClientImpl(
             apiUrl = apiUrl,

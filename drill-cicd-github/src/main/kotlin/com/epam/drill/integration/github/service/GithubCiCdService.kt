@@ -41,14 +41,14 @@ class GithubCiCdService(
         groupId: String,
         appId: String,
         headCommitSha: String,
-        mergeBaseCommitSha: String
+        mergeBaseCommitSha: String,
     ) {
         logger.info { "Requesting metrics for $groupId/$appId to compare $headCommitSha with $mergeBaseCommitSha..." }
         val metrics = metricsClient.getBuildComparison(
             groupId = groupId,
             appId = appId,
             commitSha = headCommitSha,
-            baselineCommitSha = mergeBaseCommitSha
+            baselineCommitSha = mergeBaseCommitSha,
         )
         val report = reportGenerator.getBuildComparisonReport(metrics)
         val mediaType: String = when (report.format) {
@@ -67,7 +67,7 @@ class GithubCiCdService(
     suspend fun postPullRequestReportByEvent(
         githubEventFile: File,
         groupId: String,
-        appId: String
+        appId: String,
     ) {
         val json = Json {
             ignoreUnknownKeys = true
@@ -81,7 +81,7 @@ class GithubCiCdService(
             groupId = groupId,
             appId = appId,
             headCommitSha = pullRequest.head.sha,
-            mergeBaseCommitSha = gitClient.getMergeBaseCommitSha(targetRef = "origin/${pullRequest.base.ref}")
+            mergeBaseCommitSha = gitClient.getMergeBaseCommitSha(targetRef = "origin/${pullRequest.base.ref}"),
         )
     }
 

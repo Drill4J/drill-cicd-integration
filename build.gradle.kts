@@ -112,6 +112,8 @@ nexusPublishing {
             val propertyOrEnv: (String, String) -> String? = { property, env ->
                 findProperty(property)?.toString() ?: System.getenv(env)
             }
+            nexusUrl.set(uri("https://ossrh-staging-api.central.sonatype.com/service/local/"))
+            snapshotRepositoryUrl.set(uri("https://central.sonatype.com/repository/maven-snapshots/"))
             username.set(propertyOrEnv("ossrhUserName", "OSSRH_USERNAME"))
             password.set(propertyOrEnv("ossrhToken", "OSSRH_TOKEN"))
         }

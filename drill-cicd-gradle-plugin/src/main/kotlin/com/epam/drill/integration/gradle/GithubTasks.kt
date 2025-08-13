@@ -57,7 +57,7 @@ fun Task.drillGithubPullRequestReport(config: DrillPluginExtension) {
             githubCiCdService.postPullRequestReportByEvent(
                 groupId = groupId,
                 appId = appId,
-                githubEventFile = File(eventFilePath)
+                githubEventFile = File(eventFilePath),
             )
         }
     }
