@@ -115,7 +115,9 @@ open class AgentExtension(
 )
 
 open class TestAgentExtension(
-    var testTaskId: String? = null
+    var testTaskId: String? = null,
+    var testTracingEnabled: Boolean? = null,
+    var testLaunchMetadataSendingEnabled: Boolean? = null,
 ) : AgentExtension()
 
 open class AppAgentExtension(
