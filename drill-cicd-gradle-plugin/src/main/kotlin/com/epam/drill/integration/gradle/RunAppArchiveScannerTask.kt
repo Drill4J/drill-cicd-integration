@@ -16,6 +16,7 @@
 package com.epam.drill.integration.gradle
 
 import com.epam.drill.integration.common.agent.CommandExecutor
+import com.epam.drill.integration.common.agent.ExecutableRunner
 import com.epam.drill.integration.common.agent.config.AppAgentConfiguration
 import com.epam.drill.integration.common.agent.impl.AgentCacheImpl
 import com.epam.drill.integration.common.agent.impl.AgentInstallerImpl
@@ -90,6 +91,7 @@ fun Task.scanAppArchive(
     val agentInstaller = AgentInstallerImpl(agentCache)
     val argumentsBuilder = JarCommandLineBuilder()
     val commandExecutor = CommandExecutor(javaExecutable.absolutePath)
+    val executableRunner = ExecutableRunner(agentInstaller, argumentsBuilder, commandExecutor)
     val distDir = File(project.buildDir, "/drill")
 
     AppAgentConfiguration().apply {
@@ -111,14 +113,8 @@ fun Task.scanAppArchive(
     }.let { config ->
         runBlocking {
             logger.lifecycle("App archive scanner running for files ${archiveFiles.joinToString(", ") { it.absolutePath }} ...")
-            run {
-                agentInstaller.installAgent(distDir, config)
-            }.let { agentDir ->
-                argumentsBuilder.build(agentDir, config)
-            }.let { args ->
-                commandExecutor.execute(args) { line ->
-                    logger.lifecycle(line)
-                }
+            executableRunner.runScan(config, distDir) { line ->
+                logger.lifecycle(line)
             }.also { exitCode ->
                 logger.lifecycle("App archive scanner exited with code $exitCode")
             }

@@ -16,6 +16,7 @@
 package com.epam.drill.integration.gradle
 
 import com.epam.drill.integration.common.agent.CommandExecutor
+import com.epam.drill.integration.common.agent.ExecutableRunner
 import com.epam.drill.integration.common.agent.config.AppAgentConfiguration
 import com.epam.drill.integration.common.agent.impl.AgentCacheImpl
 import com.epam.drill.integration.common.agent.impl.AgentInstallerImpl
@@ -55,6 +56,7 @@ class AppArchiveScannerMojo : AbstractDrillMojo() {
     private val agentInstaller = AgentInstallerImpl(agentCache)
     private val argumentsBuilder = JarCommandLineBuilder()
     private val commandExecutor = CommandExecutor(javaExecutable.absolutePath)
+    private val executableRunner = ExecutableRunner(agentInstaller, argumentsBuilder, commandExecutor)
 
     override fun execute() {
         if (project.packaging == "pom") {
@@ -72,14 +74,9 @@ class AppArchiveScannerMojo : AbstractDrillMojo() {
         val distDir = File(project.build?.directory, "/drill")
         val config = getConfig(archiveFile)
         runBlocking {
-            run {
-                agentInstaller.installAgent(distDir, config)
-            }.let { agentDir ->
-                argumentsBuilder.build(agentDir, config)
-            }.let { args ->
-                commandExecutor.execute(args) { line ->
-                    log.info(line)
-                }
+            log.info("App archive scanner running for file ${archiveFile.absolutePath} ...")
+            executableRunner.runScan(config, distDir) { line ->
+                log.info(line)
             }.also { exitCode ->
                 log.info("App archive scanner exited with code $exitCode")
             }

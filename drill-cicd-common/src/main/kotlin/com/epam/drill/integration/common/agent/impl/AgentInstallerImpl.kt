@@ -53,7 +53,7 @@ class AgentInstallerImpl(
         }
     }
 
-    override suspend fun getDownloadUrl(githubRepository: String, version: String, osPreset: String): FileUrl? {
+    suspend fun getDownloadUrl(githubRepository: String, version: String, osPreset: String): FileUrl? {
         val releasesUrl = "$repoApiUrl/repos/$githubRepository/releases"
 
         return httpClient.get<HttpResponse>(releasesUrl) {
@@ -80,7 +80,7 @@ class AgentInstallerImpl(
         }
     }
 
-    override suspend fun downloadByVersion(githubRepository: String, agentName: String, version: String): File =
+    suspend fun downloadByVersion(githubRepository: String, agentName: String, version: String): File =
         agentCache.get(agentName, version, currentOsPreset) { filename, downloadDir ->
             run {
                 getDownloadUrl(githubRepository, version, currentOsPreset)
@@ -92,41 +92,40 @@ class AgentInstallerImpl(
         }
 
 
-    override suspend fun downloadByUrl(downloadUrl: String, agentName: String): File =
+    suspend fun downloadByUrl(downloadUrl: String, agentName: String): File =
         agentCache.get(agentName, downloadUrl.hashCode().toString(), currentOsPreset) { filename, downloadDir ->
             downloadFile(FileUrl(downloadUrl, filename), downloadDir)
         }
 
+    override suspend fun downloadAgent(
+        configuration: AgentConfiguration
+    ): File {
+        configuration.zipPath?.takeIf { it.exists() }?.let {
+            return it
+        }
+
+        configuration.downloadUrl?.takeIf { it.isNotBlank() }?.let {
+            return downloadByUrl(it, configuration.agentName)
+        }
+
+        configuration.version?.takeIf { it.isNotBlank() }?.let {
+            return downloadByVersion(
+                configuration.githubRepository,
+                configuration.agentName,
+                it
+            )
+        }
+
+        throw IllegalStateException(
+            "Could not download or find ${configuration.agentName} zip. " +
+                    "Specify either of parameters: version, downloadUrl, zipPath"
+        )
+    }
+
     override suspend fun installAgent(
         distDir: Directory,
         configuration: AgentConfiguration
-    ): Directory {
-        val zipFile = configuration.zipPath
-        val downloadUrl = configuration.downloadUrl
-        val version = configuration.version
-
-        when {
-            zipFile != null -> return unzip(zipFile, distDir)
-
-            downloadUrl != null -> return downloadByUrlAndUnzip(
-                configuration.agentName,
-                downloadUrl,
-                distDir
-            )
-
-            version != null -> return downloadByVersionAndUnzip(
-                configuration.agentName,
-                configuration.githubRepository,
-                version,
-                distDir
-            )
-
-            else -> throw IllegalStateException(
-                "Could not download or find ${configuration.agentName} zip. " +
-                        "Specify either of parameters: version, downloadUrl, zipPath"
-            )
-        }
-    }
+    ): Directory = unzip(downloadAgent(configuration), distDir)
 
     private suspend fun downloadFile(downloadUrl: FileUrl, downloadDir: Directory): File {
         if (!downloadDir.exists()) {

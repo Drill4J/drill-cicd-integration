@@ -16,12 +16,21 @@
 package com.epam.drill.integration.common.agent
 
 import com.epam.drill.integration.common.agent.config.AgentConfiguration
-import java.io.File
 
-interface AgentInstaller {
-    suspend fun downloadAgent(configuration: AgentConfiguration): File
-    suspend fun installAgent(distDir: Directory, configuration: AgentConfiguration): Directory
+class ExecutableRunner(
+    private val agentInstaller: AgentInstaller,
+    private val commandLineBuilder: CommandLineBuilder,
+    private val commandExecutor: CommandExecutor
+) {
+
+    suspend fun runScan(
+        config: AgentConfiguration,
+        distDir: Directory,
+        onOutputLine: suspend (String) -> Unit
+    ): Int {
+        val agentDir = agentInstaller.installAgent(distDir, config)
+        val args = commandLineBuilder.build(agentDir, config)
+        val exitCode = commandExecutor.execute(args, onOutputLine)
+        return exitCode
+    }
 }
-
-data class FileUrl(val url: String, val filename: String)
-typealias Directory = File
