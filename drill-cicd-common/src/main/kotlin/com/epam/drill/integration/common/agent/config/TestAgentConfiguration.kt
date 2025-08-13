@@ -24,6 +24,7 @@ class TestAgentConfiguration : AgentConfiguration() {
     var recommendedTestsTargetCommitSha: String? = null
     var recommendedTestsTargetBuildVersion: String? = null
     var recommendedTestsBaselineCommitSha: String? = null
+    var recommendedTestsUseMaterializedViews: Boolean? = null
 
     override val githubRepository: String = "Drill4J/autotest-agent"
     override val agentName: String = "testAgent"
@@ -43,6 +44,7 @@ class TestAgentConfiguration : AgentConfiguration() {
                 recommendedTestsTargetCommitSha?.let { this[TestAgentConfiguration::recommendedTestsTargetCommitSha.name] = it }
                 recommendedTestsTargetBuildVersion?.let { this[TestAgentConfiguration::recommendedTestsTargetBuildVersion.name] = it }
                 recommendedTestsBaselineCommitSha?.let { this[TestAgentConfiguration::recommendedTestsBaselineCommitSha.name] = it }
+                recommendedTestsUseMaterializedViews?.let { this[TestAgentConfiguration::recommendedTestsUseMaterializedViews.name] = it.toString().lowercase() }
             }
         }
     }

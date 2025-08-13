@@ -29,5 +29,6 @@ interface MetricsClient {
         baselineCommitSha: String? = null,
         baselineBuildVersion: String? = null,
         coverageThreshold: Double? = null,
+        useMaterializedViews: Boolean? = null,
     ): JsonObject
 }
