@@ -152,49 +152,4 @@ class AgentInstallerImpl(
         }
         return file
     }
-
-    private fun findFile(directory: Directory, fileExtension: String): File? {
-        val files = directory.listFiles() ?: return null
-
-        for (file in files) {
-            if (file.isDirectory) {
-                val result = findFile(file, fileExtension)
-                if (result != null) {
-                    return result
-                }
-            } else if (file.extension == fileExtension) {
-                return file
-            }
-        }
-
-        return null
-    }
-
-    private suspend fun downloadByVersionAndUnzip(
-        agentName: String,
-        repositoryName: String,
-        version: String,
-        distDir: Directory
-    ): File = run {
-        downloadByVersion(
-            repositoryName,
-            agentName,
-            version,
-        )
-    }.let { zipFile ->
-        unzip(zipFile, distDir)
-    }
-
-    private suspend fun downloadByUrlAndUnzip(
-        agentName: String,
-        downloadUrl: String,
-        distDir: Directory
-    ): File = run {
-        downloadByUrl(
-            downloadUrl,
-            agentName
-        )
-    }.let { zipFile ->
-        unzip(zipFile, distDir)
-    }
 }
