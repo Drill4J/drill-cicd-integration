@@ -50,7 +50,6 @@ class MetricsClientImpl(
         baselineCommitSha: String?,
         baselineBuildVersion: String?,
         coverageThreshold: Double?,
-        useMaterializedViews: Boolean?,
     ): JsonObject {
 
         val url = "$metricsUrl/build-diff-report"
@@ -64,7 +63,6 @@ class MetricsClientImpl(
             parameter("baselineCommitSha", baselineCommitSha)
             parameter("baselineBuildVersion", baselineBuildVersion)
             parameter("coverageThreshold", coverageThreshold)
-            parameter("useMaterializedViews", useMaterializedViews)
 
             contentType(ContentType.Application.Json)
             apiKey?.let { apiKey ->

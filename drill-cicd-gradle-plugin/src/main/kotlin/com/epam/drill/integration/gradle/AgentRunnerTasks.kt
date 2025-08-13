@@ -79,7 +79,6 @@ fun modifyToRunDrillAgents(
                                 }
                                 this.recommendedTestsBaselineCommitSha = baselineFactory.produce(searchStrategy).findBaseline(searchCriteria)
                             }
-                            this.recommendedTestsUseMaterializedViews = pluginConfig.useMaterializedViews
                         }
                     }
                 },

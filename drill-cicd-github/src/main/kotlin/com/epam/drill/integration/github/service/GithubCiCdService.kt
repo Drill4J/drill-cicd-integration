@@ -42,7 +42,6 @@ class GithubCiCdService(
         appId: String,
         headCommitSha: String,
         mergeBaseCommitSha: String,
-        useMaterializedViews: Boolean? = null
     ) {
         logger.info { "Requesting metrics for $groupId/$appId to compare $headCommitSha with $mergeBaseCommitSha..." }
         val metrics = metricsClient.getBuildComparison(
@@ -50,7 +49,6 @@ class GithubCiCdService(
             appId = appId,
             commitSha = headCommitSha,
             baselineCommitSha = mergeBaseCommitSha,
-            useMaterializedViews = useMaterializedViews
         )
         val report = reportGenerator.getBuildComparisonReport(metrics)
         val mediaType: String = when (report.format) {
@@ -70,7 +68,6 @@ class GithubCiCdService(
         githubEventFile: File,
         groupId: String,
         appId: String,
-        useMaterializedViews: Boolean? = null
     ) {
         val json = Json {
             ignoreUnknownKeys = true
@@ -85,7 +82,6 @@ class GithubCiCdService(
             appId = appId,
             headCommitSha = pullRequest.head.sha,
             mergeBaseCommitSha = gitClient.getMergeBaseCommitSha(targetRef = "origin/${pullRequest.base.ref}"),
-            useMaterializedViews = useMaterializedViews
         )
     }
 

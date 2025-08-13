@@ -31,8 +31,6 @@ open class DrillPluginExtension(
     var github: GithubExtension = GithubExtension(),
     var recommendedTests: RecommendedTestsExtension = RecommendedTestsExtension(),
 
-    var useMaterializedViews: Boolean? = null,
-
     internal var testAgent: TestAgentExtension = TestAgentExtension(),
     internal var appAgent: AppAgentExtension = AppAgentExtension(),
     internal var appArchiveScanner: AppArchiveScannerExtension = AppArchiveScannerExtension(),
@@ -104,7 +102,6 @@ open class BaselineExtension(
 open class RecommendedTestsExtension(
     var enabled: Boolean? = null,
     var coveragePeriodDays: Int? = null,
-    var useMaterializedViews: Boolean? = null,
 )
 
 open class AgentExtension(

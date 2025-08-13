@@ -38,7 +38,6 @@ fun Task.drillGenerateChangeTestingReport(config: DrillPluginExtension) {
         val baselineSearchStrategy = config.baseline.searchStrategy ?: SEARCH_BY_TAG
         val baselineTagPattern = config.baseline.tagPattern ?: "*"
         val baselineTargetRef = config.baseline.targetRef
-        val useMaterializedViews = config.useMaterializedViews
 
         val reportService = ReportService(
             metricsClient = MetricsClientImpl(
@@ -61,7 +60,6 @@ fun Task.drillGenerateChangeTestingReport(config: DrillPluginExtension) {
                 baselineSearchStrategy = baselineSearchStrategy,
                 baselineSearchCriteria = searchCriteria,
                 reportPath = File(project.buildDir, "/drill-reports").absolutePath,
-                useMaterializedViews = useMaterializedViews
             )
         }
     }

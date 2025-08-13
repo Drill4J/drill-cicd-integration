@@ -34,7 +34,6 @@ class GitlabCiCdService(
         appId: String,
         headCommitSha: String,
         mergeBaseCommitSha: String,
-        useMaterializedViews: Boolean? = null
     ) {
         logger.info { "Requesting metrics for $groupId/$appId to compare $headCommitSha with $mergeBaseCommitSha..." }
         val metrics = metricsClient.getBuildComparison(
@@ -42,7 +41,6 @@ class GitlabCiCdService(
             appId = appId,
             commitSha = headCommitSha,
             baselineCommitSha = mergeBaseCommitSha,
-            useMaterializedViews = useMaterializedViews
         )
         val report = reportGenerator.getBuildComparisonReport(
             metrics
