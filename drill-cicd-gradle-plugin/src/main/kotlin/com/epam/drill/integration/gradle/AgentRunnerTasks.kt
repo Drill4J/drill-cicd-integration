@@ -56,10 +56,12 @@ fun modifyToRunDrillAgents(
         listOfNotNull(
             taskConfig?.testAgent
                 ?.takeIf { it.enabled ?: pluginConfig.testAgent.enabled ?: false }
-                ?.let {
+                ?.let { taskConfig ->
                     TestAgentConfiguration().apply {
-                        mapGeneralAgentProperties(it, pluginConfig.testAgent, pluginConfig)
-                        this.testTaskId = it.testTaskId ?: generateTestTaskId(project)
+                        mapGeneralAgentProperties(taskConfig, pluginConfig.testAgent, pluginConfig)
+                        this.testTaskId = taskConfig.testTaskId ?: pluginConfig.testAgent.testTaskId ?: generateTestTaskId(project)
+                        this.testTracingEnabled = taskConfig.testTracingEnabled ?: pluginConfig.testAgent.testTracingEnabled
+                        this.testLaunchMetadataSendingEnabled = taskConfig.testLaunchMetadataSendingEnabled ?: pluginConfig.testAgent.testLaunchMetadataSendingEnabled
                         this.recommendedTestsEnabled = pluginConfig.recommendedTests.enabled
                         if (this.recommendedTestsEnabled == true) {
                             this.recommendedTestsCoveragePeriodDays = pluginConfig.recommendedTests.coveragePeriodDays
@@ -84,9 +86,9 @@ fun modifyToRunDrillAgents(
                 },
             taskConfig?.appAgent
                 ?.takeIf { it.enabled ?: pluginConfig.appAgent.enabled ?: false }
-                ?.let {
+                ?.let { taskConfig ->
                     AppAgentConfiguration().apply {
-                        mapGeneralAgentProperties(it, pluginConfig.appAgent, pluginConfig)
+                        mapGeneralAgentProperties(taskConfig, pluginConfig.appAgent, pluginConfig)
                         this.appId = pluginConfig.appId
                         this.packagePrefixes = pluginConfig.packagePrefixes
                         this.buildVersion = pluginConfig.buildVersion
@@ -95,7 +97,7 @@ fun modifyToRunDrillAgents(
                         }.onFailure {
                             logger.warn("Unable to retrieve the current commit SHA. The 'commitSha' parameter will not be set. Error: ${it.message}")
                         }.getOrNull()
-                        this.envId = it.envId
+                        this.envId = taskConfig.envId ?: pluginConfig.appAgent.envId
                         if (task is Test) {
                             task.testClassesDirs.joinToString(separator = ";") { "!" + it.absolutePath }
                                 .let { excludePaths ->

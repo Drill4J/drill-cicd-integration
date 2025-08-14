@@ -24,6 +24,8 @@ class TestAgentConfiguration : AgentConfiguration() {
     var recommendedTestsTargetCommitSha: String? = null
     var recommendedTestsTargetBuildVersion: String? = null
     var recommendedTestsBaselineCommitSha: String? = null
+    var testTracingEnabled: Boolean? = null
+    var testLaunchMetadataSendingEnabled: Boolean? = null
 
     override val githubRepository: String = "Drill4J/autotest-agent"
     override val agentName: String = "testAgent"
@@ -44,6 +46,8 @@ class TestAgentConfiguration : AgentConfiguration() {
                 recommendedTestsTargetBuildVersion?.let { this[TestAgentConfiguration::recommendedTestsTargetBuildVersion.name] = it }
                 recommendedTestsBaselineCommitSha?.let { this[TestAgentConfiguration::recommendedTestsBaselineCommitSha.name] = it }
             }
+            testTracingEnabled?.let { this[TestAgentConfiguration::testTracingEnabled.name] = it.toString().lowercase() }
+            testLaunchMetadataSendingEnabled?.let { this[TestAgentConfiguration::testLaunchMetadataSendingEnabled.name] = it.toString().lowercase() }
         }
     }
 

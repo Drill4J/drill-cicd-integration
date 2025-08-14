@@ -61,7 +61,9 @@ abstract class AgentMavenConfiguration(
 )
 
 open class TestAgentMavenConfiguration(
-    var testTaskId: String? = null
+    var testTaskId: String? = null,
+    var testTracingEnabled: Boolean? = null,
+    var testLaunchMetadataSendingEnabled: Boolean? = null,
 ) : AgentMavenConfiguration()
 
 open class AppAgentMavenConfiguration(
