@@ -15,12 +15,14 @@
  */
 package com.epam.drill.integration.gradle
 
+import com.epam.drill.integration.common.agent.CommandExecutor
 import com.epam.drill.integration.common.agent.ExecutableRunner
-import com.epam.drill.integration.common.agent.config.AppArchiveScannerConfiguration
+import com.epam.drill.integration.common.agent.config.AppAgentConfiguration
 import com.epam.drill.integration.common.agent.impl.AgentCacheImpl
 import com.epam.drill.integration.common.agent.impl.AgentInstallerImpl
+import com.epam.drill.integration.common.agent.impl.JarCommandLineBuilder
+import com.epam.drill.integration.common.agent.javaExecutable
 import com.epam.drill.integration.common.git.impl.GitClientImpl
-import com.epam.drill.integration.common.util.fromEnv
 import com.epam.drill.integration.common.util.required
 import kotlinx.coroutines.runBlocking
 import org.apache.maven.plugins.annotations.LifecyclePhase
@@ -30,19 +32,21 @@ import org.apache.maven.plugins.annotations.ResolutionScope
 import java.io.File
 
 @Mojo(
-    name = "enableAppArchiveScanner",
-    defaultPhase = LifecyclePhase.PACKAGE, requiresDependencyResolution = ResolutionScope.RUNTIME, threadSafe = true
+    name = "scanAppArchive",
+    defaultPhase = LifecyclePhase.PACKAGE,
+    requiresDependencyResolution = ResolutionScope.RUNTIME,
+    threadSafe = true
 )
 class AppArchiveScannerMojo : AbstractDrillMojo() {
 
-    @Parameter(property = "appArchiveScanner", required = true)
-    var appArchiveScanner: AppArchiveScannerMavenConfiguration? = null
+    @Parameter(property = "appAgent", required = true)
+    var appAgent: AppAgentMavenConfiguration? = null
 
     @Parameter(property = "appId", required = true)
     var appId: String? = null
 
     @Parameter(property = "packagePrefixes", required = true)
-    var packagePrefixes: Array<String>? = null
+    var packagePrefixes: String? = null
 
     @Parameter(property = "buildVersion", required = false)
     var buildVersion: String? = null
@@ -50,51 +54,52 @@ class AppArchiveScannerMojo : AbstractDrillMojo() {
     private val gitClient = GitClientImpl()
     private val agentCache = AgentCacheImpl(drillAgentFilesDir)
     private val agentInstaller = AgentInstallerImpl(agentCache)
-    private val executableRunner = ExecutableRunner(agentInstaller)
+    private val argumentsBuilder = JarCommandLineBuilder()
+    private val commandExecutor = CommandExecutor(javaExecutable.absolutePath)
+    private val executableRunner = ExecutableRunner(agentInstaller, argumentsBuilder, commandExecutor)
 
     override fun execute() {
-        println("App archive scanner running...")
+        if (project.packaging == "pom") {
+            log.warn("The 'pom' packaging is not supported for the App Archive Scanner. " +
+                    "Please use 'jar' or 'war' packaging.")
+            return
+        }
+        val archiveFile = project.artifact.file ?: File(project.build.directory, project.build.finalName + "." + project.packaging)
+        if (!archiveFile.exists()) {
+            log.error("The archive file '${archiveFile.absolutePath}' does not exist. " +
+                    "Please ensure the project is built before running the App Archive Scanner.")
+            return
+        }
+        log.info("App archive scanner running for ${archiveFile.absolutePath}...")
         val distDir = File(project.build?.directory, "/drill")
-        val config = getConfig()
-        val appArchive = project.artifact.file
+        val config = getConfig(archiveFile)
         runBlocking {
-            val exitCode = executableRunner.runScan(
-                config,
-                distDir,
-                appArchive.absolutePath
-            ) { line ->
-                println(line)
+            log.info("App archive scanner running for file ${archiveFile.absolutePath} ...")
+            executableRunner.runScan(config, distDir) { line ->
+                log.info(line)
+            }.also { exitCode ->
+                log.info("App archive scanner exited with code $exitCode")
             }
-            println("App archive scanner exited with code $exitCode")
         }
     }
 
-    private fun getConfig() = AppArchiveScannerConfiguration().apply {
+    private fun getConfig(archiveFile: File) = AppAgentConfiguration().apply {
         val mavenConfig = this@AppArchiveScannerMojo
-        val appArchiveScanner = mavenConfig.appArchiveScanner.required("appArchiveScanner")
+        val appAgent = mavenConfig.appAgent.required("appAgent")
 
-        setGeneralAgentProperties(appArchiveScanner, mavenConfig)
+        setGeneralAgentProperties(appAgent, mavenConfig)
         appId = mavenConfig.appId.required("appId")
         packagePrefixes = mavenConfig.packagePrefixes.required("packagePrefixes")
+            .split(*arrayOf(",", ";"))
+            .map(String::trim)
+            .toTypedArray()
+        scanClassPath = archiveFile.absolutePath
         buildVersion = mavenConfig.buildVersion
+        envId = mavenConfig.appAgent?.envId
         commitSha = runCatching {
             gitClient.getCurrentCommitSha()
         }.onFailure {
             log.warn("Unable to retrieve the current commit SHA. The 'commitSha' parameter will not be set. Error: ${it.message}")
         }.getOrNull()
     }
-}
-
-
-fun AppArchiveScannerConfiguration.setGeneralAgentProperties(
-    appArchiveScannerMavenConfiguration: AppArchiveScannerMavenConfiguration,
-    mavenGeneralConfig: AbstractDrillMojo
-) {
-    version = appArchiveScannerMavenConfiguration.version
-    downloadUrl = appArchiveScannerMavenConfiguration.downloadUrl
-    zipPath = appArchiveScannerMavenConfiguration.zipPath?.let { File(it) }
-
-    apiUrl = mavenGeneralConfig.apiUrl.fromEnv("DRILL_API_URL").required("apiUrl")
-    apiKey = mavenGeneralConfig.apiKey.fromEnv("DRILL_API_KEY")
-    groupId = mavenGeneralConfig.groupId.required("groupId")
 }

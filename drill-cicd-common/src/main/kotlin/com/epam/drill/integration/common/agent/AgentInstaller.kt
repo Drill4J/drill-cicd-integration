@@ -15,14 +15,12 @@
  */
 package com.epam.drill.integration.common.agent
 
+import com.epam.drill.integration.common.agent.config.AgentConfiguration
 import java.io.File
 
 interface AgentInstaller {
-    suspend fun getDownloadUrl(githubRepository: String, version: String, osPreset: String): FileUrl?
-    suspend fun downloadByVersion(githubRepository: String, agentName: String, version: String): File
-    suspend fun downloadByUrl(downloadUrl: String, agentName: String): File
-    fun unzip(zipFile: File, destinationDir: Directory): Directory
-    fun findAgentFile(unzippedDir: Directory, fileExtension: String): File?
+    suspend fun downloadAgent(configuration: AgentConfiguration): File
+    suspend fun installAgent(distDir: Directory, configuration: AgentConfiguration): Directory
 }
 
 data class FileUrl(val url: String, val filename: String)

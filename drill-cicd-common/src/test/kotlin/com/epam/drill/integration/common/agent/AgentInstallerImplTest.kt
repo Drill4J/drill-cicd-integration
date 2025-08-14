@@ -15,6 +15,9 @@
  */
 package com.epam.drill.integration.common.agent
 
+import com.epam.drill.integration.common.agent.config.AgentConfiguration
+import com.epam.drill.integration.common.agent.config.AppAgentConfiguration
+import com.epam.drill.integration.common.agent.config.TestAgentConfiguration
 import com.epam.drill.integration.common.agent.impl.AgentInstallerImpl
 import io.ktor.client.*
 import io.ktor.client.engine.mock.*
@@ -181,40 +184,109 @@ class AgentInstallerImplTest {
     }
 
     @Test
-    fun `given valid zip file and destination directory, unzip should extract files to destination directory`() {
+    fun `given zipPath, installAgent should unzip agent`() {
         val agentFilenames = listOf("file1.txt", "file2.so", "file3.jar")
-        val zipFile = File(testZipDir, "agent.zip").apply { zipFiles(agentFilenames) }
+        val zipFile = File(testZipDir, "agent-test.zip").apply { zipFiles(agentFilenames) }
+        val configuration = AppAgentConfiguration().apply {
+            zipPath = zipFile
+        }
         val agentInstaller = AgentInstallerImpl(agentCache)
-        val destinationDir = Directory(testDownloadDir, "unzipped").also { it.mkdir() }
 
-        val result = agentInstaller.unzip(zipFile, destinationDir)
-
-        assertTrue(result.containsFiles(agentFilenames))
+        runBlocking {
+            agentInstaller.installAgent(testInstallationDir, configuration)
+        }.also { agentDir ->
+            assertEquals(File(testInstallationDir, "agent-test").absolutePath, agentDir.absolutePath)
+            agentFilenames.forEach { fileName ->
+                assertTrue(File(agentDir, fileName).exists())
+            }
+        }
     }
 
     @Test
-    fun `given directory with agent file, findAgentFile should return the file`() {
-        val testAgentFile = "file2.so"
-        val unzippedDir = Directory(testDownloadDir, "unzipped").also { it.mkdir() }
-        val dirInsideUnzippedDir = Directory(unzippedDir, "subdir").also { it.mkdir() }
-        dirInsideUnzippedDir.createFiles(listOf("file1.txt", testAgentFile, "file3.jar"))
-        val agentInstaller = AgentInstallerImpl(agentCache)
+    fun `given downloadUrl, installAgent should download agent by url and unzip it`() {
+        val testDownloadUrl = "https://example.com/agent.zip"
+        val agentFilenames = listOf("file1.txt", "file2.so", "file3.jar")
+        val zipFile = File(testZipDir, "agent-test.zip").apply { zipFiles(agentFilenames) }
+        val mockHttpClient = mockHttpClient(
+            "/agent.zip" shouldRespondBytes zipFile.readBytes()
+        )
+        val configuration = TestAgentConfiguration().apply {
+            downloadUrl = testDownloadUrl
+        }
+        val agentInstaller = AgentInstallerImpl(agentCache).also { it.httpClient = mockHttpClient }
 
-        val result = agentInstaller.findAgentFile(unzippedDir, "so")
-
-        assertEquals(File(dirInsideUnzippedDir, testAgentFile), result)
+        runBlocking {
+            agentInstaller.installAgent(testInstallationDir, configuration)
+        }.also { agentDir ->
+            val expectedAgentDirName = "${configuration.agentName}-$currentOsPreset-${testDownloadUrl.hashCode()}"
+            assertEquals(File(testInstallationDir, expectedAgentDirName), agentDir)
+            agentFilenames.forEach { fileName ->
+                assertTrue(File(agentDir, fileName).exists())
+            }
+        }
     }
 
     @Test
-    fun `given directory without agent file, findAgentFile should return null`() {
-        val unzippedDir = Directory(testDownloadDir, "unzipped").also { it.mkdir() }
-        val dirInsideUnzippedDir = Directory(unzippedDir, "subdir").also { it.mkdir() }
-        dirInsideUnzippedDir.createFiles(listOf("file1.txt", "file2.so", "file3.jar"))
+    fun `given version, installAgent should download agent by version and unzip it`() {
+        val agentVersion = "1.0.0"
+        val agentRepository = "test/repository"
+        val agentName = "agent-test"
+        class MyAgentConfiguration : AgentConfiguration() {
+            override val githubRepository: String = agentRepository
+            override val agentName: String = agentName
+        }
+        val agentFilename = "agent-$currentOsPreset-$agentVersion.zip"
+        val repoApiUrl = "http://localhost"
+        val agentDownloadUrl = "download/$agentFilename"
+        val agentFilenames = listOf("file1.txt", "file2.so", "file3.jar")
+        val zipFile = File(testZipDir, "agent-test.zip").apply { zipFiles(agentFilenames) }
+        val mockHttpClient = mockHttpClient(
+            "/repos/$agentRepository/releases" shouldRespond """
+                [
+                    {
+                        "tag_name": "v$agentVersion",
+                        "assets": [
+                            {
+                                "name": "$agentFilename",
+                                "browser_download_url": "$agentDownloadUrl"
+                            }
+                        ]
+                    }
+                ]
+                """.trimIndent(),
+            agentDownloadUrl shouldRespondBytes zipFile.readBytes()
+        )
+        val configuration = MyAgentConfiguration().apply {
+            version = agentVersion
+        }
+        val agentInstaller = AgentInstallerImpl(agentCache, repoApiUrl).also { it.httpClient = mockHttpClient }
+
+        runBlocking {
+            agentInstaller.installAgent(testInstallationDir, configuration)
+        }.also { agentDir ->
+            val expectedAgentDirName = "${configuration.agentName}-$currentOsPreset-$agentVersion"
+            assertEquals(File(testInstallationDir, expectedAgentDirName), agentDir)
+            agentFilenames.forEach { fileName ->
+                assertTrue(File(agentDir, fileName).exists())
+            }
+        }
+    }
+
+    @Test
+    fun `given configuration without required fields, installAgent should throw IllegalStateException`() {
+        val configuration = TestAgentConfiguration().apply {
+            zipPath = null
+            downloadUrl = null
+            version = null
+        }
         val agentInstaller = AgentInstallerImpl(agentCache)
+        // Simulate a case where no download URL or zip path is provided
 
-        val result = agentInstaller.findAgentFile(unzippedDir, "dll")
-
-        assertNull(result)
+        assertFailsWith<IllegalStateException> {
+            runBlocking {
+                agentInstaller.installAgent(testInstallationDir, configuration)
+            }
+        }
     }
 
 }

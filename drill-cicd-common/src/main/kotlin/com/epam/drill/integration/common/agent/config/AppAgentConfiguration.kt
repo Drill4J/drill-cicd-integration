@@ -21,6 +21,7 @@ class AppAgentConfiguration : AgentConfiguration() {
     var buildVersion: String? = null
     var commitSha: String? = null
     var envId: String? = null
+    var scanClassPath: String? = null
 
     override val githubRepository: String = "Drill4J/java-agent"
     override val agentName: String = "appAgent"
@@ -32,6 +33,7 @@ class AppAgentConfiguration : AgentConfiguration() {
             this[AppAgentConfiguration::buildVersion.name] = buildVersion
             this[AppAgentConfiguration::commitSha.name] = commitSha
             this[AppAgentConfiguration::envId.name] = envId
+            this[AppAgentConfiguration::scanClassPath.name] = scanClassPath
         }
     }
 

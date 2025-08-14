@@ -17,20 +17,9 @@ package com.epam.drill.integration.common.agent
 
 import com.epam.drill.integration.common.agent.config.AgentConfiguration
 
-class ExecutableRunner(
-    private val agentInstaller: AgentInstaller,
-    private val commandLineBuilder: CommandLineBuilder,
-    private val commandExecutor: CommandExecutor
-) {
-
-    suspend fun runScan(
-        config: AgentConfiguration,
-        distDir: Directory,
-        onOutputLine: suspend (String) -> Unit
-    ): Int {
-        val agentDir = agentInstaller.installAgent(distDir, config)
-        val args = commandLineBuilder.build(agentDir, config)
-        val exitCode = commandExecutor.execute(args, onOutputLine)
-        return exitCode
-    }
+interface CommandLineBuilder {
+    fun build(
+        agentDir: Directory,
+        configuration: AgentConfiguration
+    ): List<String>
 }
