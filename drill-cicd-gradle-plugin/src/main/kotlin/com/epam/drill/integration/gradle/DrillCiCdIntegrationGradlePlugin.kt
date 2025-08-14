@@ -18,6 +18,7 @@ package com.epam.drill.integration.gradle
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.JavaExec
+import org.gradle.api.tasks.bundling.AbstractArchiveTask
 import org.gradle.api.tasks.testing.Test
 import org.gradle.process.JavaForkOptions
 import kotlin.reflect.KClass
@@ -43,6 +44,12 @@ class DrillCiCdIntegrationGradlePlugin : Plugin<Project> {
 
         project.task("drillSendBuildInfo") {
             drillSendBuildInfo(config)
+        }.also {
+            it.group = TASK_GROUP
+        }
+
+        project.task("drillScanAppArchive") {
+            drillScanAppArchive(config)
         }.also {
             it.group = TASK_GROUP
         }
@@ -73,6 +80,10 @@ class DrillCiCdIntegrationGradlePlugin : Plugin<Project> {
             extensions.create("drill", DrillTaskExtension::class.java)
         }
 
+        project.tasks.withType(AbstractArchiveTask::class.java) {
+            extensions.create("drill", DrillTaskExtension::class.java)
+        }
+
         project.afterEvaluate {
             tasks
                 .filter { taskType.any { taskType -> taskType.java.isInstance(it) } }
@@ -80,8 +91,12 @@ class DrillCiCdIntegrationGradlePlugin : Plugin<Project> {
                 .forEach { task ->
                     modifyToRunDrillAgents(task, project, config)
                 }
+
+            tasks
+                .filter { it is AbstractArchiveTask }
+                .forEach { task ->
+                    modifyToRunAppArchiveScanner(task, project, config)
+                }
         }
     }
 }
-
-

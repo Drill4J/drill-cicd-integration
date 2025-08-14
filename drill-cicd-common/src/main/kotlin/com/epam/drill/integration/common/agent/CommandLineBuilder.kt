@@ -13,21 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.epam.drill.integration.common.client
+package com.epam.drill.integration.common.agent
 
-import kotlinx.serialization.json.JsonObject
+import com.epam.drill.integration.common.agent.config.AgentConfiguration
 
-interface MetricsClient {
-
-    suspend fun getBuildComparison(
-        groupId: String,
-        appId: String,
-        instanceId: String? = null,
-        commitSha: String? = null,
-        buildVersion: String? = null,
-        baselineInstanceId: String? = null,
-        baselineCommitSha: String? = null,
-        baselineBuildVersion: String? = null,
-        coverageThreshold: Double? = null,
-    ): JsonObject
+interface CommandLineBuilder {
+    fun build(
+        agentDir: Directory,
+        configuration: AgentConfiguration
+    ): List<String>
 }

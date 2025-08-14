@@ -9,10 +9,10 @@
     <url>http://maven.apache.org</url>
     <version>${drill.plugin.version}</version>
     <properties>
-        <kotlin.version>1.8.20</kotlin.version>
+        <kotlin.version>1.9.25</kotlin.version>
         <ktor.version>1.6.8</ktor.version>
         <microutils.logging.version>3.0.5</microutils.logging.version>
-        <kotlinx.serialization.version>1.5.1</kotlinx.serialization.version>
+        <kotlinx.serialization.version>1.6.3</kotlinx.serialization.version>
     </properties>
     <build>
         <sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>

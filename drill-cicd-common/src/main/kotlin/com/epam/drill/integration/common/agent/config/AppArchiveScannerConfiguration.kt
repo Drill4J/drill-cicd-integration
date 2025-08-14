@@ -15,25 +15,21 @@
  */
 package com.epam.drill.integration.common.agent.config
 
-class AppAgentConfiguration : AgentConfiguration() {
+class AppArchiveScannerConfiguration : AgentConfiguration() {
     var appId: String? = null
     var packagePrefixes: Array<String> = emptyArray()
     var buildVersion: String? = null
     var commitSha: String? = null
-    var envId: String? = null
-    var scanClassPath: String? = null
 
-    override val githubRepository: String = "Drill4J/java-agent"
-    override val agentName: String = "appAgent"
+    override val githubRepository: String = "Drill4J/app-archive-scanner"
+    override val agentName: String = "appArchiveScanner"
 
     override fun toAgentArguments(): MutableMap<String, String?> {
         return super.toAgentArguments().apply {
-            this[AppAgentConfiguration::appId.name] = appId
-            this[AppAgentConfiguration::packagePrefixes.name] = packagePrefixes.joinToString(";")
-            this[AppAgentConfiguration::buildVersion.name] = buildVersion
-            this[AppAgentConfiguration::commitSha.name] = commitSha
-            this[AppAgentConfiguration::envId.name] = envId
-            this[AppAgentConfiguration::scanClassPath.name] = scanClassPath
+            this[AppArchiveScannerConfiguration::appId.name] = appId
+            this[AppArchiveScannerConfiguration::packagePrefixes.name] = packagePrefixes.joinToString(";")
+            this[AppArchiveScannerConfiguration::buildVersion.name] = buildVersion
+            this[AppArchiveScannerConfiguration::commitSha.name] = commitSha
         }
     }
 

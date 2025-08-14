@@ -73,7 +73,6 @@ class GithubPullRequestReportMojo : AbstractDrillMojo() {
                 groupId = groupId,
                 appId = appId,
                 githubEventFile = File(eventFilePath),
-                useMaterializedViews = useMaterializedViews,
             )
         }
     }

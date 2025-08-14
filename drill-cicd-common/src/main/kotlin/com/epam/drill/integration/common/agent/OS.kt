@@ -15,6 +15,7 @@
  */
 package com.epam.drill.integration.common.agent
 
+import java.io.File
 import java.util.*
 
 private var CURRENT_OS_NAME: String = System.getProperty("os.name").lowercase(Locale.ENGLISH)
@@ -36,13 +37,17 @@ private fun isArch(os: OS): Boolean {
 }
 
 val currentOsPreset: String
-    get() = OS.values()
-        .firstOrNull() { isFamily(it) && isArch(it) }
+    get() = OS.entries
+        .firstOrNull { isFamily(it) && isArch(it) }
         ?.preset
         ?: throw IllegalStateException("No preset for OS: $CURRENT_OS_NAME and arch: $CURRENT_OS_ARCH")
 
 val currentOsLibExt: String
-    get() = OS.values()
-        .firstOrNull() { isFamily(it) && isArch(it) }
+    get() = OS.entries
+        .firstOrNull { isFamily(it) && isArch(it) }
         ?.libExt
         ?: throw IllegalStateException("No library extension for OS: $CURRENT_OS_NAME and arch: $CURRENT_OS_ARCH")
+
+private val javaHome = System.getProperty("java.home")
+private val javaBin = "bin" + File.separator + "java" + (if (isFamily(OS.WINDOWS)) ".exe" else "")
+val javaExecutable = File(javaHome, javaBin)

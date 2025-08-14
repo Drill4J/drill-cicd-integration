@@ -80,7 +80,6 @@ class TestAgentMojo : AbstractAgentMojo() {
                     recommendedTestsBaselineCommitSha = baselineFactory.produce(searchStrategy).findBaseline(searchCriteria)
                 }                
             }
-            recommendedTestsUseMaterializedViews = useMaterializedViews
         }
         log.info("testTaskId: $testTaskId")
     }

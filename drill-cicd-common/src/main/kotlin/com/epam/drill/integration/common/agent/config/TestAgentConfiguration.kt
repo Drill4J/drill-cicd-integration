@@ -24,7 +24,6 @@ class TestAgentConfiguration : AgentConfiguration() {
     var recommendedTestsTargetCommitSha: String? = null
     var recommendedTestsTargetBuildVersion: String? = null
     var recommendedTestsBaselineCommitSha: String? = null
-    var recommendedTestsUseMaterializedViews: Boolean? = null
     var testTracingEnabled: Boolean? = null
     var testLaunchMetadataSendingEnabled: Boolean? = null
 
@@ -46,7 +45,6 @@ class TestAgentConfiguration : AgentConfiguration() {
                 recommendedTestsTargetCommitSha?.let { this[TestAgentConfiguration::recommendedTestsTargetCommitSha.name] = it }
                 recommendedTestsTargetBuildVersion?.let { this[TestAgentConfiguration::recommendedTestsTargetBuildVersion.name] = it }
                 recommendedTestsBaselineCommitSha?.let { this[TestAgentConfiguration::recommendedTestsBaselineCommitSha.name] = it }
-                recommendedTestsUseMaterializedViews?.let { this[TestAgentConfiguration::recommendedTestsUseMaterializedViews.name] = it.toString().lowercase() }
             }
             testTracingEnabled?.let { this[TestAgentConfiguration::testTracingEnabled.name] = it.toString().lowercase() }
             testLaunchMetadataSendingEnabled?.let { this[TestAgentConfiguration::testLaunchMetadataSendingEnabled.name] = it.toString().lowercase() }

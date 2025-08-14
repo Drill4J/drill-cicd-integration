@@ -15,12 +15,12 @@
  */
 package com.epam.drill.integration.gradle
 
-import com.epam.drill.integration.common.agent.AgentRunner
 import com.epam.drill.integration.common.agent.config.AgentConfiguration
 import com.epam.drill.integration.common.agent.config.TestAgentConfiguration
 import com.epam.drill.integration.common.agent.config.AppAgentConfiguration
 import com.epam.drill.integration.common.agent.impl.AgentCacheImpl
 import com.epam.drill.integration.common.agent.impl.AgentInstallerImpl
+import com.epam.drill.integration.common.agent.impl.NativeAgentCommandLineBuilder
 import com.epam.drill.integration.common.baseline.BaselineFactory
 import com.epam.drill.integration.common.baseline.BaselineSearchStrategy
 import com.epam.drill.integration.common.baseline.MergeBaseCriteria
@@ -49,7 +49,7 @@ fun modifyToRunDrillAgents(
 
         val agentCache = AgentCacheImpl(drillAgentFilesDir)
         val agentInstaller = AgentInstallerImpl(agentCache)
-        val agentRunner = AgentRunner(agentInstaller)
+        val argumentsBuilder = NativeAgentCommandLineBuilder()
         val distDir = File(project.buildDir, "/drill")
 
 
@@ -81,7 +81,6 @@ fun modifyToRunDrillAgents(
                                 }
                                 this.recommendedTestsBaselineCommitSha = baselineFactory.produce(searchStrategy).findBaseline(searchCriteria)
                             }
-                            this.recommendedTestsUseMaterializedViews = pluginConfig.useMaterializedViews
                         }
                     }
                 },
@@ -102,19 +101,16 @@ fun modifyToRunDrillAgents(
                         if (task is Test) {
                             task.testClassesDirs.joinToString(separator = ";") { "!" + it.absolutePath }
                                 .let { excludePaths ->
-                                    this.additionalParams = mapOf(
-                                        "scanClassPath" to excludePaths
-                                    ) + (additionalParams ?: emptyMap())
+                                    this.scanClassPath = excludePaths
                                 }
                         }
                     }
                 }
         ).map { config ->
             runBlocking {
-                agentRunner.getJvmOptionsToRun(
-                    File(distDir, config.agentName),
-                    config
-                )
+                agentInstaller.installAgent(File(distDir, config.agentName), config)
+            }.let { agentDir ->
+                argumentsBuilder.build(agentDir, config)
             }
         }.flatten().let {
             getJavaAddOpensOptions() + it
@@ -133,7 +129,7 @@ fun modifyToRunDrillAgents(
 
 private fun Task.generateTestTaskId(project: Project) = "${project.group}:${project.name}:${this.name}"
 
-private fun AgentConfiguration.mapGeneralAgentProperties(
+internal fun AgentConfiguration.mapGeneralAgentProperties(
     agentTaskExtension: AgentExtension,
     agentPluginExtension: AgentExtension,
     pluginExtension: DrillPluginExtension

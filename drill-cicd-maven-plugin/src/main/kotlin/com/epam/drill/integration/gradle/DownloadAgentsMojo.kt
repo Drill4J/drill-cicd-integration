@@ -17,6 +17,7 @@ package com.epam.drill.integration.gradle
 
 import com.epam.drill.integration.common.agent.config.AgentConfiguration
 import com.epam.drill.integration.common.agent.config.AppAgentConfiguration
+import com.epam.drill.integration.common.agent.config.AppArchiveScannerConfiguration
 import com.epam.drill.integration.common.agent.config.TestAgentConfiguration
 import com.epam.drill.integration.common.agent.impl.AgentCacheImpl
 import com.epam.drill.integration.common.agent.impl.AgentInstallerImpl
@@ -41,6 +42,8 @@ class DownloadAgentsMojo : AbstractDrillMojo() {
     var testAgent: TestAgentMavenConfiguration? = null
     @Parameter(property = "appAgent", required = false)
     var appAgent: AppAgentMavenConfiguration? = null
+    @Parameter(property = "appArchiveScanner", required = false)
+    var appArchiveScanner: AppArchiveScannerMavenConfiguration? = null
 
     override fun execute() {
         appAgent?.let {
@@ -51,6 +54,12 @@ class DownloadAgentsMojo : AbstractDrillMojo() {
         }
         testAgent?.let {
             val agentConfig = TestAgentConfiguration()
+            val agentName = agentConfig.agentName
+            val githubRepository = agentConfig.githubRepository
+            download(it, agentName, githubRepository)
+        }
+        appArchiveScanner?.let {
+            val agentConfig = AppArchiveScannerConfiguration()
             val agentName = agentConfig.agentName
             val githubRepository = agentConfig.githubRepository
             download(it, agentName, githubRepository)

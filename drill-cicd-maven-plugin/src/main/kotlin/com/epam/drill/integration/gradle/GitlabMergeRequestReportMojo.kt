@@ -59,8 +59,6 @@ class GitlabMergeRequestReportMojo : AbstractDrillMojo() {
         val mergeBaseCommitSha = gitlab.mergeRequest.mergeBaseCommitSha
             .fromEnv("CI_MERGE_REQUEST_DIFF_BASE_SHA")
             .required("gitlab.mergeRequest.mergeBaseCommitSha")
-        val useMaterializedViews = useMaterializedViews
-            .fromEnv("DRILL_USE_MATERIALIZED_VIEWS")
 
         val gitlabCiCdService = GitlabCiCdService(
             GitlabApiClientV4Impl(
@@ -82,7 +80,6 @@ class GitlabMergeRequestReportMojo : AbstractDrillMojo() {
                 appId = appId,
                 headCommitSha = commitSha,
                 mergeBaseCommitSha = mergeBaseCommitSha,
-                useMaterializedViews = useMaterializedViews?.let { java.lang.Boolean.parseBoolean(it) },
             )
         }
     }

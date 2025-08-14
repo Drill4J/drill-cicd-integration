@@ -58,7 +58,6 @@ fun Task.drillGithubPullRequestReport(config: DrillPluginExtension) {
                 groupId = groupId,
                 appId = appId,
                 githubEventFile = File(eventFilePath),
-                useMaterializedViews = config.useMaterializedViews,
             )
         }
     }
