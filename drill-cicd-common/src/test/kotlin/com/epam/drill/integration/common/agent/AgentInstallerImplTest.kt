@@ -48,86 +48,17 @@ class AgentInstallerImplTest {
         val testRepository = "test/repository"
         val testVersion = "1.0.0"
         val testOsPreset = "linuxX64"
-        val testFilename = "$testOsPreset-$testVersion.zip"
-        val testDownloadUrl = "https://example.com/$testFilename"
-        val mockHttpClient = mockHttpClient(
-            "/repos/$testRepository/releases" shouldRespond """
-                [
-                    {
-                        "tag_name": "v$testVersion",
-                        "assets": [
-                            {
-                                "name": "$testFilename",
-                                "browser_download_url": "$testDownloadUrl"
-                            }
-                        ]
-                    }
-                ]
-                """.trimIndent()
-        )
-        val agentInstaller = AgentInstallerImpl(agentCache).also { it.httpClient = mockHttpClient }
+        val testFilename = "agent-$testOsPreset-$testVersion.zip"
+        val testDownloadUrl = "http://example.com/$testRepository/releases/download/v$testVersion/$testFilename"
+        val mockHttpClient = mockHttpClient()
+        val agentInstaller = AgentInstallerImpl(agentCache = agentCache, githubUrl = "http://example.com")
+            .also { it.httpClient = mockHttpClient }
 
         val result = agentInstaller.getDownloadUrl(testRepository, testVersion, testOsPreset)
 
         assertNotNull(result)
         assertEquals(testDownloadUrl, result.url)
         assertEquals(testFilename, result.filename)
-    }
-
-    @Test
-    fun `given non-existing version, getDownloadUrl should return null`() = runBlocking {
-        val testRepository = "test/repository"
-        val testVersion = "2.0.0"
-        val testOsPreset = "linuxX64"
-
-        val mockHttpClient = mockHttpClient(
-            "/repos/$testRepository/releases" shouldRespond """
-             [
-                {
-                    "tag_name": "v1.0.0",
-                    "assets": [
-                        {
-                            "name": "$testOsPreset-2.0.0.zip",
-                            "browser_download_url": "https://example.com/$testOsPreset-1.0.0.zip"
-                        }
-                    ]
-                }
-            ]
-            """.trimIndent()
-        )
-        val agentInstaller = AgentInstallerImpl(agentCache).also { it.httpClient = mockHttpClient }
-
-        val result = agentInstaller.getDownloadUrl(testRepository, testVersion, testOsPreset)
-
-        assertNull(result)
-    }
-
-    @Test
-    fun `given non-existing OS preset, getDownloadUrl should return null`() = runBlocking {
-        val testRepository = "test/repository"
-        val testVersion = "1.0.0"
-        val testOsPreset = "mingwX64"
-
-        val mockHttpClient = mockHttpClient(
-            "/repos/$testRepository/releases" shouldRespond """
-             [
-                {
-                    "tag_name": "v$testVersion",
-                    "assets": [
-                        {
-                            "name": "linuxX64-$testVersion.zip",
-                            "browser_download_url": "https://example.com/linuxX64-$testVersion.zip"
-                        }
-                    ]
-                }
-            ]
-            """.trimIndent()
-        )
-        val agentInstaller = AgentInstallerImpl(agentCache).also { it.httpClient = mockHttpClient }
-
-        val result = agentInstaller.getDownloadUrl(testRepository, testVersion, testOsPreset)
-
-        assertNull(result)
     }
 
 
@@ -236,30 +167,17 @@ class AgentInstallerImplTest {
             override val agentName: String = agentName
         }
         val agentFilename = "agent-$currentOsPreset-$agentVersion.zip"
-        val repoApiUrl = "http://localhost"
-        val agentDownloadUrl = "download/$agentFilename"
+        val repoApiUrl = "http://example.com"
         val agentFilenames = listOf("file1.txt", "file2.so", "file3.jar")
         val zipFile = File(testZipDir, "agent-test.zip").apply { zipFiles(agentFilenames) }
         val mockHttpClient = mockHttpClient(
-            "/repos/$agentRepository/releases" shouldRespond """
-                [
-                    {
-                        "tag_name": "v$agentVersion",
-                        "assets": [
-                            {
-                                "name": "$agentFilename",
-                                "browser_download_url": "$agentDownloadUrl"
-                            }
-                        ]
-                    }
-                ]
-                """.trimIndent(),
-            agentDownloadUrl shouldRespondBytes zipFile.readBytes()
+            "/$agentRepository/releases/download/v$agentVersion/$agentFilename" shouldRespondBytes zipFile.readBytes()
         )
         val configuration = MyAgentConfiguration().apply {
             version = agentVersion
         }
-        val agentInstaller = AgentInstallerImpl(agentCache, repoApiUrl).also { it.httpClient = mockHttpClient }
+        val agentInstaller = AgentInstallerImpl(agentCache, repoApiUrl)
+            .also { it.httpClient = mockHttpClient }
 
         runBlocking {
             agentInstaller.installAgent(testInstallationDir, configuration)
