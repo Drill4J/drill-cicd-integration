@@ -34,12 +34,13 @@ import mu.KotlinLogging
 import java.io.File
 import kotlin.io.use
 
+private const val GITHUB_URL = "https://github.com"
 private const val GITHUB_API_URL = "https://api.github.com"
 private const val GITHUB_USER_TOKEN = "GH_USER_TOKEN"
 
 class AgentInstallerImpl(
     private val agentCache: AgentCache,
-    private val repoApiUrl: String = GITHUB_API_URL,
+    private val githubUrl: String = GITHUB_URL,
     repoTokenName: String = GITHUB_USER_TOKEN,
 ) : AgentInstaller {
     private val json = Json { ignoreUnknownKeys = true }
@@ -54,30 +55,9 @@ class AgentInstallerImpl(
     }
 
     suspend fun getDownloadUrl(githubRepository: String, version: String, osPreset: String): FileUrl? {
-        val releasesUrl = "$repoApiUrl/repos/$githubRepository/releases"
-
-        return httpClient.get<HttpResponse>(releasesUrl) {
-            parameter("prerelease", true)
-            headers {
-                token?.let { append(HttpHeaders.Authorization, "Bearer $it") }
-            }
-        }.let { response ->
-            json.parseToJsonElement(response.readText())
-        }.jsonArray.firstOrNull { release ->
-            val tag = release.jsonObject["tag_name"]?.jsonPrimitive?.content
-            tag?.removePrefix("v") == version
-        }?.jsonObject?.get("assets")?.jsonArray?.firstOrNull { asset ->
-            val fileName = asset.jsonObject["name"]?.jsonPrimitive?.content
-            fileName
-                ?.contains(osPreset)
-                ?: false
-        }?.let { asset ->
-            val fileName = asset.jsonObject["name"]?.jsonPrimitive?.content
-                ?: throw IllegalStateException("Can't get file name from $asset")
-            val url = asset.jsonObject["browser_download_url"]?.jsonPrimitive?.content
-                ?: throw IllegalStateException("Can't get url from $asset")
-            FileUrl(url, fileName)
-        }
+        val fileName = "agent-$osPreset-$version.zip"
+        val downloadUrl = "$githubUrl/$githubRepository/releases/download/v$version/$fileName"
+        return FileUrl(downloadUrl, fileName)
     }
 
     suspend fun downloadByVersion(githubRepository: String, agentName: String, version: String): File =
