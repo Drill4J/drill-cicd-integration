@@ -15,11 +15,14 @@
  */
 package com.epam.drill.integration.gradle
 
+import com.epam.drill.integration.common.agent.CommandLineBuilder
 import com.epam.drill.integration.common.agent.config.AgentConfiguration
+import com.epam.drill.integration.common.agent.config.AgentMode
 import com.epam.drill.integration.common.agent.config.TestAgentConfiguration
 import com.epam.drill.integration.common.agent.config.AppAgentConfiguration
 import com.epam.drill.integration.common.agent.impl.AgentCacheImpl
 import com.epam.drill.integration.common.agent.impl.AgentInstallerImpl
+import com.epam.drill.integration.common.agent.impl.JavaAgentCommandLineBuilder
 import com.epam.drill.integration.common.agent.impl.NativeAgentCommandLineBuilder
 import com.epam.drill.integration.common.baseline.BaselineFactory
 import com.epam.drill.integration.common.baseline.BaselineSearchStrategy
@@ -49,7 +52,6 @@ fun modifyToRunDrillAgents(
 
         val agentCache = AgentCacheImpl(drillAgentFilesDir)
         val agentInstaller = AgentInstallerImpl(agentCache)
-        val argumentsBuilder = NativeAgentCommandLineBuilder()
         val distDir = File(project.buildDir, "/drill")
 
 
@@ -104,13 +106,17 @@ fun modifyToRunDrillAgents(
                                     this.scanClassPath = excludePaths
                                 }
                         }
+                        this.agentMode = taskConfig.agentMode ?: pluginConfig.appAgent.agentMode ?: AgentMode.NATIVE
                     }
                 }
         ).map { config ->
             runBlocking {
                 agentInstaller.installAgent(File(distDir, config.agentName), config)
             }.let { agentDir ->
-                argumentsBuilder.build(agentDir, config)
+                when (config.agentMode) {
+                    AgentMode.NATIVE -> NativeAgentCommandLineBuilder()
+                    AgentMode.JAVA -> JavaAgentCommandLineBuilder()
+                }.build(agentDir, config)
             }
         }.flatten().let {
             getJavaAddOpensOptions() + it

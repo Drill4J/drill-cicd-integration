@@ -16,8 +16,10 @@
 package com.epam.drill.integration.gradle
 
 import com.epam.drill.integration.common.agent.config.AgentConfiguration
+import com.epam.drill.integration.common.agent.config.AgentMode
 import com.epam.drill.integration.common.agent.impl.AgentCacheImpl
 import com.epam.drill.integration.common.agent.impl.AgentInstallerImpl
+import com.epam.drill.integration.common.agent.impl.JavaAgentCommandLineBuilder
 import com.epam.drill.integration.common.agent.impl.NativeAgentCommandLineBuilder
 import com.epam.drill.integration.common.util.fromEnv
 import com.epam.drill.integration.common.util.getJavaAddOpensOptions
@@ -33,7 +35,6 @@ abstract class AbstractAgentMojo: AbstractDrillMojo() {
 
     private val agentCache = AgentCacheImpl(drillAgentFilesDir)
     private val agentInstaller = AgentInstallerImpl(agentCache)
-    private val argumentsBuilder = NativeAgentCommandLineBuilder()
 
     abstract fun getAgentConfig(): AgentConfiguration
 
@@ -46,7 +47,10 @@ abstract class AbstractAgentMojo: AbstractDrillMojo() {
                 config
             )
         }.let { agentDir ->
-            argumentsBuilder.build(agentDir, config)
+            when (config.agentMode) {
+                AgentMode.NATIVE -> NativeAgentCommandLineBuilder()
+                AgentMode.JAVA -> JavaAgentCommandLineBuilder()
+            }.build(agentDir, config)
         }
 
         val oldArgLine = project.properties.getProperty(ARG_LINE) ?: ""

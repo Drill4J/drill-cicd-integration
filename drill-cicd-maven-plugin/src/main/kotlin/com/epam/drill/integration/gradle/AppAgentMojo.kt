@@ -15,6 +15,7 @@
  */
 package com.epam.drill.integration.gradle
 
+import com.epam.drill.integration.common.agent.config.AgentMode
 import com.epam.drill.integration.common.agent.config.AppAgentConfiguration
 import com.epam.drill.integration.common.git.impl.GitClientImpl
 import com.epam.drill.integration.common.util.required
@@ -60,5 +61,6 @@ class AppAgentMojo : AbstractAgentMojo() {
         }.onFailure {
             log.warn("Unable to retrieve the current commit SHA. The 'commitSha' parameter will not be set. Error: ${it.message}")
         }.getOrNull()
+        agentMode = mavenConfig.appAgent?.agentMode?.let { AgentMode.valueOf(it) } ?: AgentMode.NATIVE
     }
 }

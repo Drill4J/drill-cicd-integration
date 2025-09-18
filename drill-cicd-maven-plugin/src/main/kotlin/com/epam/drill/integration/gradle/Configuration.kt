@@ -15,6 +15,7 @@
  */
 package com.epam.drill.integration.gradle
 
+import com.epam.drill.integration.common.agent.config.AgentMode
 import com.epam.drill.integration.common.baseline.BaselineSearchStrategy
 
 open class GitlabConfiguration(
@@ -67,7 +68,8 @@ open class TestAgentMavenConfiguration(
 ) : AgentMavenConfiguration()
 
 open class AppAgentMavenConfiguration(
-    var envId: String? = null
+    var envId: String? = null,
+    var agentMode: String? = null
 ) : AgentMavenConfiguration()
 
 open class AppArchiveScannerMavenConfiguration(
