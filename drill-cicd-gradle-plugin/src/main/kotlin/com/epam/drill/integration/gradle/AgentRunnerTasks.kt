@@ -106,7 +106,7 @@ fun modifyToRunDrillAgents(
                                     this.scanClassPath = excludePaths
                                 }
                         }
-                        this.agentMode = taskConfig.agentMode ?: pluginConfig.appAgent.agentMode ?: AgentMode.NATIVE
+                        this.agentMode = (taskConfig.agentMode ?: pluginConfig.appAgent.agentMode)?.let { AgentMode.valueOf(it) } ?: AgentMode.NATIVE
                     }
                 }
         ).map { config ->

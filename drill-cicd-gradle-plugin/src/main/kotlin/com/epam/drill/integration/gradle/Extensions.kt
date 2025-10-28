@@ -121,7 +121,7 @@ open class TestAgentExtension(
 open class AppAgentExtension(
     var envId: String? = null,
     var archiveScannerEnabled: Boolean? = null,
-    var agentMode: AgentMode? = null,
+    var agentMode: String? = null,
 ) : AgentExtension()
 
 open class DrillTaskExtension(
