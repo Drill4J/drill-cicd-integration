@@ -24,7 +24,6 @@ import org.gradle.process.JavaForkOptions
 import kotlin.reflect.KClass
 
 private const val TASK_GROUP = "drill"
-private val taskType: Set<KClass<out JavaForkOptions>> = setOf(Test::class, JavaExec::class)
 
 class DrillCiCdIntegrationGradlePlugin : Plugin<Project> {
     override fun apply(project: Project) {
@@ -86,14 +85,13 @@ class DrillCiCdIntegrationGradlePlugin : Plugin<Project> {
 
         project.afterEvaluate {
             tasks
-                .filter { taskType.any { taskType -> taskType.java.isInstance(it) } }
-                .filter { it is JavaForkOptions }
+                .filterIsInstance<Test>()
                 .forEach { task ->
                     modifyToRunDrillAgents(task, project, config)
                 }
 
             tasks
-                .filter { it is AbstractArchiveTask }
+                .filterIsInstance<AbstractArchiveTask>()
                 .forEach { task ->
                     modifyToRunAppArchiveScanner(task, project, config)
                 }
