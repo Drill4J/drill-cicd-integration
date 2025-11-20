@@ -15,6 +15,7 @@
  */
 package com.epam.drill.integration.gradle
 
+import com.epam.drill.integration.common.agent.config.AgentMode
 import com.epam.drill.integration.common.baseline.BaselineSearchStrategy
 import org.gradle.api.Action
 
@@ -120,6 +121,7 @@ open class TestAgentExtension(
 open class AppAgentExtension(
     var envId: String? = null,
     var archiveScannerEnabled: Boolean? = null,
+    var agentMode: String? = null,
 ) : AgentExtension()
 
 open class DrillTaskExtension(

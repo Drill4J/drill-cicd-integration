@@ -31,6 +31,8 @@ abstract class AgentConfiguration {
 
     var additionalParams: Map<String, String>? = null
 
+    var agentMode: AgentMode = AgentMode.NATIVE
+
     abstract val githubRepository: String
     abstract val agentName: String
 
@@ -42,4 +44,9 @@ abstract class AgentConfiguration {
         this[AgentConfiguration::logFile.name] = logFile?.absolutePath
         additionalParams?.let { this.putAll(it) }
     }
+}
+
+enum class AgentMode {
+    NATIVE,
+    JAVA
 }
