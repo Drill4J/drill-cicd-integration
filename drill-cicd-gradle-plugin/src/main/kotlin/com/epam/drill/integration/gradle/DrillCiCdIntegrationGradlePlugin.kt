@@ -88,6 +88,7 @@ class DrillCiCdIntegrationGradlePlugin : Plugin<Project> {
                 .filterIsInstance<Test>()
                 .forEach { task ->
                     modifyToRunDrillAgents(task, project, config)
+                    modifyToRunAppArchiveScanner(task, project, config)
                 }
 
             tasks

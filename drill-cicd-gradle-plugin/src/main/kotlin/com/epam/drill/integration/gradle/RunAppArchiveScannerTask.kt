@@ -28,6 +28,7 @@ import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.tasks.bundling.AbstractArchiveTask
 import java.io.File
+import org.gradle.api.tasks.testing.Test
 
 fun Task.drillScanAppArchive(config: DrillPluginExtension) {
     doFirst {
@@ -38,7 +39,7 @@ fun Task.drillScanAppArchive(config: DrillPluginExtension) {
             return@doFirst
         }
         scanAppArchive(
-            archiveFiles = archiveFiles,
+            archiveFilesPaths = archiveFiles.map{ it.absolutePath },
             project = project,
             pluginConfig = config
         )
@@ -70,20 +71,22 @@ fun modifyToRunAppArchiveScanner(
                 logger.lifecycle("Skipping ${task.name}: up-to-date or no work required")
             }
             scanAppArchive(
-                archiveFiles = outputs.files.files,
+                archiveFilesPaths = outputs.files.files.map { it.absolutePath },
                 project = project,
                 pluginConfig = pluginConfig,
-                taskConfig = taskConfig
+                taskConfig = taskConfig,
+                testTask = task
             )
         }
     }
 }
 
 fun Task.scanAppArchive(
-    archiveFiles: Collection<File>,
+    archiveFilesPaths: Collection<String>,
     project: Project,
     pluginConfig: DrillPluginExtension,
     taskConfig: DrillTaskExtension? = null,
+    testTask: Task? = null
 ) {
     val gitClient = GitClientImpl()
 
@@ -109,10 +112,22 @@ fun Task.scanAppArchive(
         }.onFailure {
             logger.warn("Unable to retrieve the current commit SHA. The 'commitSha' parameter will not be set. Error: ${it.message}")
         }.getOrNull()
-        this.scanClassPath = archiveFiles.joinToString(";") { it.absolutePath }
+        
+        this.classScanningEnabled = true
+
+        val scanClassPaths = mutableListOf<String>()
+        scanClassPaths.addAll(archiveFilesPaths)
+        if (testTask is Test) {
+            scanClassPaths.addAll(testTask.classpath.map{ it.absolutePath })
+            scanClassPaths.addAll(testTask.testClassesDirs.map{ "!" + it.absolutePath })
+        }
+        this.scanClassPath = scanClassPaths.joinToString (";")
+
     }.let { config ->
         runBlocking {
-            logger.lifecycle("App archive scanner running for files ${archiveFiles.joinToString(", ") { it.absolutePath }} ...")
+            if (archiveFilesPaths.isNotEmpty()) {
+                logger.lifecycle("App archive scanner running for files ${archiveFilesPaths.joinToString(", ") { it }} ...")
+            }
             executableRunner.runScan(config, distDir) { line ->
                 logger.lifecycle(line)
             }.also { exitCode ->
