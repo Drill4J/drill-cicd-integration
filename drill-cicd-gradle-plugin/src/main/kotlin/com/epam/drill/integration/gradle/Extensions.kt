@@ -120,6 +120,7 @@ open class TestAgentExtension(
 
 open class AppAgentExtension(
     var envId: String? = null,
+    var classpathScannerEnabled: Boolean? = null,
     var archiveScannerEnabled: Boolean? = null,
     var agentMode: String? = null,
 ) : AgentExtension()
