@@ -60,7 +60,7 @@ fun modifyToScanClasspath(
 ) {
     val taskConfig = task.extensions.findByType(DrillTaskExtension::class.java)
 
-    task.doLast {
+    task.doFirst {
         taskConfig?.appAgent?.takeIf {
             it.classpathScannerEnabled ?: pluginConfig.appAgent.classpathScannerEnabled ?: false
         }?.let {
@@ -76,7 +76,7 @@ fun modifyToScanClasspath(
             }
             if (scanPaths.isEmpty()) {
                 logger.error("No files found on task's classpath or test classes")
-                return@doLast
+                return@doFirst
             }
 
             scanAppArchive(
