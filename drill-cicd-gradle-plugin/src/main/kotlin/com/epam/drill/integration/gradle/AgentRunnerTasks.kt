@@ -106,6 +106,7 @@ fun modifyToRunDrillAgents(
                                     this.scanClassPath = excludePaths
                                 }
                         }
+                        this.classScanningEnabled = false
                         this.agentMode = (taskConfig.agentMode ?: pluginConfig.appAgent.agentMode)?.let { AgentMode.valueOf(it) } ?: AgentMode.NATIVE
                     }
                 }

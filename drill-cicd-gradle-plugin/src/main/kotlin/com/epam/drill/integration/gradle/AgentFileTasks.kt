@@ -50,7 +50,7 @@ fun Task.drillDownloadAgents(config: DrillPluginExtension) {
     }
 
     doFirst {
-        config.appAgent.takeIf { it.enabled == true || it.archiveScannerEnabled == true }?.let {
+        config.appAgent.takeIf { it.enabled == true || it.archiveScannerEnabled == true || it.classpathScannerEnabled == true }?.let {
             AppAgentConfiguration().also {
                 it.mapGeneralAgentProperties(config.appAgent, config.appAgent, config)
             }.let {

@@ -28,17 +28,17 @@ import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.tasks.bundling.AbstractArchiveTask
 import java.io.File
+import org.gradle.api.tasks.testing.Test
 
 fun Task.drillScanAppArchive(config: DrillPluginExtension) {
     doFirst {
         val archiveFiles = collectArchiveFiles(project)
         if (archiveFiles.isEmpty()) {
-            logger.error("No archive files found in the project. " +
-                    "Please ensure that your build produces an archive (e.g., JAR, WAR, etc.).")
+            logger.error("No archive files found. Please ensure that your build produces an archive (JAR, WAR)")
             return@doFirst
         }
         scanAppArchive(
-            archiveFiles = archiveFiles,
+            scanPaths = archiveFiles.map{ it.absolutePath },
             project = project,
             pluginConfig = config
         )
@@ -53,6 +53,41 @@ private fun collectArchiveFiles(project: Project): List<File> {
         }
 }
 
+fun modifyToScanClasspath(
+    task: Task,
+    project: Project,
+    pluginConfig: DrillPluginExtension
+) {
+    val taskConfig = task.extensions.findByType(DrillTaskExtension::class.java)
+
+    task.doLast {
+        taskConfig?.appAgent?.takeIf {
+            it.classpathScannerEnabled ?: pluginConfig.appAgent.classpathScannerEnabled ?: false
+        }?.let {
+            logger.lifecycle("Task :${task.name} is modified to scan files on a classpath by Drill4J")
+            if (!state.didWork) {
+                logger.lifecycle("Skipping ${task.name}: up-to-date or no work required")
+            }
+
+            val scanPaths = mutableListOf<String>()
+            if (task is Test) {
+                scanPaths.addAll(task.classpath.map{ it.absolutePath })
+                scanPaths.addAll(task.testClassesDirs.map{ "!" + it.absolutePath })
+            }
+            if (scanPaths.isEmpty()) {
+                logger.error("No files found on task's classpath or test classes")
+                return@doLast
+            }
+
+            scanAppArchive(
+                scanPaths = scanPaths,
+                project = project,
+                pluginConfig = pluginConfig,
+                taskConfig = taskConfig,
+            )
+        }
+    }
+}
 
 fun modifyToRunAppArchiveScanner(
     task: Task,
@@ -69,18 +104,24 @@ fun modifyToRunAppArchiveScanner(
             if (!state.didWork) {
                 logger.lifecycle("Skipping ${task.name}: up-to-date or no work required")
             }
+            val scanPaths = outputs.files.files.map { it.absolutePath }
+            if (scanPaths.isEmpty()) {
+                logger.error("No archive files found. Please ensure that your build produces an archive (JAR, WAR)")
+                return@doLast
+            }
+
             scanAppArchive(
-                archiveFiles = outputs.files.files,
+                scanPaths = scanPaths,
                 project = project,
                 pluginConfig = pluginConfig,
-                taskConfig = taskConfig
+                taskConfig = taskConfig,
             )
         }
     }
 }
 
 fun Task.scanAppArchive(
-    archiveFiles: Collection<File>,
+    scanPaths: Collection<String>,
     project: Project,
     pluginConfig: DrillPluginExtension,
     taskConfig: DrillTaskExtension? = null,
@@ -109,14 +150,17 @@ fun Task.scanAppArchive(
         }.onFailure {
             logger.warn("Unable to retrieve the current commit SHA. The 'commitSha' parameter will not be set. Error: ${it.message}")
         }.getOrNull()
-        this.scanClassPath = archiveFiles.joinToString(";") { it.absolutePath }
+
+        this.classScanningEnabled = true
+        this.scanClassPath = scanPaths.joinToString (";")
+
     }.let { config ->
         runBlocking {
-            logger.lifecycle("App archive scanner running for files ${archiveFiles.joinToString(", ") { it.absolutePath }} ...")
+            logger.lifecycle("Drill4J file scanner is running...")
             executableRunner.runScan(config, distDir) { line ->
                 logger.lifecycle(line)
             }.also { exitCode ->
-                logger.lifecycle("App archive scanner exited with code $exitCode")
+                logger.lifecycle("Drill4J file scanner exited with code $exitCode")
             }
         }
     }

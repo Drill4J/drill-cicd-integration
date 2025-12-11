@@ -24,7 +24,15 @@ class JarCommandLineBuilder : CommandLineBuilder {
     override fun build(
         agentDir: Directory,
         configuration: AgentConfiguration
-    ): List<String> = listOf("-jar") + findJarFile(agentDir).absolutePath + getArgsMap(configuration).map { (key, value) -> "--$key=$value" }
+    ): List<String> {
+        val jar = findJarFile(agentDir).absolutePath
+        val args = getArgsMap(configuration).map { (key, value) -> "--$key=$value" }
+
+        val temp = File.createTempFile("agent-args-", ".txt")
+        temp.writeText((listOf("-jar", jar) + args).joinToString("\n"))
+
+        return listOf("@${temp.absolutePath}")
+    }
 
     private fun findJarFile(agentDir: Directory): File {
         return findFile(agentDir, "jar")
