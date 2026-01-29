@@ -16,12 +16,8 @@
 package com.epam.drill.integration.gradle
 
 import com.epam.drill.integration.common.agent.config.AgentConfiguration
-import com.epam.drill.integration.common.agent.config.AppAgentConfiguration
-import com.epam.drill.integration.common.agent.config.AppArchiveScannerConfiguration
-import com.epam.drill.integration.common.agent.config.TestAgentConfiguration
 import com.epam.drill.integration.common.agent.impl.AgentCacheImpl
 import com.epam.drill.integration.common.agent.impl.AgentInstallerImpl
-import com.epam.drill.integration.common.util.required
 import kotlinx.coroutines.runBlocking
 import org.apache.maven.plugins.annotations.LifecyclePhase
 import org.apache.maven.plugins.annotations.Mojo
@@ -38,28 +34,12 @@ class DownloadAgentsMojo : AbstractDrillMojo() {
     private val agentCache = AgentCacheImpl(drillAgentFilesDir)
     private val agentInstaller = AgentInstallerImpl(agentCache)
 
-    @Parameter(property = "testAgent", required = false)
-    var testAgent: TestAgentMavenConfiguration? = null
-    @Parameter(property = "appAgent", required = false)
-    var appAgent: AppAgentMavenConfiguration? = null
-    @Parameter(property = "appArchiveScanner", required = false)
-    var appArchiveScanner: AppArchiveScannerMavenConfiguration? = null
+    @Parameter(property = "agent", required = false)
+    var agent: AgentMavenConfiguration? = null
 
     override fun execute() {
-        appAgent?.let {
-            val agentConfig = AppAgentConfiguration()
-            val agentName = agentConfig.agentName
-            val githubRepository = agentConfig.githubRepository
-            download(it, agentName, githubRepository)
-        }
-        testAgent?.let {
-            val agentConfig = TestAgentConfiguration()
-            val agentName = agentConfig.agentName
-            val githubRepository = agentConfig.githubRepository
-            download(it, agentName, githubRepository)
-        }
-        appArchiveScanner?.let {
-            val agentConfig = AppArchiveScannerConfiguration()
+        agent?.let {
+            val agentConfig = AgentConfiguration()
             val agentName = agentConfig.agentName
             val githubRepository = agentConfig.githubRepository
             download(it, agentName, githubRepository)

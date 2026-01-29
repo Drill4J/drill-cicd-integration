@@ -17,10 +17,14 @@ package com.epam.drill.integration.common.agent.config
 
 import java.io.File
 
-abstract class AgentConfiguration {
+open class AgentConfiguration {
     var apiUrl: String? = null
     var apiKey: String? = null
     var groupId: String? = null
+    var appId: String? = null
+    var packagePrefixes: Array<String> = emptyArray()
+    var buildVersion: String? = null
+    var commitSha: String? = null
 
     var logLevel: String? = null
     var logFile: File? = null
@@ -29,12 +33,33 @@ abstract class AgentConfiguration {
     var downloadUrl: String? = null
     var zipPath: File? = null
 
-    var additionalParams: Map<String, String>? = null
+    var githubRepository: String = "Drill4J/java-agent"
+    var agentName: String = "javaAgent"
 
     var agentMode: AgentMode = AgentMode.NATIVE
 
-    abstract val githubRepository: String
-    abstract val agentName: String
+    var additionalParams: Map<String, String>? = null
+
+    //coverage
+    var envId: String? = null
+
+    //class scanning
+    var scanClassPath: String? = null
+    var classScanningEnabled: Boolean? = null
+
+
+    //test tracking
+    var testTaskId: String? = null
+
+    var recommendedTestsEnabled: Boolean? = null
+    var recommendedTestsCoveragePeriodDays: Int? = null
+    var recommendedTestsTargetAppId: String? = null
+    var recommendedTestsTargetCommitSha: String? = null
+    var recommendedTestsTargetBuildVersion: String? = null
+    var recommendedTestsBaselineCommitSha: String? = null
+
+    var testTracingEnabled: Boolean? = null
+    var testLaunchMetadataSendingEnabled: Boolean? = null
 
     open fun toAgentArguments() = mutableMapOf<String, String?>().apply {
         this[AgentConfiguration::apiUrl.name] = apiUrl
@@ -42,6 +67,28 @@ abstract class AgentConfiguration {
         this[AgentConfiguration::groupId.name] = groupId
         this[AgentConfiguration::logLevel.name] = logLevel
         this[AgentConfiguration::logFile.name] = logFile?.absolutePath
+
+        this[AgentConfiguration::appId.name] = appId
+        this[AgentConfiguration::packagePrefixes.name] = packagePrefixes.joinToString(";")
+        this[AgentConfiguration::buildVersion.name] = buildVersion
+        this[AgentConfiguration::commitSha.name] = commitSha
+        this[AgentConfiguration::envId.name] = envId
+        this[AgentConfiguration::scanClassPath.name] = scanClassPath
+        this[AgentConfiguration::classScanningEnabled.name] = classScanningEnabled.toString()
+
+        testTaskId?.let { this[AgentConfiguration::testTaskId.name] = it }
+        recommendedTestsEnabled?.let { enabled ->
+            this[AgentConfiguration::recommendedTestsEnabled.name] = enabled.toString().lowercase()
+            recommendedTestsCoveragePeriodDays?.let { this[AgentConfiguration::recommendedTestsCoveragePeriodDays.name] = it.toString() }
+            recommendedTestsCoveragePeriodDays?.let { this[AgentConfiguration::recommendedTestsCoveragePeriodDays.name] = it.toString() }
+            recommendedTestsTargetAppId?.let { this[AgentConfiguration::recommendedTestsTargetAppId.name] = it }
+            recommendedTestsTargetCommitSha?.let { this[AgentConfiguration::recommendedTestsTargetCommitSha.name] = it }
+            recommendedTestsTargetBuildVersion?.let { this[AgentConfiguration::recommendedTestsTargetBuildVersion.name] = it }
+            recommendedTestsBaselineCommitSha?.let { this[AgentConfiguration::recommendedTestsBaselineCommitSha.name] = it }
+        }
+        testTracingEnabled?.let { this[AgentConfiguration::testTracingEnabled.name] = it.toString().lowercase() }
+        testLaunchMetadataSendingEnabled?.let { this[AgentConfiguration::testLaunchMetadataSendingEnabled.name] = it.toString().lowercase() }
+
         additionalParams?.let { this.putAll(it) }
     }
 }
