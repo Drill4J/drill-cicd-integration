@@ -50,6 +50,7 @@ class AgentMojo : AbstractAgentMojo() {
         mapGeneralAgentProperties(config)
         mapBuildSpecificProperties(config, log, gitClient)
         mapClassScanningProperties(config, project, null)
+        mapCoverageProperties(config)
         mapTestSpecificProperties(config, project, session, log, gitClient, baselineFactory)
     }
 }
@@ -65,6 +66,12 @@ private fun getProfiles(session: MavenSession?): String {
 
 private fun getGoals(session: MavenSession?) = session?.request?.goals?.joinToString(";")
 
+internal fun AgentConfiguration.mapCoverageProperties(
+    config: AgentMojo,
+) {
+    this.coverageCollectionEnabled = config.coverage?.enabled ?: false
+}
+
 internal fun AgentConfiguration.mapTestSpecificProperties(
     config: AgentMojo,
     project: MavenProject,
@@ -73,6 +80,7 @@ internal fun AgentConfiguration.mapTestSpecificProperties(
     gitClient: GitClient,
     baselineFactory: BaselineFactory,
 ) {
+    this.testAgentEnabled = config.testTracking?.enabled ?: false
     this.testTaskId = config.testTaskId ?: generateTestTaskId(project, session)
     this.testTracingEnabled = (config.testTracking?.enabled ?: false) && (config.coverage?.perTestLaunch ?: false)
     this.testLaunchMetadataSendingEnabled = config.testTracking?.enabled ?: false

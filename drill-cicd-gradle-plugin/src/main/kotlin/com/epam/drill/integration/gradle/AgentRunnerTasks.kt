@@ -58,6 +58,7 @@ fun modifyToRunDrillAgents(
         AgentConfiguration().apply {
             mapGeneralAgentProperties(pluginConfig)
             mapBuildSpecificProperties(pluginConfig, task, gitClient)
+            mapCoverageProperties(pluginConfig)
             mapClassScanningProperties(pluginConfig, task, project)
             mapTestSpecificProperties(pluginConfig, task, project, gitClient, baselineFactory)
         }.let { config ->
@@ -123,6 +124,12 @@ internal fun AgentConfiguration.mapBuildSpecificProperties(
     }.getOrNull()
 }
 
+internal fun AgentConfiguration.mapCoverageProperties(
+    pluginExtension: DrillPluginExtension,
+) {
+    this.coverageCollectionEnabled = pluginExtension.coverage.enabled
+}
+
 internal fun AgentConfiguration.mapClassScanningProperties(
     pluginExtension: DrillPluginExtension,
     task: Task,
@@ -158,6 +165,7 @@ internal fun AgentConfiguration.mapTestSpecificProperties(
     gitClient: GitClient,
     baselineFactory: BaselineFactory
 ) {
+    this.testAgentEnabled = pluginExtension.testTracking.enabled
     this.testTaskId = pluginExtension.testTaskId ?: task.generateTestTaskId(project)
     this.testTracingEnabled = pluginExtension.testTracking.enabled && pluginExtension.coverage.perTestLaunch
     this.testLaunchMetadataSendingEnabled = pluginExtension.testTracking.enabled

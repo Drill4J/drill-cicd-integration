@@ -41,6 +41,7 @@ open class AgentConfiguration {
     var additionalParams: Map<String, String>? = null
 
     //coverage
+    var coverageCollectionEnabled: Boolean? = null
     var envId: String? = null
 
     //class scanning
@@ -58,6 +59,7 @@ open class AgentConfiguration {
     var recommendedTestsTargetBuildVersion: String? = null
     var recommendedTestsBaselineCommitSha: String? = null
 
+    var testAgentEnabled: Boolean? = null
     var testTracingEnabled: Boolean? = null
     var testLaunchMetadataSendingEnabled: Boolean? = null
 
@@ -76,19 +78,21 @@ open class AgentConfiguration {
         this[AgentConfiguration::scanClassPath.name] = scanClassPath
         this[AgentConfiguration::classScanningEnabled.name] = classScanningEnabled.toString()
 
-        testTaskId?.let { this[AgentConfiguration::testTaskId.name] = it }
-        recommendedTestsEnabled?.let { enabled ->
-            this[AgentConfiguration::recommendedTestsEnabled.name] = enabled.toString().lowercase()
-            recommendedTestsCoveragePeriodDays?.let { this[AgentConfiguration::recommendedTestsCoveragePeriodDays.name] = it.toString() }
-            recommendedTestsCoveragePeriodDays?.let { this[AgentConfiguration::recommendedTestsCoveragePeriodDays.name] = it.toString() }
-            recommendedTestsTargetAppId?.let { this[AgentConfiguration::recommendedTestsTargetAppId.name] = it }
-            recommendedTestsTargetCommitSha?.let { this[AgentConfiguration::recommendedTestsTargetCommitSha.name] = it }
-            recommendedTestsTargetBuildVersion?.let { this[AgentConfiguration::recommendedTestsTargetBuildVersion.name] = it }
-            recommendedTestsBaselineCommitSha?.let { this[AgentConfiguration::recommendedTestsBaselineCommitSha.name] = it }
+        this[AgentConfiguration::testAgentEnabled.name] = testAgentEnabled.toString()
+        if (testAgentEnabled == true) {
+            testTaskId?.let { this[AgentConfiguration::testTaskId.name] = it }
+            recommendedTestsEnabled?.let { enabled ->
+                this[AgentConfiguration::recommendedTestsEnabled.name] = enabled.toString().lowercase()
+                recommendedTestsCoveragePeriodDays?.let { this[AgentConfiguration::recommendedTestsCoveragePeriodDays.name] = it.toString() }
+                recommendedTestsCoveragePeriodDays?.let { this[AgentConfiguration::recommendedTestsCoveragePeriodDays.name] = it.toString() }
+                recommendedTestsTargetAppId?.let { this[AgentConfiguration::recommendedTestsTargetAppId.name] = it }
+                recommendedTestsTargetCommitSha?.let { this[AgentConfiguration::recommendedTestsTargetCommitSha.name] = it }
+                recommendedTestsTargetBuildVersion?.let { this[AgentConfiguration::recommendedTestsTargetBuildVersion.name] = it }
+                recommendedTestsBaselineCommitSha?.let { this[AgentConfiguration::recommendedTestsBaselineCommitSha.name] = it }
+            }
+            testTracingEnabled?.let { this[AgentConfiguration::testTracingEnabled.name] = it.toString().lowercase() }
+            testLaunchMetadataSendingEnabled?.let { this[AgentConfiguration::testLaunchMetadataSendingEnabled.name] = it.toString().lowercase() }
         }
-        testTracingEnabled?.let { this[AgentConfiguration::testTracingEnabled.name] = it.toString().lowercase() }
-        testLaunchMetadataSendingEnabled?.let { this[AgentConfiguration::testLaunchMetadataSendingEnabled.name] = it.toString().lowercase() }
-
         additionalParams?.let { this.putAll(it) }
     }
 }
