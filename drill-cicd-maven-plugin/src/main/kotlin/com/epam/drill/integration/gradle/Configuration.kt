@@ -50,7 +50,7 @@ open class RecommendedTestsConfiguration(
     var coveragePeriodDays: Int? = null,
 )
 
-abstract class AgentMavenConfiguration(
+open class AgentMavenConfiguration(
     var version: String? = null,
     var downloadUrl: String? = null,
     var zipPath: String? = null,
@@ -58,19 +58,33 @@ abstract class AgentMavenConfiguration(
     var logLevel: String? = "INFO",
     var logFile: String? = null,
 
+    var agentMode: String? = null,
+
     var additionalParams: Map<String, String>? = null,
 )
 
-open class TestAgentMavenConfiguration(
-    var testTaskId: String? = null,
-    var testTracingEnabled: Boolean? = null,
-    var testLaunchMetadataSendingEnabled: Boolean? = null,
-) : AgentMavenConfiguration()
+open class CoverageConfiguration(
+    var enabled: Boolean = false,
+    var perTestSession: Boolean = true,
+    var perTestLaunch: Boolean = true,
+)
 
-open class AppAgentMavenConfiguration(
-    var envId: String? = null,
-    var agentMode: String? = null
-) : AgentMavenConfiguration()
+open class ClassScanningConfiguration(
+    var enabled: Boolean = false,
+    var appClasses: List<String> = emptyList(),
+    var testClasses: List<String> = emptyList(),
+    var afterBuild: Boolean = false,
+    var beforeTests: Boolean = true,
+    var beforeRun: Boolean = true,
+    var runtime: Boolean = false,
+    var classLoaders: ClassLoaderScanningConfiguration = ClassLoaderScanningConfiguration()
+)
 
-open class AppArchiveScannerMavenConfiguration(
-) : AgentMavenConfiguration()
+open class ClassLoaderScanningConfiguration(
+    var enabled: Boolean = false,
+    var delay: Long = 5000L,
+)
+
+open class TestTrackingConfiguration(
+    var enabled: Boolean = false,
+)
