@@ -53,14 +53,16 @@ fun Task.drillGenerateChangeTestingReport(config: DrillPluginExtension) {
         }
 
         logger.lifecycle("Generating Drill4J Change Testing Report...")
+        val reportPath = File(project.buildDir, "/drill-reports").absolutePath
         runBlocking {
             reportService.generateChangeTestingReport(
                 groupId = groupId,
                 appId = appId,
                 baselineSearchStrategy = baselineSearchStrategy,
                 baselineSearchCriteria = searchCriteria,
-                reportPath = File(project.buildDir, "/drill-reports").absolutePath,
+                reportPath = reportPath,
             )
         }
+        logger.lifecycle("Drill4J Change Testing Report generated at: $reportPath")
     }
 }
