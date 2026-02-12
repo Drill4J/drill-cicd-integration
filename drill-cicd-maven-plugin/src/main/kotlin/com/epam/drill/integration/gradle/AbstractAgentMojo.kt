@@ -149,11 +149,17 @@ internal fun AgentConfiguration.mapBuildSpecificProperties(
 internal fun AgentConfiguration.mapClassScanningProperties(
     config: AbstractAgentMojo,
     project: MavenProject,
-    archiveFile: File?
+    lifecyclePhase: String,
+    archiveFile: File?,
 ) {
-    val appClasses = config.classScanning?.appClasses ?: archiveFile?.absolutePath?.let { listOf(it) } ?: listOf(project.build.outputDirectory)
-    val testClasses = config.classScanning?.testClasses ?: listOf(project.build.testOutputDirectory)
-    this.scanClassPath = (appClasses + testClasses.map { "!$it" }).joinToString(separator = ";")
+    val appClasses = config.classScanning?.appClasses?.takeIf { it.isNotEmpty() } ?: archiveFile?.absolutePath?.let { listOf(it) } ?: listOf(project.build.outputDirectory)
+    val testClasses = config.classScanning?.testClasses?.takeIf { it.isNotEmpty() } ?: listOf(project.build.testOutputDirectory)
+    when (lifecyclePhase) {
+        "package" ->
+        "test-compile" -> log.info("Using the compiled classes from ${appClasses.joinToString(", ")} and ${testClasses.joinToString(", ")} for class scanning.")
+         else -> log.warn("Unexpected lifecycle phase '$lifecyclePhase' for class scanning. Defaulting to using compiled classes from ${appClasses.joinToString(", ")} and ${testClasses.joinToString(", ")} for class scanning.")
+    }
     this.classScanningEnabled = (config.classScanning?.enabled ?: false) && (config.classScanning?.runtime ?: false)
+    this.scanClassPath = (appClasses + testClasses.map { "!$it" }).joinToString(separator = ";")
 }
 

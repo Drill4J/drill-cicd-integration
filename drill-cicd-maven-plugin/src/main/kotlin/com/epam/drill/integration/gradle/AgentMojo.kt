@@ -42,14 +42,14 @@ class AgentMojo : AbstractAgentMojo() {
     @Parameter(property = "testTracking", required = false)
     var testTracking: TestTrackingConfiguration? = null
 
-    @Parameter(property = "testRecommendations")
+    @Parameter(property = "recommendedTests", required = false)
     var recommendedTests: RecommendedTestsConfiguration? = null
 
     override fun getAgentConfig() = AgentConfiguration().apply {
         val config = this@AgentMojo
         mapGeneralAgentProperties(config)
         mapBuildSpecificProperties(config, log, gitClient)
-        mapClassScanningProperties(config, project, null)
+        mapClassScanningProperties(config, project, mojoExecution.lifecyclePhase, null)
         mapCoverageProperties(config)
         mapTestSpecificProperties(config, project, session, log, gitClient, baselineFactory)
     }

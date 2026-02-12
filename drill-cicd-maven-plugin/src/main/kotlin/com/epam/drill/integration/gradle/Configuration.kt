@@ -64,27 +64,27 @@ open class AgentMavenConfiguration(
 )
 
 open class CoverageConfiguration(
-    var enabled: Boolean = false,
+    var enabled: Boolean = true,
     var perTestSession: Boolean = true,
     var perTestLaunch: Boolean = true,
 )
 
 open class ClassScanningConfiguration(
-    var enabled: Boolean = false,
-    var appClasses: List<String> = emptyList(),
-    var testClasses: List<String> = emptyList(),
+    var enabled: Boolean = true,
+    var appClasses: List<String>? = null,
+    var testClasses: List<String>? = null,
     var afterBuild: Boolean = false,
     var beforeTests: Boolean = true,
     var beforeRun: Boolean = true,
     var runtime: Boolean = false,
-    var classLoaders: ClassLoaderScanningConfiguration = ClassLoaderScanningConfiguration()
+    var classLoaders: ClassLoaderScanningConfiguration? = null,
 )
 
 open class ClassLoaderScanningConfiguration(
-    var enabled: Boolean = false,
+    var enabled: Boolean = true,
     var delay: Long = 5000L,
 )
 
 open class TestTrackingConfiguration(
-    var enabled: Boolean = false,
+    var enabled: Boolean = true,
 )

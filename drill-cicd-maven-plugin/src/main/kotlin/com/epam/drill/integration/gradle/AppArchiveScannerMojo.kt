@@ -17,8 +17,10 @@ package com.epam.drill.integration.gradle
 
 import com.epam.drill.integration.common.agent.config.AgentConfiguration
 import kotlinx.coroutines.runBlocking
+import org.apache.maven.plugin.MojoExecution
 import org.apache.maven.plugins.annotations.LifecyclePhase
 import org.apache.maven.plugins.annotations.Mojo
+import org.apache.maven.plugins.annotations.Parameter
 import org.apache.maven.plugins.annotations.ResolutionScope
 import java.io.File
 
@@ -34,7 +36,11 @@ class AppArchiveScannerMojo : AbstractAgentMojo() {
         val config = this@AppArchiveScannerMojo
         mapGeneralAgentProperties(config)
         mapBuildSpecificProperties(config, log, gitClient)
-        mapClassScanningProperties(config, project, archiveFile)
+        mapClassScanningProperties(config, project, mojoExecution.lifecyclePhase, archiveFile)
+        this.classScanningEnabled = true
+        if (this.scanClassPath?.isEmpty() ?: true) {
+            throw IllegalStateException("No classes or archives to scan for Drill4J Agent.")
+        }
     }
 
     override fun execute() {
