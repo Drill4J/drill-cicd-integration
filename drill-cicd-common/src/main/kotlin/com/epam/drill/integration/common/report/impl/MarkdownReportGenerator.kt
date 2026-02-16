@@ -39,6 +39,8 @@ class MarkdownReportGenerator : ReportGenerator {
         val testedChanges = metrics?.get("tested_changes")?.jsonPrimitive?.intOrNull ?: 0
         val coverage = metrics?.get("coverage")?.jsonPrimitive?.doubleOrNull ?: 0.0
         val impactedTests = metrics?.get("impacted_tests")?.jsonPrimitive?.intOrNull ?: 0
+        val passedImpactedTests = metrics?.get("passed_impacted_tests")?.jsonPrimitive?.intOrNull ?: 0
+        val failedImpactedTests = metrics?.get("failed_impacted_tests")?.jsonPrimitive?.intOrNull ?: 0
 
         val links = data["data"]?.jsonObject?.get("links") as? JsonObject
         val buildLink = links?.get("build")?.jsonPrimitive?.contentOrNull
@@ -58,8 +60,18 @@ class MarkdownReportGenerator : ReportGenerator {
         val coverageText = "${coverage.percent()}% of changes covered".wrapToLink(changesLink)
 
         val impactedTestsText = "$impactedTests test${impactedTests.pluralEnding("s")}"
+            .wrapToLink(impactedTestsLink)
+        val passedImpactedTestsText = "$passedImpactedTests passed"
+            .takeIf { passedImpactedTests > 0 }
+        val failedImpactedTestsText = "$failedImpactedTests failed"
+            .takeIf { failedImpactedTests > 0 }
+        val passedAndFailedTestsText = listOfNotNull(passedImpactedTestsText, failedImpactedTestsText).joinToString(
+            ", ",
+            prefix = "(",
+            postfix = ")"
+        )
+        val impactedTestsWithResultsText = "$impactedTestsText $passedAndFailedTestsText"
             .takeIf { impactedTests > 0 }
-            ?.wrapToLink(impactedTestsLink)
             ?: "None"
 
         val seeDetailsText = "See details in Drill4J"
@@ -104,7 +116,7 @@ $coverageText
 
         val recommendedTestsParagraph = """
 **Impacted tests**
-$impactedTestsText
+$impactedTestsWithResultsText
 
 
 """.trimIndent()
