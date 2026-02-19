@@ -69,14 +69,16 @@ class GenerateChangeTestingReportMojo : AbstractDrillMojo() {
         }
 
         log.info("Generating Drill4J Change Testing Report...")
+        val reportPath = File(project.build?.directory, "/drill-reports").absolutePath
         runBlocking {
             reportService.generateChangeTestingReport(
                 groupId = groupId,
                 appId = appId,
                 baselineSearchStrategy = baselineSearchStrategy,
                 baselineSearchCriteria = searchCriteria,
-                reportPath = File(project.build?.directory, "/drill-reports").absolutePath
+                reportPath = reportPath
             )
         }
+        log.info("Drill4J Change Testing Report generated at: $reportPath")
     }
 }
