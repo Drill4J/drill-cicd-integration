@@ -62,7 +62,7 @@ fun modifyToScanClasspath(
 
     task.doFirst {
         taskConfig?.appAgent?.takeIf {
-            it.classpathScannerEnabled ?: pluginConfig.appAgent.classpathScannerEnabled ?: true
+            it.classpathScannerEnabled ?: pluginConfig.appAgent.classpathScannerEnabled ?: false
         }?.let {
             logger.lifecycle("Task :${task.name} is modified to scan files on a classpath by Drill4J")
             if (!state.didWork) {
