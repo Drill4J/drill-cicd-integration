@@ -36,7 +36,7 @@ class AppArchiveScannerMojo : AbstractAgentMojo() {
         val config = this@AppArchiveScannerMojo
         mapGeneralAgentProperties(config)
         mapBuildSpecificProperties(config, log, gitClient)
-        mapClassScanningProperties(config, project, mojoExecution.lifecyclePhase, archiveFile)
+        mapClassScanningProperties(config, project, mojoExecution.lifecyclePhase, log, archiveFile)
         this.classScanningEnabled = true
         if (this.scanClassPath?.isEmpty() ?: true) {
             throw IllegalStateException("No classes or archives to scan for Drill4J Agent.")

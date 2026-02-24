@@ -49,7 +49,7 @@ class AgentMojo : AbstractAgentMojo() {
         val config = this@AgentMojo
         mapGeneralAgentProperties(config)
         mapBuildSpecificProperties(config, log, gitClient)
-        mapClassScanningProperties(config, project, mojoExecution.lifecyclePhase, null)
+        mapClassScanningProperties(config, project, mojoExecution.lifecyclePhase, log, null)
         mapCoverageProperties(config)
         mapTestSpecificProperties(config, project, session, log, gitClient, baselineFactory)
     }

@@ -44,7 +44,7 @@ import kotlin.collections.joinToString
 val drillAgentFilesDir = File(System.getProperty("user.home"), ".drill/agents")
 private const val ARG_LINE = "argLine"
 
-abstract class AbstractAgentMojo: AbstractDrillMojo() {
+abstract class AbstractAgentMojo : AbstractDrillMojo() {
     @Parameter(property = "appId", required = true)
     var appId: String? = null
 
@@ -142,7 +142,8 @@ internal fun AgentConfiguration.mapBuildSpecificProperties(
     this.commitSha = runCatching {
         gitClient.getCurrentCommitSha()
     }.onFailure {
-        log.warn("Unable to retrieve the current commit SHA. The 'commitSha' parameter will not be set. Error: ${it.message}")
+        log.warn("Unable to retrieve the current commit SHA. " +
+                "The 'commitSha' parameter will not be set. Error: ${it.message}")
     }.getOrNull()
 }
 
@@ -150,14 +151,28 @@ internal fun AgentConfiguration.mapClassScanningProperties(
     config: AbstractAgentMojo,
     project: MavenProject,
     lifecyclePhase: String,
+    log: Log,
     archiveFile: File?,
 ) {
-    val appClasses = config.classScanning?.appClasses?.takeIf { it.isNotEmpty() } ?: archiveFile?.absolutePath?.let { listOf(it) } ?: listOf(project.build.outputDirectory)
-    val testClasses = config.classScanning?.testClasses?.takeIf { it.isNotEmpty() } ?: listOf(project.build.testOutputDirectory)
+    val appClasses =
+        config.classScanning?.appClasses?.takeIf { it.isNotEmpty() }
+            ?: archiveFile?.absolutePath?.let { listOf(it) }
+            ?: listOf(project.build.outputDirectory)
+    val testClasses =
+        config.classScanning?.testClasses?.takeIf { it.isNotEmpty() }
+            ?: listOf(project.build.testOutputDirectory)
     when (lifecyclePhase) {
-        "package" ->
-        "test-compile" -> log.info("Using the compiled classes from ${appClasses.joinToString(", ")} and ${testClasses.joinToString(", ")} for class scanning.")
-         else -> log.warn("Unexpected lifecycle phase '$lifecyclePhase' for class scanning. Defaulting to using compiled classes from ${appClasses.joinToString(", ")} and ${testClasses.joinToString(", ")} for class scanning.")
+        "package",
+        "test-compile" -> log.info(
+            "Using the compiled classes from ${appClasses.joinToString(", ")} " +
+                    "and ${testClasses.joinToString(", ")} for class scanning."
+        )
+
+        else -> log.warn(
+            "Unexpected lifecycle phase '$lifecyclePhase' for class scanning. " +
+                    "Defaulting to using compiled classes from ${appClasses.joinToString(", ")} " +
+                    "and ${testClasses.joinToString(", ")} for class scanning."
+        )
     }
     this.classScanningEnabled = (config.classScanning?.enabled ?: false) && (config.classScanning?.runtime ?: false)
     this.scanClassPath = (appClasses + testClasses.map { "!$it" }).joinToString(separator = ";")
