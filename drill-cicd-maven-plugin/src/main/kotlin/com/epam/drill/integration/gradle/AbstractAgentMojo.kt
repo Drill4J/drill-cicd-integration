@@ -26,9 +26,6 @@ import com.epam.drill.integration.common.agent.impl.JavaAgentCommandLineBuilder
 import com.epam.drill.integration.common.agent.impl.NativeAgentCommandLineBuilder
 import com.epam.drill.integration.common.agent.javaExecutable
 import com.epam.drill.integration.common.baseline.BaselineFactory
-import com.epam.drill.integration.common.baseline.BaselineSearchStrategy
-import com.epam.drill.integration.common.baseline.MergeBaseCriteria
-import com.epam.drill.integration.common.baseline.TagCriteria
 import com.epam.drill.integration.common.git.GitClient
 import com.epam.drill.integration.common.git.impl.GitClientImpl
 import com.epam.drill.integration.common.util.getJavaAddOpensOptions
@@ -142,8 +139,10 @@ internal fun AgentConfiguration.mapBuildSpecificProperties(
     this.commitSha = runCatching {
         gitClient.getCurrentCommitSha()
     }.onFailure {
-        log.warn("Unable to retrieve the current commit SHA. " +
-                "The 'commitSha' parameter will not be set. Error: ${it.message}")
+        log.warn(
+            "Unable to retrieve the current commit SHA. " +
+                    "The 'commitSha' parameter will not be set. Error: ${it.message}"
+        )
     }.getOrNull()
 }
 
@@ -153,28 +152,44 @@ internal fun AgentConfiguration.mapClassScanningProperties(
     lifecyclePhase: String,
     log: Log,
     archiveFile: File?,
+    isScanArchiveGoal: Boolean
 ) {
+    if (isScanArchiveGoal) {
+        this.classScanningEnabled = true
+        this.enableScanClassLoaders = false
+    } else {
+        this.classScanningEnabled = (config.classScanning?.enabled ?: false) && (config.classScanning?.runtime ?: false)
+        if (classScanningEnabled == true) {
+            this.enableScanClassLoaders = config.classScanning?.runtimeClassLoaders?.enabled ?: false
+            if (this.enableScanClassLoaders == true) {
+                this.scanClassDelay = config.classScanning?.runtimeClassLoaders?.delay
+            }
+        }
+    }
     val appClasses =
         config.classScanning?.appClasses?.takeIf { it.isNotEmpty() }
-            ?: archiveFile?.absolutePath?.let { listOf(it) }
-            ?: listOf(project.build.outputDirectory)
+            ?: if (isScanArchiveGoal) {
+                archiveFile?.absolutePath?.let { listOf(it) } ?: listOf(project.build.outputDirectory)
+            } else emptyList()
     val testClasses =
         config.classScanning?.testClasses?.takeIf { it.isNotEmpty() }
             ?: listOf(project.build.testOutputDirectory)
-    when (lifecyclePhase) {
-        "package",
-        "test-compile" -> log.info(
-            "Using the compiled classes from ${appClasses.joinToString(", ")} " +
-                    "and ${testClasses.joinToString(", ")} for class scanning."
-        )
+    if (isScanArchiveGoal) {
+        when (lifecyclePhase) {
+            "package",
+            "test-compile" -> log.info(
+                "Using the compiled classes from ${appClasses.joinToString(", ")} " +
+                        "and ${testClasses.joinToString(", ")} for class scanning."
+            )
 
-        else -> log.warn(
-            "Unexpected lifecycle phase '$lifecyclePhase' for class scanning. " +
-                    "Defaulting to using compiled classes from ${appClasses.joinToString(", ")} " +
-                    "and ${testClasses.joinToString(", ")} for class scanning."
-        )
+            else -> log.warn(
+                "Unexpected lifecycle phase '$lifecyclePhase' for class scanning. " +
+                        "Defaulting to using compiled classes from ${appClasses.joinToString(", ")} " +
+                        "and ${testClasses.joinToString(", ")} for class scanning."
+            )
+        }
     }
-    this.classScanningEnabled = (config.classScanning?.enabled ?: false) && (config.classScanning?.runtime ?: false)
+
     this.scanClassPath = (appClasses + testClasses.map { "!$it" }).joinToString(separator = ";")
 }
 

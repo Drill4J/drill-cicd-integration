@@ -38,6 +38,13 @@ open class AgentConfiguration {
 
     var agentMode: AgentMode = AgentMode.NATIVE
 
+    //transport settings
+    var messageSendingMode: String? = null
+    var messageQueueLimit: String? = null
+    var messageMaxRetries: Int? = null
+    var useProtobufSerializer: Boolean? = null
+    var useGzipCompression: Boolean? = null
+
     var additionalParams: Map<String, String>? = null
 
     //coverage
@@ -45,23 +52,24 @@ open class AgentConfiguration {
     var envId: String? = null
 
     //class scanning
-    var scanClassPath: String? = null
     var classScanningEnabled: Boolean? = null
+    var scanClassPath: String? = null
+    var enableScanClassLoaders: Boolean? = null
+    var scanClassDelay: Int? = null
 
+    //test tracing
+    var testSessionId: String? = null
+    var testTracingEnabled: Boolean? = null
+    var testTracingPerTestSessionEnabled: Boolean? = null
+    var testTracingPerTestLaunchEnabled: Boolean? = null
 
-    //test tracking
+    //test prioritization
     var testTaskId: String? = null
-
     var recommendedTestsEnabled: Boolean? = null
-    var recommendedTestsCoveragePeriodDays: Int? = null
     var recommendedTestsTargetAppId: String? = null
     var recommendedTestsTargetCommitSha: String? = null
     var recommendedTestsTargetBuildVersion: String? = null
     var recommendedTestsBaselineCommitSha: String? = null
-
-    var testAgentEnabled: Boolean? = null
-    var testTracingEnabled: Boolean? = null
-    var testLaunchMetadataSendingEnabled: Boolean? = null
 
     open fun toAgentArguments() = mutableMapOf<String, String?>().apply {
         this[AgentConfiguration::apiUrl.name] = apiUrl
@@ -75,24 +83,58 @@ open class AgentConfiguration {
         this[AgentConfiguration::buildVersion.name] = buildVersion
         this[AgentConfiguration::commitSha.name] = commitSha
         this[AgentConfiguration::envId.name] = envId
-        this[AgentConfiguration::scanClassPath.name] = scanClassPath
-        this[AgentConfiguration::classScanningEnabled.name] = classScanningEnabled.toString()
 
-        this[AgentConfiguration::testAgentEnabled.name] = testAgentEnabled.toString()
-        if (testAgentEnabled == true) {
-            testTaskId?.let { this[AgentConfiguration::testTaskId.name] = it }
-            recommendedTestsEnabled?.let { enabled ->
-                this[AgentConfiguration::recommendedTestsEnabled.name] = enabled.toString().lowercase()
-                recommendedTestsCoveragePeriodDays?.let { this[AgentConfiguration::recommendedTestsCoveragePeriodDays.name] = it.toString() }
-                recommendedTestsCoveragePeriodDays?.let { this[AgentConfiguration::recommendedTestsCoveragePeriodDays.name] = it.toString() }
-                recommendedTestsTargetAppId?.let { this[AgentConfiguration::recommendedTestsTargetAppId.name] = it }
-                recommendedTestsTargetCommitSha?.let { this[AgentConfiguration::recommendedTestsTargetCommitSha.name] = it }
-                recommendedTestsTargetBuildVersion?.let { this[AgentConfiguration::recommendedTestsTargetBuildVersion.name] = it }
-                recommendedTestsBaselineCommitSha?.let { this[AgentConfiguration::recommendedTestsBaselineCommitSha.name] = it }
-            }
-            testTracingEnabled?.let { this[AgentConfiguration::testTracingEnabled.name] = it.toString().lowercase() }
-            testLaunchMetadataSendingEnabled?.let { this[AgentConfiguration::testLaunchMetadataSendingEnabled.name] = it.toString().lowercase() }
+        coverageCollectionEnabled?.let { isCoverageCollectionEnabled ->
+            this[AgentConfiguration::coverageCollectionEnabled.name] = isCoverageCollectionEnabled.toString().lowercase()
         }
+
+        classScanningEnabled?.let { isClassScanningEnabled ->
+            this[AgentConfiguration::classScanningEnabled.name] = isClassScanningEnabled.toString().lowercase()
+            if (isClassScanningEnabled) {
+                scanClassPath?.let { this[AgentConfiguration::scanClassPath.name] = it }
+                enableScanClassLoaders?.let { this[AgentConfiguration::enableScanClassLoaders.name] = enableScanClassLoaders.toString().lowercase() }
+                if (enableScanClassLoaders == true) {
+                    scanClassDelay?.let { this[AgentConfiguration::scanClassDelay.name] = it.toString() }
+                }
+            }
+        }
+
+        testTaskId?.let { this[AgentConfiguration::testTaskId.name] = it }
+        testTracingEnabled?.let { isTestTracingEnabled ->
+            this[AgentConfiguration::testTracingEnabled.name] = isTestTracingEnabled.toString().lowercase()
+            if (isTestTracingEnabled) {
+                testTracingPerTestSessionEnabled?.let {
+                    this[AgentConfiguration::testTracingPerTestSessionEnabled.name] = it.toString().lowercase()
+                }
+                testTracingPerTestLaunchEnabled?.let {
+                    this[AgentConfiguration::testTracingPerTestLaunchEnabled.name] = it.toString().lowercase()
+                }
+                testSessionId?.let { this[AgentConfiguration::testSessionId.name] = it }
+            }
+        }
+        recommendedTestsEnabled?.let { isRecommendedTestsEnabled ->
+            this[AgentConfiguration::recommendedTestsEnabled.name] =
+                isRecommendedTestsEnabled.toString().lowercase()
+            if (isRecommendedTestsEnabled) {
+                recommendedTestsTargetAppId?.let { this[AgentConfiguration::recommendedTestsTargetAppId.name] = it }
+                recommendedTestsTargetCommitSha?.let {
+                    this[AgentConfiguration::recommendedTestsTargetCommitSha.name] = it
+                }
+                recommendedTestsTargetBuildVersion?.let {
+                    this[AgentConfiguration::recommendedTestsTargetBuildVersion.name] = it
+                }
+                recommendedTestsBaselineCommitSha?.let {
+                    this[AgentConfiguration::recommendedTestsBaselineCommitSha.name] = it
+                }
+            }
+        }
+
+        messageSendingMode?.let { this[AgentConfiguration::messageSendingMode.name] = it }
+        messageQueueLimit?.let { this[AgentConfiguration::messageQueueLimit.name] = it }
+        messageMaxRetries?.let { this[AgentConfiguration::messageMaxRetries.name] = it.toString() }
+        useProtobufSerializer?.let { this[AgentConfiguration::useProtobufSerializer.name] = it.toString().lowercase() }
+        useGzipCompression?.let { this[AgentConfiguration::useGzipCompression.name] = it.toString().lowercase() }
+
         additionalParams?.let { this.putAll(it) }
     }
 }

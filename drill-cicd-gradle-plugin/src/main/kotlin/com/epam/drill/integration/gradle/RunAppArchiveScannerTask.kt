@@ -74,14 +74,15 @@ fun Task.scanAppArchive(
     AgentConfiguration().apply {
         mapGeneralAgentProperties(pluginConfig)
         mapBuildSpecificProperties(pluginConfig, task, gitClient)
-        mapClassScanningProperties(pluginConfig, task, project, scanPaths)
-        this.classScanningEnabled = true
+        mapClassScanningProperties(pluginConfig, task, project, scanPaths, true)
+        this.messageSendingMode = "DIRECT"
         if (this.scanClassPath?.isEmpty() ?: true) {
             throw IllegalStateException("No classes or archives to scan for Drill4J Agent.")
         }
     }.let { config ->
         runBlocking {
             logger.lifecycle("Drill4J file scanner is running...")
+            logger.lifecycle("Scanning: ${config.scanClassPath}")
             executableRunner.runScan(config, distDir) { line ->
                 logger.lifecycle(line)
             }.also { exitCode ->

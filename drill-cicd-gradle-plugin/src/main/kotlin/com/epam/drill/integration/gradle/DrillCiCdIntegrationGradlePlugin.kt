@@ -80,7 +80,7 @@ class DrillCiCdIntegrationGradlePlugin : Plugin<Project> {
                 .filterIsInstance<Test>()
                 .forEach { task ->
                     modifyToRunDrillAgents(task, project, config)
-                    if (config.classScanning.enabled && config.classScanning.beforeTests)
+                    if (config.classScanning.enabled && config.classScanning.beforeTestTask)
                         task.doFirst {
                             modifyToScanAppArchive(task, project, config)
                         }
@@ -91,7 +91,7 @@ class DrillCiCdIntegrationGradlePlugin : Plugin<Project> {
                 .filterIsInstance<JavaExec>()
                 .forEach { task ->
                     modifyToRunDrillAgents(task, project, config)
-                    if (config.classScanning.enabled && config.classScanning.beforeRun)
+                    if (config.classScanning.enabled && config.classScanning.beforeExecTask)
                         task.doFirst {
                             modifyToScanAppArchive(task, project, config)
                         }
@@ -100,7 +100,7 @@ class DrillCiCdIntegrationGradlePlugin : Plugin<Project> {
             tasks
                 .filterIsInstance<AbstractArchiveTask>()
                 .forEach { task ->
-                    if (config.classScanning.enabled && config.classScanning.afterBuild)
+                    if (config.classScanning.enabled && config.classScanning.afterArchiveTask)
                         task.doLast {
                             modifyToScanAppArchive(task, project, config)
                         }

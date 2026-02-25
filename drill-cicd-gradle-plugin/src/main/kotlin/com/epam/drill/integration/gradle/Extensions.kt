@@ -33,7 +33,7 @@ open class DrillPluginExtension(
     var agent: AgentExtension = AgentExtension(),
     var coverage: CoverageExtension = CoverageExtension(),
     var classScanning: ClassScanningExtension = ClassScanningExtension(),
-    var testTracking: TestTracking = TestTracking(),
+    var testTracing: TestTracing = TestTracing(),
 
     var baseline: BaselineExtension = BaselineExtension(),
     var gitlab: GitlabExtension = GitlabExtension(),
@@ -63,13 +63,13 @@ open class DrillPluginExtension(
         action.execute(classScanning)
     }
 
-    fun testTracking() {
-        testTracking.enabled = true
+    fun testTracing() {
+        testTracing.enabled = true
     }
 
-    fun testTracking(action: Action<TestTracking>) {
-        testTracking.enabled = true
-        action.execute(testTracking)
+    fun testTracing(action: Action<TestTracing>) {
+        testTracing.enabled = true
+        action.execute(testTracing)
     }
 
     fun baseline(action: Action<BaselineExtension>) {
@@ -127,7 +127,6 @@ open class BaselineExtension(
 
 open class RecommendedTestsExtension(
     var enabled: Boolean? = null,
-    var coveragePeriodDays: Int? = null,
 )
 
 open class AgentExtension(
@@ -143,26 +142,38 @@ open class AgentExtension(
 
 open class CoverageExtension(
     var enabled: Boolean = false,
-    var perTestSession: Boolean = true,
-    var perTestLaunch: Boolean = true,
 )
 
 open class ClassScanningExtension(
     var enabled: Boolean = false,
     var appClasses: FileCollection? = null,
     var testClasses: FileCollection? = null,
-    var afterBuild: Boolean = false,
-    var beforeTests: Boolean = true,
-    var beforeRun: Boolean = true,
+    var afterArchiveTask: Boolean = false,
+    var beforeTestTask: Boolean = true,
+    var beforeExecTask: Boolean = true,
     var runtime: Boolean = false,
-    var classLoaders: ClassLoaderScanningExtension = ClassLoaderScanningExtension()
-)
+    var runtimeClassLoaders: ClassLoaderScanningExtension = ClassLoaderScanningExtension()
+) {
+    fun disableRuntimeClassLoaderScanning() {
+        runtimeClassLoaders.enabled = false
+    }
+    fun runtimeClassLoaderScanning() {
+        runtimeClassLoaders.enabled = true
+    }
+    fun runtimeClassLoaderScanning(action: Action<ClassLoaderScanningExtension>) {
+        runtimeClassLoaders.enabled = true
+        action.execute(runtimeClassLoaders)
+    }
+}
 
 open class ClassLoaderScanningExtension(
-    var enabled: Boolean = false,
-    var delay: Long = 5000L,
+    var enabled: Boolean = true,
+    var delay: Int? = null,
 )
 
-open class TestTracking(
+open class TestTracing(
     var enabled: Boolean = false,
+    var testSessionId: String? = null,
+    var perTestSession: Boolean = true,
+    var perTestLaunch: Boolean = true,
 )

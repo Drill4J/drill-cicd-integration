@@ -15,7 +15,6 @@
  */
 package com.epam.drill.integration.gradle
 
-import com.epam.drill.integration.common.agent.config.AgentMode
 import com.epam.drill.integration.common.baseline.BaselineSearchStrategy
 
 open class GitlabConfiguration(
@@ -47,7 +46,6 @@ open class BaselineConfiguration(
 
 open class RecommendedTestsConfiguration(
     var enabled: Boolean = true,
-    var coveragePeriodDays: Int? = null,
 )
 
 open class AgentMavenConfiguration(
@@ -65,26 +63,24 @@ open class AgentMavenConfiguration(
 
 open class CoverageConfiguration(
     var enabled: Boolean = true,
-    var perTestSession: Boolean = true,
-    var perTestLaunch: Boolean = true,
 )
 
 open class ClassScanningConfiguration(
     var enabled: Boolean = true,
     var appClasses: List<String>? = null,
     var testClasses: List<String>? = null,
-    var afterBuild: Boolean = false,
-    var beforeTests: Boolean = true,
-    var beforeRun: Boolean = true,
     var runtime: Boolean = false,
-    var classLoaders: ClassLoaderScanningConfiguration? = null,
+    var runtimeClassLoaders: ClassLoaderScanningConfiguration? = null,
 )
 
 open class ClassLoaderScanningConfiguration(
     var enabled: Boolean = true,
-    var delay: Long = 5000L,
+    var delay: Int? = null,
 )
 
-open class TestTrackingConfiguration(
+open class TestTracingConfiguration(
     var enabled: Boolean = true,
+    var testSessionId: String? = null,
+    var perTestSession: Boolean = true,
+    var perTestLaunch: Boolean = true,
 )

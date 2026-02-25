@@ -59,7 +59,7 @@ fun modifyToRunDrillAgents(
             mapGeneralAgentProperties(pluginConfig)
             mapBuildSpecificProperties(pluginConfig, task, gitClient)
             mapCoverageProperties(pluginConfig)
-            mapClassScanningProperties(pluginConfig, task, project)
+            mapClassScanningProperties(pluginConfig, task, project, null, false)
             mapTestSpecificProperties(pluginConfig, task, project, gitClient, baselineFactory)
         }.let { config ->
             runBlocking {
@@ -134,26 +134,38 @@ internal fun AgentConfiguration.mapClassScanningProperties(
     pluginExtension: DrillPluginExtension,
     task: Task,
     project: Project,
-    classPaths: FileCollection? = null
+    classPaths: FileCollection? = null,
+    isScanArchiveTask: Boolean
 ) {
-    this.classScanningEnabled = pluginExtension.classScanning.enabled && pluginExtension.classScanning.runtime
-    val appClasses: FileCollection? = pluginExtension.classScanning.appClasses ?: classPaths ?: when (task) {
-        is Test -> task.classpath
-        is JavaExec -> task.classpath
-        is AbstractArchiveTask -> {
-            task.archiveFile.orNull?.asFile?.takeIf { it.exists() }?.let { project.files(it) }
+    if (isScanArchiveTask) {
+        this.classScanningEnabled = true
+        this.enableScanClassLoaders = false
+    } else {
+        this.classScanningEnabled = pluginExtension.classScanning.enabled && pluginExtension.classScanning.runtime
+        if (this.classScanningEnabled == true) {
+            this.enableScanClassLoaders = pluginExtension.classScanning.runtimeClassLoaders.enabled
+            if (this.enableScanClassLoaders == true) {
+                this.scanClassDelay = pluginExtension.classScanning.runtimeClassLoaders.delay
+            }
         }
-        else -> null
     }
-    if (appClasses == null || appClasses.isEmpty) when (task) {
-        is Test, is JavaExec -> task.logger.error("No files found on task's classpath")
-        is AbstractArchiveTask -> task.logger.error("No archive files found. Please ensure that your build produces an archive (JAR, WAR)")
-    }
+    val appClasses: FileCollection? = pluginExtension.classScanning.appClasses ?: if (isScanArchiveTask) {
+        classPaths ?: when (task) {
+            is Test -> task.classpath
+            is JavaExec -> task.classpath
+            is AbstractArchiveTask -> {
+                task.archiveFile.orNull?.asFile?.takeIf { it.exists() }?.let { project.files(it) }
+            }
+
+            else -> null
+        }
+    } else null
     val testClasses: FileCollection? = pluginExtension.classScanning.testClasses ?: when (task) {
         is Test -> task.testClassesDirs
         else -> null
     }
-    val appClassPaths = appClasses?.filterNot { testClasses?.contains(it) ?: false }?.map { it.absolutePath } ?: emptyList()
+    val appClassPaths =
+        appClasses?.filterNot { testClasses?.contains(it) ?: false }?.map { it.absolutePath } ?: emptyList()
     val testClassPaths = testClasses?.map { "!" + it.absolutePath } ?: emptyList()
     this.scanClassPath = (appClassPaths + testClassPaths).joinToString(";")
 }
@@ -165,13 +177,16 @@ internal fun AgentConfiguration.mapTestSpecificProperties(
     gitClient: GitClient,
     baselineFactory: BaselineFactory
 ) {
-    this.testAgentEnabled = pluginExtension.testTracking.enabled
     this.testTaskId = pluginExtension.testTaskId ?: task.generateTestTaskId(project)
-    this.testTracingEnabled = pluginExtension.testTracking.enabled && pluginExtension.coverage.perTestLaunch
-    this.testLaunchMetadataSendingEnabled = pluginExtension.testTracking.enabled
+    this.testTracingEnabled = pluginExtension.testTracing.enabled
+    if (testTracingEnabled == true) {
+        this.testSessionId = pluginExtension.testTracing.testSessionId
+        this.testTracingPerTestSessionEnabled = pluginExtension.testTracing.perTestSession
+        this.testTracingPerTestLaunchEnabled = pluginExtension.testTracing.perTestLaunch
+    }
+
     this.recommendedTestsEnabled = pluginExtension.recommendedTests.enabled
     if (this.recommendedTestsEnabled == true) {
-        this.recommendedTestsCoveragePeriodDays = pluginExtension.recommendedTests.coveragePeriodDays
         this.recommendedTestsTargetAppId = pluginExtension.appId
         this.recommendedTestsTargetCommitSha = runCatching {
             gitClient.getCurrentCommitSha()

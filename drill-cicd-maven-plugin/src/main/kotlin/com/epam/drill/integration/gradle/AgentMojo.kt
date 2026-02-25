@@ -40,7 +40,7 @@ class AgentMojo : AbstractAgentMojo() {
     var coverage: CoverageConfiguration? = null
 
     @Parameter(property = "testTracking", required = false)
-    var testTracking: TestTrackingConfiguration? = null
+    var testTracing: TestTracingConfiguration? = null
 
     @Parameter(property = "recommendedTests", required = false)
     var recommendedTests: RecommendedTestsConfiguration? = null
@@ -49,7 +49,7 @@ class AgentMojo : AbstractAgentMojo() {
         val config = this@AgentMojo
         mapGeneralAgentProperties(config)
         mapBuildSpecificProperties(config, log, gitClient)
-        mapClassScanningProperties(config, project, mojoExecution.lifecyclePhase, log, null)
+        mapClassScanningProperties(config, project, mojoExecution.lifecyclePhase, log, null, false)
         mapCoverageProperties(config)
         mapTestSpecificProperties(config, project, session, log, gitClient, baselineFactory)
     }
@@ -80,13 +80,15 @@ internal fun AgentConfiguration.mapTestSpecificProperties(
     gitClient: GitClient,
     baselineFactory: BaselineFactory,
 ) {
-    this.testAgentEnabled = config.testTracking?.enabled ?: false
     this.testTaskId = config.testTaskId ?: generateTestTaskId(project, session)
-    this.testTracingEnabled = (config.testTracking?.enabled ?: false) && (config.coverage?.perTestLaunch ?: false)
-    this.testLaunchMetadataSendingEnabled = config.testTracking?.enabled ?: false
-    this.recommendedTestsEnabled = config.recommendedTests?.enabled ?: false
+    this.testTracingEnabled = config.testTracing?.enabled
+    if (testTracingEnabled == true) {
+        this.testSessionId = config.testTracing?.testSessionId
+        this.testTracingPerTestSessionEnabled = config.testTracing?.perTestSession ?: false
+        this.testTracingPerTestLaunchEnabled = config.testTracing?.perTestLaunch ?: false
+    }
+    this.recommendedTestsEnabled = config.recommendedTests?.enabled
     if (this.recommendedTestsEnabled == true) {
-        this.recommendedTestsCoveragePeriodDays = config.recommendedTests?.coveragePeriodDays
         this.recommendedTestsTargetAppId = config.appId
         this.recommendedTestsTargetCommitSha = runCatching {
             gitClient.getCurrentCommitSha()
