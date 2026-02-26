@@ -45,7 +45,7 @@ open class BaselineConfiguration(
 )
 
 open class RecommendedTestsConfiguration(
-    var enabled: Boolean = true,
+    var enabled: Boolean = false,
 )
 
 open class AgentMavenConfiguration(
@@ -57,20 +57,17 @@ open class AgentMavenConfiguration(
     var logFile: String? = null,
 
     var agentMode: String? = null,
-
-    var additionalParams: Map<String, String>? = null,
 )
 
 open class CoverageConfiguration(
-    var enabled: Boolean = true,
+    var enabled: Boolean = false,
 )
 
 open class ClassScanningConfiguration(
-    var enabled: Boolean = true,
+    var enabled: Boolean = false,
     var appClasses: List<String>? = null,
     var testClasses: List<String>? = null,
-    var runtime: Boolean = false,
-    var runtimeClassLoaders: ClassLoaderScanningConfiguration? = null,
+    var runtimeClassLoaderScanning: ClassLoaderScanningConfiguration? = null,
 )
 
 open class ClassLoaderScanningConfiguration(
@@ -79,7 +76,7 @@ open class ClassLoaderScanningConfiguration(
 )
 
 open class TestTracingConfiguration(
-    var enabled: Boolean = true,
+    var enabled: Boolean = false,
     var testSessionId: String? = null,
     var perTestSession: Boolean = true,
     var perTestLaunch: Boolean = true,

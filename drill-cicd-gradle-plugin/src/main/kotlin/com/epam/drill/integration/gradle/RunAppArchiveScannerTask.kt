@@ -81,12 +81,12 @@ fun Task.scanAppArchive(
         }
     }.let { config ->
         runBlocking {
-            logger.lifecycle("Drill4J file scanner is running...")
+            logger.lifecycle("Drill4J class scanner is running...")
             logger.lifecycle("Scanning: ${config.scanClassPath}")
             executableRunner.runScan(config, distDir) { line ->
                 logger.lifecycle(line)
             }.also { exitCode ->
-                logger.lifecycle("Drill4J file scanner exited with code $exitCode")
+                logger.lifecycle("Drill4J class scanner exited with code $exitCode")
             }
         }
     }

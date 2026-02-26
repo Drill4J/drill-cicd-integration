@@ -43,19 +43,19 @@ class AppArchiveScannerMojo : AbstractAgentMojo() {
 
     override fun execute() {
         if (project.packaging == "pom") {
-            log.warn("The 'pom' packaging is not supported for the App Archive Scanner. " +
+            log.warn("The 'pom' packaging is not supported for Drill4J Class Scanner. " +
                     "Please use 'jar' or 'war' packaging.")
             return
         }
-        log.info("App archive scanner running for ${archiveFile?.absolutePath}...")
         val distDir = File(project.build?.directory, "/drill")
         val config = getAgentConfig()
         runBlocking {
-            log.info("App archive scanner running for file ${archiveFile?.absolutePath} ...")
+            log.info("Drill4J class scanner is running...")
+            log.info("Scanning: ${config.scanClassPath}")
             executableRunner.runScan(config, distDir) { line ->
                 log.info(line)
             }.also { exitCode ->
-                log.info("App archive scanner exited with code $exitCode")
+                log.info("Drill4J class scanner exited with code $exitCode")
             }
         }
     }
@@ -65,7 +65,7 @@ class AppArchiveScannerMojo : AbstractAgentMojo() {
             val archiveFile = project.artifact.file ?: File(project.build.directory, project.build.finalName + "." + project.packaging)
             if (!archiveFile.exists()) {
                 log.error("The archive file '${archiveFile.absolutePath}' does not exist. " +
-                        "Please ensure the project is built before running the App Archive Scanner.")
+                        "Please ensure the project is built before running Drill4J Class Scanner.")
                 return null
             }
             return archiveFile

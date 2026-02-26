@@ -158,11 +158,11 @@ internal fun AgentConfiguration.mapClassScanningProperties(
         this.classScanningEnabled = true
         this.enableScanClassLoaders = false
     } else {
-        this.classScanningEnabled = (config.classScanning?.enabled ?: false) && (config.classScanning?.runtime ?: false)
+        this.classScanningEnabled = (config.classScanning?.enabled ?: false)
         if (classScanningEnabled == true) {
-            this.enableScanClassLoaders = config.classScanning?.runtimeClassLoaders?.enabled ?: false
+            this.enableScanClassLoaders = config.classScanning?.runtimeClassLoaderScanning?.enabled ?: true
             if (this.enableScanClassLoaders == true) {
-                this.scanClassDelay = config.classScanning?.runtimeClassLoaders?.delay
+                this.scanClassDelay = config.classScanning?.runtimeClassLoaderScanning?.delay
             }
         }
     }
