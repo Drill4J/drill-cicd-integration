@@ -15,13 +15,22 @@
  */
 package com.epam.drill.integration.gradle
 
+import org.apache.maven.execution.MavenSession
 import org.apache.maven.plugin.AbstractMojo
+import org.apache.maven.plugin.MojoExecution
+import org.apache.maven.plugins.annotations.Component
 import org.apache.maven.plugins.annotations.Parameter
 import org.apache.maven.project.MavenProject
 
 abstract class AbstractDrillMojo : AbstractMojo() {
     @Parameter(defaultValue = "\${project}", required = true, readonly = true)
     protected lateinit var project: MavenProject
+
+    @Parameter(defaultValue = "\${mojoExecution}", readonly = true, required = true)
+    protected lateinit var mojoExecution: MojoExecution
+
+    @Component
+    protected var session: MavenSession? = null
 
     @Parameter(property = "apiUrl", required = true)
     var apiUrl: String? = null

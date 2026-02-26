@@ -17,7 +17,7 @@ package com.epam.drill.integration.gradle
 
 import com.epam.drill.integration.common.agent.CommandExecutor
 import com.epam.drill.integration.common.agent.ExecutableRunner
-import com.epam.drill.integration.common.agent.config.AppAgentConfiguration
+import com.epam.drill.integration.common.agent.config.AgentConfiguration
 import com.epam.drill.integration.common.agent.impl.AgentCacheImpl
 import com.epam.drill.integration.common.agent.impl.AgentInstallerImpl
 import com.epam.drill.integration.common.agent.impl.JarCommandLineBuilder
@@ -26,106 +26,42 @@ import com.epam.drill.integration.common.git.impl.GitClientImpl
 import kotlinx.coroutines.runBlocking
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.file.FileCollection
 import org.gradle.api.tasks.bundling.AbstractArchiveTask
 import java.io.File
-import org.gradle.api.tasks.testing.Test
 
-fun Task.drillScanAppArchive(config: DrillPluginExtension) {
-    doFirst {
-        val archiveFiles = collectArchiveFiles(project)
-        if (archiveFiles.isEmpty()) {
-            logger.error("No archive files found. Please ensure that your build produces an archive (JAR, WAR)")
-            return@doFirst
-        }
-        scanAppArchive(
-            scanPaths = archiveFiles.map{ it.absolutePath },
-            project = project,
-            pluginConfig = config
-        )
-    }
+internal fun collectArchiveFiles(project: Project): FileCollection {
+    return project.files(
+        project.tasks
+            .withType(AbstractArchiveTask::class.java)
+            .mapNotNull { task ->
+                task.archiveFile.orNull?.asFile?.takeIf { it.exists() }
+            })
 }
 
-private fun collectArchiveFiles(project: Project): List<File> {
-    return project.tasks
-        .withType(AbstractArchiveTask::class.java)
-        .mapNotNull { task ->
-            task.archiveFile.orNull?.asFile?.takeIf { it.exists() }
-        }
-}
-
-fun modifyToScanClasspath(
+fun Task.modifyToScanAppArchive(
     task: Task,
     project: Project,
-    pluginConfig: DrillPluginExtension
+    pluginConfig: DrillPluginExtension,
 ) {
-    val taskConfig = task.extensions.findByType(DrillTaskExtension::class.java)
-
-    task.doFirst {
-        taskConfig?.appAgent?.takeIf {
-            it.classpathScannerEnabled ?: pluginConfig.appAgent.classpathScannerEnabled ?: true
-        }?.let {
-            logger.lifecycle("Task :${task.name} is modified to scan files on a classpath by Drill4J")
-            if (!state.didWork) {
-                logger.lifecycle("Skipping ${task.name}: up-to-date or no work required")
-            }
-
-            val scanPaths = mutableListOf<String>()
-            if (task is Test) {
-                scanPaths.addAll(task.classpath.map{ it.absolutePath })
-                scanPaths.addAll(task.testClassesDirs.map{ "!" + it.absolutePath })
-            }
-            if (scanPaths.isEmpty()) {
-                logger.error("No files found on task's classpath or test classes")
-                return@doFirst
-            }
-
-            scanAppArchive(
-                scanPaths = scanPaths,
-                project = project,
-                pluginConfig = pluginConfig,
-                taskConfig = taskConfig,
-            )
-        }
+    logger.lifecycle("Task :${task.name} is modified to scan application classes by Drill4J")
+    if (!state.didWork) {
+        logger.lifecycle("Skipping ${task.name}: up-to-date or no work required")
+        return
     }
-}
 
-fun modifyToRunAppArchiveScanner(
-    task: Task,
-    project: Project,
-    pluginConfig: DrillPluginExtension
-) {
-    val taskConfig = task.extensions.findByType(DrillTaskExtension::class.java)
-
-    task.doLast {
-        taskConfig?.appAgent?.takeIf {
-            it.archiveScannerEnabled ?: pluginConfig.appAgent.archiveScannerEnabled ?: false
-        }?.let {
-            logger.lifecycle("Task :${task.name} is modified to scan application archive by Drill4J")
-            if (!state.didWork) {
-                logger.lifecycle("Skipping ${task.name}: up-to-date or no work required")
-            }
-            val scanPaths = outputs.files.files.map { it.absolutePath }
-            if (scanPaths.isEmpty()) {
-                logger.error("No archive files found. Please ensure that your build produces an archive (JAR, WAR)")
-                return@doLast
-            }
-
-            scanAppArchive(
-                scanPaths = scanPaths,
-                project = project,
-                pluginConfig = pluginConfig,
-                taskConfig = taskConfig,
-            )
-        }
-    }
+    scanAppArchive(
+        project = project,
+        pluginConfig = pluginConfig
+    )
 }
 
 fun Task.scanAppArchive(
-    scanPaths: Collection<String>,
     project: Project,
     pluginConfig: DrillPluginExtension,
-    taskConfig: DrillTaskExtension? = null,
+    scanPaths: FileCollection? = null,
 ) {
+    val task = this
     val gitClient = GitClientImpl()
 
     val agentCache = AgentCacheImpl(drillAgentFilesDir)
@@ -135,32 +71,22 @@ fun Task.scanAppArchive(
     val executableRunner = ExecutableRunner(agentInstaller, argumentsBuilder, commandExecutor)
     val distDir = File(project.buildDir, "/drill")
 
-    AppAgentConfiguration().apply {
-        mapGeneralAgentProperties(
-            agentTaskExtension = taskConfig?.appAgent ?: AppAgentExtension(),
-            agentPluginExtension = pluginConfig.appAgent,
-            pluginExtension = pluginConfig
-        )
-        this.appId = pluginConfig.appId
-
-        this.packagePrefixes = pluginConfig.packagePrefixes
-        this.buildVersion = pluginConfig.buildVersion
-        this.commitSha = runCatching {
-            gitClient.getCurrentCommitSha()
-        }.onFailure {
-            logger.warn("Unable to retrieve the current commit SHA. The 'commitSha' parameter will not be set. Error: ${it.message}")
-        }.getOrNull()
-
-        this.classScanningEnabled = true
-        this.scanClassPath = scanPaths.joinToString (";")
-
+    AgentConfiguration().apply {
+        mapGeneralAgentProperties(pluginConfig)
+        mapBuildSpecificProperties(pluginConfig, task, gitClient)
+        mapClassScanningProperties(pluginConfig, task, project, scanPaths, true)
+        this.messageSendingMode = "DIRECT"
+        if (this.scanClassPath?.isEmpty() ?: true) {
+            throw IllegalStateException("No classes or archives to scan for Drill4J Agent.")
+        }
     }.let { config ->
         runBlocking {
-            logger.lifecycle("Drill4J file scanner is running...")
+            logger.lifecycle("Drill4J class scanner is running...")
+            logger.lifecycle("Scanning: ${config.scanClassPath}")
             executableRunner.runScan(config, distDir) { line ->
                 logger.lifecycle(line)
             }.also { exitCode ->
-                logger.lifecycle("Drill4J file scanner exited with code $exitCode")
+                logger.lifecycle("Drill4J class scanner exited with code $exitCode")
             }
         }
     }

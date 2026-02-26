@@ -15,11 +15,8 @@
  */
 package com.epam.drill.integration.gradle
 
-import com.epam.drill.integration.common.agent.CommandLineBuilder
 import com.epam.drill.integration.common.agent.config.AgentConfiguration
 import com.epam.drill.integration.common.agent.config.AgentMode
-import com.epam.drill.integration.common.agent.config.TestAgentConfiguration
-import com.epam.drill.integration.common.agent.config.AppAgentConfiguration
 import com.epam.drill.integration.common.agent.impl.AgentCacheImpl
 import com.epam.drill.integration.common.agent.impl.AgentInstallerImpl
 import com.epam.drill.integration.common.agent.impl.JavaAgentCommandLineBuilder
@@ -28,22 +25,26 @@ import com.epam.drill.integration.common.baseline.BaselineFactory
 import com.epam.drill.integration.common.baseline.BaselineSearchStrategy
 import com.epam.drill.integration.common.baseline.MergeBaseCriteria
 import com.epam.drill.integration.common.baseline.TagCriteria
+import com.epam.drill.integration.common.git.GitClient
 import com.epam.drill.integration.common.git.impl.GitClientImpl
 import com.epam.drill.integration.common.util.getJavaAddOpensOptions
 import com.epam.drill.integration.common.util.required
 import kotlinx.coroutines.runBlocking
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.file.FileCollection
+import org.gradle.api.tasks.JavaExec
+import org.gradle.api.tasks.bundling.AbstractArchiveTask
 import org.gradle.api.tasks.testing.Test
 import org.gradle.process.JavaForkOptions
 import java.io.File
+import kotlin.collections.plus
 
 fun modifyToRunDrillAgents(
     task: Task,
     project: Project,
     pluginConfig: DrillPluginExtension
 ) {
-    val taskConfig = task.extensions.findByType(DrillTaskExtension::class.java)
     val gitClient = GitClientImpl()
     val baselineFactory = BaselineFactory(gitClient)
 
@@ -54,63 +55,13 @@ fun modifyToRunDrillAgents(
         val agentInstaller = AgentInstallerImpl(agentCache)
         val distDir = File(project.buildDir, "/drill")
 
-
-        listOfNotNull(
-            taskConfig?.testAgent
-                ?.takeIf { it.enabled ?: pluginConfig.testAgent.enabled ?: false }
-                ?.let { taskConfig ->
-                    TestAgentConfiguration().apply {
-                        mapGeneralAgentProperties(taskConfig, pluginConfig.testAgent, pluginConfig)
-                        this.testTaskId = taskConfig.testTaskId ?: pluginConfig.testAgent.testTaskId ?: generateTestTaskId(project)
-                        this.testTracingEnabled = taskConfig.testTracingEnabled ?: pluginConfig.testAgent.testTracingEnabled
-                        this.testLaunchMetadataSendingEnabled = taskConfig.testLaunchMetadataSendingEnabled ?: pluginConfig.testAgent.testLaunchMetadataSendingEnabled
-                        this.recommendedTestsEnabled = pluginConfig.recommendedTests.enabled
-                        if (this.recommendedTestsEnabled == true) {
-                            this.recommendedTestsCoveragePeriodDays = pluginConfig.recommendedTests.coveragePeriodDays
-                            this.recommendedTestsTargetAppId = pluginConfig.appId
-                            this.recommendedTestsTargetCommitSha = runCatching {
-                                gitClient.getCurrentCommitSha()
-                            }.onFailure {
-                                logger.warn("Unable to retrieve the current commit SHA. The 'recommendedTestsTargetCommitSha' parameter will not be set. Error: ${it.message}")
-                            }.getOrNull()
-                            this.recommendedTestsTargetBuildVersion = pluginConfig.buildVersion
-                            pluginConfig.baseline.searchStrategy?.let { searchStrategy ->
-                                val baselineTagPattern = pluginConfig.baseline.tagPattern ?: "*"
-                                val baselineTargetRef = pluginConfig.baseline.targetRef
-                                val searchCriteria = when (searchStrategy) {
-                                    BaselineSearchStrategy.SEARCH_BY_TAG -> TagCriteria(baselineTagPattern)
-                                    BaselineSearchStrategy.SEARCH_BY_MERGE_BASE -> MergeBaseCriteria(baselineTargetRef.required("baselineTargetRef"))
-                                }
-                                this.recommendedTestsBaselineCommitSha = baselineFactory.produce(searchStrategy).findBaseline(searchCriteria)
-                            }
-                        }
-                    }
-                },
-            taskConfig?.appAgent
-                ?.takeIf { it.enabled ?: pluginConfig.appAgent.enabled ?: false }
-                ?.let { taskConfig ->
-                    AppAgentConfiguration().apply {
-                        mapGeneralAgentProperties(taskConfig, pluginConfig.appAgent, pluginConfig)
-                        this.appId = pluginConfig.appId
-                        this.packagePrefixes = pluginConfig.packagePrefixes
-                        this.buildVersion = pluginConfig.buildVersion
-                        this.commitSha = runCatching {
-                            gitClient.getCurrentCommitSha()
-                        }.onFailure {
-                            logger.warn("Unable to retrieve the current commit SHA. The 'commitSha' parameter will not be set. Error: ${it.message}")
-                        }.getOrNull()
-                        this.envId = taskConfig.envId ?: pluginConfig.appAgent.envId
-                        if (task is Test) {
-                            task.testClassesDirs.joinToString(separator = ";") { "!" + it.absolutePath }
-                                .let { excludePaths ->
-                                    this.scanClassPath = excludePaths
-                                }
-                        }
-                        this.classScanningEnabled = false
-                        this.agentMode = (taskConfig.agentMode ?: pluginConfig.appAgent.agentMode)?.let { AgentMode.valueOf(it) } ?: AgentMode.NATIVE
-                    }
-                }
-        ).map { config ->
+        AgentConfiguration().apply {
+            mapGeneralAgentProperties(pluginConfig)
+            mapBuildSpecificProperties(pluginConfig, task, gitClient)
+            mapCoverageProperties(pluginConfig)
+            mapClassScanningProperties(pluginConfig, task, project, null, false)
+            mapTestSpecificProperties(pluginConfig, task, project, gitClient, baselineFactory)
+        }.let { config ->
             runBlocking {
                 agentInstaller.installAgent(File(distDir, config.agentName), config)
             }.let { agentDir ->
@@ -119,7 +70,7 @@ fun modifyToRunDrillAgents(
                     AgentMode.JAVA -> JavaAgentCommandLineBuilder()
                 }.build(agentDir, config)
             }
-        }.flatten().let {
+        }.let {
             getJavaAddOpensOptions() + it
         }.run {
             (task as JavaForkOptions).jvmArgs.let { previousJvmArgs ->
@@ -134,27 +85,124 @@ fun modifyToRunDrillAgents(
     }
 }
 
-private fun Task.generateTestTaskId(project: Project) = "${project.group}:${project.name}:${this.name}"
+internal fun Task.generateTestTaskId(project: Project) = "${project.group}:${project.name}:${this.name}"
 
 internal fun AgentConfiguration.mapGeneralAgentProperties(
-    agentTaskExtension: AgentExtension,
-    agentPluginExtension: AgentExtension,
     pluginExtension: DrillPluginExtension
 ) {
-    (agentTaskExtension.takeIf {
+    pluginExtension.agent.takeIf {
         it.version != null || it.zipPath != null || it.downloadUrl != null
-    } ?: agentPluginExtension).let { agentExtension ->
+    }?.let { agentExtension ->
         this.version = agentExtension.version
         this.downloadUrl = agentExtension.downloadUrl
         this.zipPath = agentExtension.zipPath?.let { File(it) }
     }
 
-    this.logLevel = agentTaskExtension.logLevel ?: agentPluginExtension.logLevel
-    this.logFile = (agentTaskExtension.logFile ?: agentPluginExtension.logFile)?.let { File(it) }
+    this.logLevel = pluginExtension.agent.logLevel
+    this.logFile = (pluginExtension.agent.logFile)?.let { File(it) }
+    this.agentMode = (pluginExtension.agent.agentMode)?.let { AgentMode.valueOf(it) } ?: AgentMode.NATIVE
 
     this.apiUrl = pluginExtension.apiUrl
     this.apiKey = pluginExtension.apiKey
     this.groupId = pluginExtension.groupId
+    this.appId = pluginExtension.appId
+    this.envId = pluginExtension.envId
+    this.packagePrefixes = pluginExtension.packagePrefixes
+    this.additionalParams = pluginExtension.additionalParams
+}
 
-    this.additionalParams = agentPluginExtension.additionalParams + agentTaskExtension.additionalParams
+internal fun AgentConfiguration.mapBuildSpecificProperties(
+    pluginExtension: DrillPluginExtension,
+    task: Task,
+    gitClient: GitClient
+) {
+    this.buildVersion = pluginExtension.buildVersion
+    this.commitSha = runCatching {
+        gitClient.getCurrentCommitSha()
+    }.onFailure {
+        task.logger.warn("Unable to retrieve the current commit SHA. The 'commitSha' parameter will not be set. Error: ${it.message}")
+    }.getOrNull()
+}
+
+internal fun AgentConfiguration.mapCoverageProperties(
+    pluginExtension: DrillPluginExtension,
+) {
+    this.coverageCollectionEnabled = pluginExtension.coverage.enabled
+}
+
+internal fun AgentConfiguration.mapClassScanningProperties(
+    pluginExtension: DrillPluginExtension,
+    task: Task,
+    project: Project,
+    classPaths: FileCollection? = null,
+    isScanArchiveTask: Boolean
+) {
+    if (isScanArchiveTask) {
+        this.classScanningEnabled = true
+        this.enableScanClassLoaders = false
+    } else {
+        this.classScanningEnabled = pluginExtension.classScanning.enabled && pluginExtension.classScanning.runtime
+        if (this.classScanningEnabled == true) {
+            this.enableScanClassLoaders = pluginExtension.classScanning.runtimeClassLoaders.enabled
+            if (this.enableScanClassLoaders == true) {
+                this.scanClassDelay = pluginExtension.classScanning.runtimeClassLoaders.delay
+            }
+        }
+    }
+    val appClasses: FileCollection? = pluginExtension.classScanning.appClasses ?: if (isScanArchiveTask) {
+        classPaths ?: when (task) {
+            is Test -> task.classpath
+            is JavaExec -> task.classpath
+            is AbstractArchiveTask -> {
+                task.archiveFile.orNull?.asFile?.takeIf { it.exists() }?.let { project.files(it) }
+            }
+
+            else -> null
+        }
+    } else null
+    val testClasses: FileCollection? = pluginExtension.classScanning.testClasses ?: when (task) {
+        is Test -> task.testClassesDirs
+        else -> null
+    }
+    val appClassPaths =
+        appClasses?.filterNot { testClasses?.contains(it) ?: false }?.map { it.absolutePath } ?: emptyList()
+    val testClassPaths = testClasses?.map { "!" + it.absolutePath } ?: emptyList()
+    this.scanClassPath = (appClassPaths + testClassPaths).joinToString(";")
+}
+
+internal fun AgentConfiguration.mapTestSpecificProperties(
+    pluginExtension: DrillPluginExtension,
+    task: Task,
+    project: Project,
+    gitClient: GitClient,
+    baselineFactory: BaselineFactory
+) {
+    this.testTaskId = pluginExtension.testTaskId ?: task.generateTestTaskId(project)
+    this.testTracingEnabled = pluginExtension.testTracing.enabled
+    if (testTracingEnabled == true) {
+        this.testSessionId = pluginExtension.testTracing.testSessionId
+        this.testTracingPerTestSessionEnabled = pluginExtension.testTracing.perTestSession
+        this.testTracingPerTestLaunchEnabled = pluginExtension.testTracing.perTestLaunch
+    }
+
+    this.recommendedTestsEnabled = pluginExtension.recommendedTests.enabled
+    if (this.recommendedTestsEnabled == true) {
+        this.recommendedTestsTargetAppId = pluginExtension.appId
+        this.recommendedTestsTargetCommitSha = runCatching {
+            gitClient.getCurrentCommitSha()
+        }.onFailure {
+            task.logger.warn("Unable to retrieve the current commit SHA. The 'recommendedTestsTargetCommitSha' parameter will not be set. Error: ${it.message}")
+        }.getOrNull()
+        this.recommendedTestsTargetBuildVersion = pluginExtension.buildVersion
+        pluginExtension.baseline.searchStrategy?.let { searchStrategy ->
+            val baselineTagPattern = pluginExtension.baseline.tagPattern ?: "*"
+            val baselineTargetRef = pluginExtension.baseline.targetRef
+            val searchCriteria = when (searchStrategy) {
+                BaselineSearchStrategy.SEARCH_BY_TAG -> TagCriteria(baselineTagPattern)
+                BaselineSearchStrategy.SEARCH_BY_MERGE_BASE -> MergeBaseCriteria(baselineTargetRef.required("baselineTargetRef"))
+            }
+            this.recommendedTestsBaselineCommitSha =
+                baselineFactory.produce(searchStrategy).findBaseline(searchCriteria)
+        }
+    }
 }

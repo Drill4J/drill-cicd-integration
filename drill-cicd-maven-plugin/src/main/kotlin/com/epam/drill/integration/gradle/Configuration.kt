@@ -15,7 +15,6 @@
  */
 package com.epam.drill.integration.gradle
 
-import com.epam.drill.integration.common.agent.config.AgentMode
 import com.epam.drill.integration.common.baseline.BaselineSearchStrategy
 
 open class GitlabConfiguration(
@@ -46,11 +45,10 @@ open class BaselineConfiguration(
 )
 
 open class RecommendedTestsConfiguration(
-    var enabled: Boolean = true,
-    var coveragePeriodDays: Int? = null,
+    var enabled: Boolean = false,
 )
 
-abstract class AgentMavenConfiguration(
+open class AgentMavenConfiguration(
     var version: String? = null,
     var downloadUrl: String? = null,
     var zipPath: String? = null,
@@ -58,19 +56,28 @@ abstract class AgentMavenConfiguration(
     var logLevel: String? = "INFO",
     var logFile: String? = null,
 
-    var additionalParams: Map<String, String>? = null,
+    var agentMode: String? = null,
 )
 
-open class TestAgentMavenConfiguration(
-    var testTaskId: String? = null,
-    var testTracingEnabled: Boolean? = null,
-    var testLaunchMetadataSendingEnabled: Boolean? = null,
-) : AgentMavenConfiguration()
+open class CoverageConfiguration(
+    var enabled: Boolean = false,
+)
 
-open class AppAgentMavenConfiguration(
-    var envId: String? = null,
-    var agentMode: String? = null
-) : AgentMavenConfiguration()
+open class ClassScanningConfiguration(
+    var enabled: Boolean = false,
+    var appClasses: List<String>? = null,
+    var testClasses: List<String>? = null,
+    var runtimeClassLoaderScanning: ClassLoaderScanningConfiguration? = null,
+)
 
-open class AppArchiveScannerMavenConfiguration(
-) : AgentMavenConfiguration()
+open class ClassLoaderScanningConfiguration(
+    var enabled: Boolean = true,
+    var delay: Int? = null,
+)
+
+open class TestTracingConfiguration(
+    var enabled: Boolean = false,
+    var testSessionId: String? = null,
+    var perTestSession: Boolean = true,
+    var perTestLaunch: Boolean = true,
+)

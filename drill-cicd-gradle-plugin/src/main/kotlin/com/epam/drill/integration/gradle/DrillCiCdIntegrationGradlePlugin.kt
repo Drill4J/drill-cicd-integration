@@ -20,8 +20,6 @@ import org.gradle.api.Project
 import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.bundling.AbstractArchiveTask
 import org.gradle.api.tasks.testing.Test
-import org.gradle.process.JavaForkOptions
-import kotlin.reflect.KClass
 
 private const val TASK_GROUP = "drill"
 
@@ -48,7 +46,13 @@ class DrillCiCdIntegrationGradlePlugin : Plugin<Project> {
         }
 
         project.task("drillScanAppArchive") {
-            drillScanAppArchive(config)
+            doFirst {
+                scanAppArchive(
+                    project = project,
+                    pluginConfig = config,
+                    scanPaths = collectArchiveFiles(project)
+                )
+            }
         }.also {
             it.group = TASK_GROUP
         }
@@ -71,30 +75,35 @@ class DrillCiCdIntegrationGradlePlugin : Plugin<Project> {
             it.group = TASK_GROUP
         }
 
-        project.tasks.withType(Test::class.java) {
-            extensions.create("drill", DrillTaskExtension::class.java)
-        }
-
-        project.tasks.withType(JavaExec::class.java) {
-            extensions.create("drill", DrillTaskExtension::class.java)
-        }
-
-        project.tasks.withType(AbstractArchiveTask::class.java) {
-            extensions.create("drill", DrillTaskExtension::class.java)
-        }
-
         project.afterEvaluate {
             tasks
                 .filterIsInstance<Test>()
                 .forEach { task ->
                     modifyToRunDrillAgents(task, project, config)
-                    modifyToScanClasspath(task, project, config)
+                    if (config.classScanning.enabled && config.classScanning.beforeTestTask)
+                        task.doFirst {
+                            modifyToScanAppArchive(task, project, config)
+                        }
+
+                }
+
+            tasks
+                .filterIsInstance<JavaExec>()
+                .forEach { task ->
+                    modifyToRunDrillAgents(task, project, config)
+                    if (config.classScanning.enabled && config.classScanning.beforeExecTask)
+                        task.doFirst {
+                            modifyToScanAppArchive(task, project, config)
+                        }
                 }
 
             tasks
                 .filterIsInstance<AbstractArchiveTask>()
                 .forEach { task ->
-                    modifyToRunAppArchiveScanner(task, project, config)
+                    if (config.classScanning.enabled && config.classScanning.afterArchiveTask)
+                        task.doLast {
+                            modifyToScanAppArchive(task, project, config)
+                        }
                 }
         }
     }

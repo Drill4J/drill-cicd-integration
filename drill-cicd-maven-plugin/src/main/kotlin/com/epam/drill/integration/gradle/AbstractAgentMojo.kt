@@ -15,26 +15,68 @@
  */
 package com.epam.drill.integration.gradle
 
+import com.epam.drill.integration.common.agent.CommandExecutor
+import com.epam.drill.integration.common.agent.ExecutableRunner
 import com.epam.drill.integration.common.agent.config.AgentConfiguration
 import com.epam.drill.integration.common.agent.config.AgentMode
 import com.epam.drill.integration.common.agent.impl.AgentCacheImpl
 import com.epam.drill.integration.common.agent.impl.AgentInstallerImpl
+import com.epam.drill.integration.common.agent.impl.JarCommandLineBuilder
 import com.epam.drill.integration.common.agent.impl.JavaAgentCommandLineBuilder
 import com.epam.drill.integration.common.agent.impl.NativeAgentCommandLineBuilder
-import com.epam.drill.integration.common.util.fromEnv
+import com.epam.drill.integration.common.agent.javaExecutable
+import com.epam.drill.integration.common.baseline.BaselineFactory
+import com.epam.drill.integration.common.git.GitClient
+import com.epam.drill.integration.common.git.impl.GitClientImpl
 import com.epam.drill.integration.common.util.getJavaAddOpensOptions
 import com.epam.drill.integration.common.util.required
 import kotlinx.coroutines.runBlocking
+import org.apache.maven.plugin.logging.Log
+import org.apache.maven.plugins.annotations.Parameter
+import org.apache.maven.project.MavenProject
 import java.io.File
+import kotlin.collections.joinToString
 
 
 val drillAgentFilesDir = File(System.getProperty("user.home"), ".drill/agents")
 private const val ARG_LINE = "argLine"
 
-abstract class AbstractAgentMojo: AbstractDrillMojo() {
+abstract class AbstractAgentMojo : AbstractDrillMojo() {
+    @Parameter(property = "appId", required = true)
+    var appId: String? = null
 
-    private val agentCache = AgentCacheImpl(drillAgentFilesDir)
-    private val agentInstaller = AgentInstallerImpl(agentCache)
+    @Parameter(property = "packagePrefixes", required = true)
+    var packagePrefixes: String? = null
+
+    @Parameter(property = "buildVersion", required = false)
+    var buildVersion: String? = null
+
+    @Parameter(property = "envId", required = false)
+    var envId: String? = null
+
+    @Parameter(property = "testTaskId", required = false)
+    var testTaskId: String? = null
+
+    @Parameter(property = "agent", required = true)
+    var agent: AgentMavenConfiguration? = null
+
+    @Parameter(property = "classScanning", required = false)
+    var classScanning: ClassScanningConfiguration? = null
+
+    @Parameter(property = "baseline", required = true)
+    var baseline: BaselineConfiguration? = null
+
+    @Parameter(property = "additionalParams", required = false)
+    var additionalParams: Map<String, String>? = null
+
+
+    protected val agentCache = AgentCacheImpl(drillAgentFilesDir)
+    protected val agentInstaller = AgentInstallerImpl(agentCache)
+    protected val gitClient = GitClientImpl()
+    protected val argumentsBuilder = JarCommandLineBuilder()
+    protected val commandExecutor = CommandExecutor(javaExecutable.absolutePath)
+    protected val executableRunner = ExecutableRunner(agentInstaller, argumentsBuilder, commandExecutor)
+    protected val baselineFactory = BaselineFactory(gitClient)
 
     abstract fun getAgentConfig(): AgentConfiguration
 
@@ -61,20 +103,93 @@ abstract class AbstractAgentMojo: AbstractDrillMojo() {
     }
 }
 
-fun AgentConfiguration.setGeneralAgentProperties(
-    mavenAgentConfig: AgentMavenConfiguration,
-    mavenGeneralConfig: AbstractDrillMojo
+internal fun AgentConfiguration.mapGeneralAgentProperties(
+    config: AbstractAgentMojo
 ) {
-    version = mavenAgentConfig.version
-    downloadUrl = mavenAgentConfig.downloadUrl
-    zipPath = mavenAgentConfig.zipPath?.let { File(it) }
+    val agentConfig = config.agent.required("agent")
 
-    logLevel = mavenAgentConfig.logLevel
-    logFile = mavenAgentConfig.logFile?.let { File(it) }
+    agentConfig.takeIf {
+        it.version != null || it.zipPath != null || it.downloadUrl != null
+    }?.let { agentExtension ->
+        this.version = agentExtension.version
+        this.downloadUrl = agentExtension.downloadUrl
+        this.zipPath = agentExtension.zipPath?.let { File(it) }
+    }
 
-    apiUrl = mavenGeneralConfig.apiUrl.fromEnv("DRILL_API_URL").required("apiUrl")
-    apiKey = mavenGeneralConfig.apiKey.fromEnv("DRILL_API_KEY")
-    groupId = mavenGeneralConfig.groupId.required("groupId")
+    this.logLevel = agentConfig.logLevel
+    this.logFile = (agentConfig.logFile)?.let { File(it) }
+    this.agentMode = (agentConfig.agentMode)?.let { AgentMode.valueOf(it) } ?: AgentMode.NATIVE
 
-    additionalParams = mavenAgentConfig.additionalParams
+    this.apiUrl = config.apiUrl
+    this.apiKey = config.apiKey
+    this.groupId = config.groupId
+    this.appId = config.appId
+    this.envId = config.envId
+    this.packagePrefixes = config.packagePrefixes?.split(",")?.map { it.trim() }?.toTypedArray() ?: emptyArray()
+    this.buildVersion = config.buildVersion
+    this.additionalParams = config.additionalParams
 }
+
+internal fun AgentConfiguration.mapBuildSpecificProperties(
+    config: AbstractAgentMojo,
+    log: Log,
+    gitClient: GitClient
+) {
+    this.buildVersion = config.buildVersion
+    this.commitSha = runCatching {
+        gitClient.getCurrentCommitSha()
+    }.onFailure {
+        log.warn(
+            "Unable to retrieve the current commit SHA. " +
+                    "The 'commitSha' parameter will not be set. Error: ${it.message}"
+        )
+    }.getOrNull()
+}
+
+internal fun AgentConfiguration.mapClassScanningProperties(
+    config: AbstractAgentMojo,
+    project: MavenProject,
+    lifecyclePhase: String,
+    log: Log,
+    archiveFile: File?,
+    isScanArchiveGoal: Boolean
+) {
+    if (isScanArchiveGoal) {
+        this.classScanningEnabled = true
+        this.enableScanClassLoaders = false
+    } else {
+        this.classScanningEnabled = (config.classScanning?.enabled ?: false)
+        if (classScanningEnabled == true) {
+            this.enableScanClassLoaders = config.classScanning?.runtimeClassLoaderScanning?.enabled ?: true
+            if (this.enableScanClassLoaders == true) {
+                this.scanClassDelay = config.classScanning?.runtimeClassLoaderScanning?.delay
+            }
+        }
+    }
+    val appClasses =
+        config.classScanning?.appClasses?.takeIf { it.isNotEmpty() }
+            ?: if (isScanArchiveGoal) {
+                archiveFile?.absolutePath?.let { listOf(it) } ?: listOf(project.build.outputDirectory)
+            } else emptyList()
+    val testClasses =
+        config.classScanning?.testClasses?.takeIf { it.isNotEmpty() }
+            ?: listOf(project.build.testOutputDirectory)
+    if (isScanArchiveGoal) {
+        when (lifecyclePhase) {
+            "package",
+            "test-compile" -> log.info(
+                "Using the compiled classes from ${appClasses.joinToString(", ")} " +
+                        "and ${testClasses.joinToString(", ")} for class scanning."
+            )
+
+            else -> log.warn(
+                "Unexpected lifecycle phase '$lifecyclePhase' for class scanning. " +
+                        "Defaulting to using compiled classes from ${appClasses.joinToString(", ")} " +
+                        "and ${testClasses.joinToString(", ")} for class scanning."
+            )
+        }
+    }
+
+    this.scanClassPath = (appClasses + testClasses.map { "!$it" }).joinToString(separator = ";")
+}
+

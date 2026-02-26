@@ -16,8 +16,6 @@
 package com.epam.drill.integration.common.agent
 
 import com.epam.drill.integration.common.agent.config.AgentConfiguration
-import com.epam.drill.integration.common.agent.config.AppAgentConfiguration
-import com.epam.drill.integration.common.agent.config.TestAgentConfiguration
 import com.epam.drill.integration.common.agent.impl.AgentInstallerImpl
 import io.ktor.client.*
 import io.ktor.client.engine.mock.*
@@ -118,7 +116,7 @@ class AgentInstallerImplTest {
     fun `given zipPath, installAgent should unzip agent`() {
         val agentFilenames = listOf("file1.txt", "file2.so", "file3.jar")
         val zipFile = File(testZipDir, "agent-test.zip").apply { zipFiles(agentFilenames) }
-        val configuration = AppAgentConfiguration().apply {
+        val configuration = AgentConfiguration().apply {
             zipPath = zipFile
         }
         val agentInstaller = AgentInstallerImpl(agentCache)
@@ -141,7 +139,7 @@ class AgentInstallerImplTest {
         val mockHttpClient = mockHttpClient(
             "/agent.zip" shouldRespondBytes zipFile.readBytes()
         )
-        val configuration = TestAgentConfiguration().apply {
+        val configuration = AgentConfiguration().apply {
             downloadUrl = testDownloadUrl
         }
         val agentInstaller = AgentInstallerImpl(agentCache).also { it.httpClient = mockHttpClient }
@@ -162,10 +160,6 @@ class AgentInstallerImplTest {
         val agentVersion = "1.0.0"
         val agentRepository = "test/repository"
         val agentName = "agent-test"
-        class MyAgentConfiguration : AgentConfiguration() {
-            override val githubRepository: String = agentRepository
-            override val agentName: String = agentName
-        }
         val agentFilename = "agent-$currentOsPreset-$agentVersion.zip"
         val repoApiUrl = "http://example.com"
         val agentFilenames = listOf("file1.txt", "file2.so", "file3.jar")
@@ -173,8 +167,10 @@ class AgentInstallerImplTest {
         val mockHttpClient = mockHttpClient(
             "/$agentRepository/releases/download/v$agentVersion/$agentFilename" shouldRespondBytes zipFile.readBytes()
         )
-        val configuration = MyAgentConfiguration().apply {
-            version = agentVersion
+        val configuration = AgentConfiguration().apply {
+            this.version = agentVersion
+            this.githubRepository = agentRepository
+            this.agentName = agentName
         }
         val agentInstaller = AgentInstallerImpl(agentCache, repoApiUrl)
             .also { it.httpClient = mockHttpClient }
@@ -192,7 +188,7 @@ class AgentInstallerImplTest {
 
     @Test
     fun `given configuration without required fields, installAgent should throw IllegalStateException`() {
-        val configuration = TestAgentConfiguration().apply {
+        val configuration = AgentConfiguration().apply {
             zipPath = null
             downloadUrl = null
             version = null

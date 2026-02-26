@@ -16,8 +16,6 @@
 package com.epam.drill.integration.gradle
 
 import com.epam.drill.integration.common.agent.config.AgentConfiguration
-import com.epam.drill.integration.common.agent.config.AppAgentConfiguration
-import com.epam.drill.integration.common.agent.config.TestAgentConfiguration
 import com.epam.drill.integration.common.agent.impl.AgentCacheImpl
 import com.epam.drill.integration.common.agent.impl.AgentInstallerImpl
 import kotlinx.coroutines.runBlocking
@@ -50,16 +48,9 @@ fun Task.drillDownloadAgents(config: DrillPluginExtension) {
     }
 
     doFirst {
-        config.appAgent.takeIf { it.enabled == true || it.archiveScannerEnabled == true || it.classpathScannerEnabled == true }?.let {
-            AppAgentConfiguration().also {
-                it.mapGeneralAgentProperties(config.appAgent, config.appAgent, config)
-            }.let {
-                download(it)
-            }
-        }
-        config.testAgent.takeIf { it.enabled == true }?.let {
-            TestAgentConfiguration().also {
-                it.mapGeneralAgentProperties(config.testAgent, config.testAgent, config)
+        config.agent.let {
+            AgentConfiguration().also {
+                it.mapGeneralAgentProperties(config)
             }.let {
                 download(it)
             }
