@@ -50,7 +50,6 @@ class DrillCiCdIntegrationGradlePlugin : Plugin<Project> {
                 scanAppArchive(
                     project = project,
                     pluginConfig = config,
-                    scanPaths = collectArchiveFiles(project)
                 )
             }
         }.also {

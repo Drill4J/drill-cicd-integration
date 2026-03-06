@@ -45,6 +45,13 @@ fun modifyToRunDrillAgents(
     project: Project,
     pluginConfig: DrillPluginExtension
 ) {
+    val coverage = pluginConfig.coverage.enabled
+    val classScanning = pluginConfig.classScanning.enabled
+    val testTracing = pluginConfig.testTracing.enabled
+    if (!coverage && !classScanning && !testTracing) {
+        return
+    }
+
     val gitClient = GitClientImpl()
     val baselineFactory = BaselineFactory(gitClient)
 
@@ -59,7 +66,7 @@ fun modifyToRunDrillAgents(
             mapGeneralAgentProperties(pluginConfig)
             mapBuildSpecificProperties(pluginConfig, task, gitClient)
             mapCoverageProperties(pluginConfig)
-            mapClassScanningProperties(pluginConfig, task, project, null, false)
+            mapClassScanningProperties(pluginConfig, task, project, false)
             mapTestSpecificProperties(pluginConfig, task, project, gitClient, baselineFactory)
         }.let { config ->
             runBlocking {
@@ -134,7 +141,6 @@ internal fun AgentConfiguration.mapClassScanningProperties(
     pluginExtension: DrillPluginExtension,
     task: Task,
     project: Project,
-    classPaths: FileCollection? = null,
     isScanArchiveTask: Boolean
 ) {
     if (isScanArchiveTask) {
@@ -150,14 +156,23 @@ internal fun AgentConfiguration.mapClassScanningProperties(
         }
     }
     val appClasses: FileCollection? = pluginExtension.classScanning.appClasses ?: if (isScanArchiveTask) {
-        classPaths ?: when (task) {
-            is Test -> task.classpath
-            is JavaExec -> task.classpath
+        when (task) {
+            is Test -> {
+                task.logger.lifecycle("!!! Test task classpath")
+                task.classpath
+            }
+            is JavaExec -> {
+                task.logger.lifecycle("!!! Java Exec task classpath")
+                task.classpath
+            }
             is AbstractArchiveTask -> {
+                task.logger.lifecycle("!!! Archive task classpath")
                 task.archiveFile.orNull?.asFile?.takeIf { it.exists() }?.let { project.files(it) }
             }
-
-            else -> null
+            else -> {
+                task.logger.lifecycle("!!! ${task::class.java} task classpath")
+                collectArchiveFiles(project)
+            }
         }
     } else null
     val testClasses: FileCollection? = pluginExtension.classScanning.testClasses ?: when (task) {

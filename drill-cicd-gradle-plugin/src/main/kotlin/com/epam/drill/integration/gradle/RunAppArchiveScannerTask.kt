@@ -59,7 +59,6 @@ fun Task.modifyToScanAppArchive(
 fun Task.scanAppArchive(
     project: Project,
     pluginConfig: DrillPluginExtension,
-    scanPaths: FileCollection? = null,
 ) {
     val task = this
     val gitClient = GitClientImpl()
@@ -74,7 +73,7 @@ fun Task.scanAppArchive(
     AgentConfiguration().apply {
         mapGeneralAgentProperties(pluginConfig)
         mapBuildSpecificProperties(pluginConfig, task, gitClient)
-        mapClassScanningProperties(pluginConfig, task, project, scanPaths, true)
+        mapClassScanningProperties(pluginConfig, task, project, true)
         this.messageSendingMode = "DIRECT"
         if (this.scanClassPath?.isEmpty() ?: true) {
             throw IllegalStateException("No classes or archives to scan for Drill4J Agent.")
