@@ -22,7 +22,7 @@ open class AgentConfiguration {
     var apiKey: String? = null
     var groupId: String? = null
     var appId: String? = null
-    var packagePrefixes: Array<String> = emptyArray()
+    var packagePrefixes: Array<String>? = null
     var buildVersion: String? = null
     var commitSha: String? = null
 
@@ -48,24 +48,24 @@ open class AgentConfiguration {
     var additionalParams: Map<String, String>? = null
 
     //coverage
-    var coverageCollectionEnabled: Boolean? = null
+    var coverageCollectionEnabled: Boolean = false
     var envId: String? = null
 
     //class scanning
-    var classScanningEnabled: Boolean? = null
+    var classScanningEnabled: Boolean = false
     var scanClassPath: String? = null
     var enableScanClassLoaders: Boolean? = null
     var scanClassDelay: Int? = null
 
     //test tracing
     var testSessionId: String? = null
-    var testTracingEnabled: Boolean? = null
+    var testTracingEnabled: Boolean = false
     var testTracingPerTestSessionEnabled: Boolean? = null
     var testTracingPerTestLaunchEnabled: Boolean? = null
 
     //test prioritization
     var testTaskId: String? = null
-    var recommendedTestsEnabled: Boolean? = null
+    var recommendedTestsEnabled: Boolean = false
     var recommendedTestsTargetAppId: String? = null
     var recommendedTestsTargetCommitSha: String? = null
     var recommendedTestsTargetBuildVersion: String? = null
@@ -79,16 +79,16 @@ open class AgentConfiguration {
         this[AgentConfiguration::logFile.name] = logFile?.absolutePath
 
         this[AgentConfiguration::appId.name] = appId
-        this[AgentConfiguration::packagePrefixes.name] = packagePrefixes.joinToString(";")
         this[AgentConfiguration::buildVersion.name] = buildVersion
         this[AgentConfiguration::commitSha.name] = commitSha
         this[AgentConfiguration::envId.name] = envId
+        packagePrefixes?.let { this[AgentConfiguration::packagePrefixes.name] = it.joinToString(";") }
 
-        coverageCollectionEnabled?.let { isCoverageCollectionEnabled ->
+        coverageCollectionEnabled.let { isCoverageCollectionEnabled ->
             this[AgentConfiguration::coverageCollectionEnabled.name] = isCoverageCollectionEnabled.toString().lowercase()
         }
 
-        classScanningEnabled?.let { isClassScanningEnabled ->
+        classScanningEnabled.let { isClassScanningEnabled ->
             this[AgentConfiguration::classScanningEnabled.name] = isClassScanningEnabled.toString().lowercase()
             if (isClassScanningEnabled) {
                 scanClassPath?.let { this[AgentConfiguration::scanClassPath.name] = it }
@@ -100,7 +100,7 @@ open class AgentConfiguration {
         }
 
         testTaskId?.let { this[AgentConfiguration::testTaskId.name] = it }
-        testTracingEnabled?.let { isTestTracingEnabled ->
+        testTracingEnabled.let { isTestTracingEnabled ->
             this[AgentConfiguration::testTracingEnabled.name] = isTestTracingEnabled.toString().lowercase()
             if (isTestTracingEnabled) {
                 testTracingPerTestSessionEnabled?.let {
@@ -112,7 +112,7 @@ open class AgentConfiguration {
                 testSessionId?.let { this[AgentConfiguration::testSessionId.name] = it }
             }
         }
-        recommendedTestsEnabled?.let { isRecommendedTestsEnabled ->
+        recommendedTestsEnabled.let { isRecommendedTestsEnabled ->
             this[AgentConfiguration::recommendedTestsEnabled.name] =
                 isRecommendedTestsEnabled.toString().lowercase()
             if (isRecommendedTestsEnabled) {

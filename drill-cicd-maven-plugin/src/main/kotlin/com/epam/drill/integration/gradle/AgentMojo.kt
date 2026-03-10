@@ -81,14 +81,14 @@ internal fun AgentConfiguration.mapTestSpecificProperties(
     baselineFactory: BaselineFactory,
 ) {
     this.testTaskId = config.testTaskId ?: generateTestTaskId(project, session)
-    this.testTracingEnabled = config.testTracing?.enabled
-    if (testTracingEnabled == true) {
+    this.testTracingEnabled = config.testTracing?.enabled ?: false
+    if (testTracingEnabled) {
         this.testSessionId = config.testTracing?.testSessionId
         this.testTracingPerTestSessionEnabled = config.testTracing?.perTestSession ?: false
         this.testTracingPerTestLaunchEnabled = config.testTracing?.perTestLaunch ?: false
     }
-    this.recommendedTestsEnabled = config.recommendedTests?.enabled
-    if (this.recommendedTestsEnabled == true) {
+    this.recommendedTestsEnabled = config.recommendedTests?.enabled ?: false
+    if (this.recommendedTestsEnabled) {
         this.recommendedTestsTargetAppId = config.appId
         this.recommendedTestsTargetCommitSha = runCatching {
             gitClient.getCurrentCommitSha()

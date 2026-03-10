@@ -64,7 +64,7 @@ open class CoverageConfiguration(
 )
 
 open class ClassScanningConfiguration(
-    var enabled: Boolean = false,
+    var runtime: Boolean = false,
     var appClasses: List<String>? = null,
     var testClasses: List<String>? = null,
     var runtimeClassLoaderScanning: ClassLoaderScanningConfiguration? = null,

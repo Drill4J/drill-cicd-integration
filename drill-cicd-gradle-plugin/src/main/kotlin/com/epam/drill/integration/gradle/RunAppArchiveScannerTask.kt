@@ -40,10 +40,10 @@ internal fun collectArchiveFiles(project: Project): FileCollection {
 }
 
 fun Task.modifyToScanAppArchive(
-    task: Task,
     project: Project,
-    pluginConfig: DrillPluginExtension,
+    config: DrillPluginExtension,
 ) {
+    val task: Task = this
     logger.lifecycle("Task :${task.name} is modified to scan application classes by Drill4J")
     if (!state.didWork) {
         logger.lifecycle("Skipping ${task.name}: up-to-date or no work required")
@@ -52,7 +52,7 @@ fun Task.modifyToScanAppArchive(
 
     scanAppArchive(
         project = project,
-        pluginConfig = pluginConfig
+        pluginConfig = config
     )
 }
 

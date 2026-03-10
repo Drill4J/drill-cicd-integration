@@ -158,8 +158,8 @@ internal fun AgentConfiguration.mapClassScanningProperties(
         this.classScanningEnabled = true
         this.enableScanClassLoaders = false
     } else {
-        this.classScanningEnabled = (config.classScanning?.enabled ?: false)
-        if (classScanningEnabled == true) {
+        this.classScanningEnabled = (config.classScanning?.runtime ?: false)
+        if (classScanningEnabled) {
             this.enableScanClassLoaders = config.classScanning?.runtimeClassLoaderScanning?.enabled ?: true
             if (this.enableScanClassLoaders == true) {
                 this.scanClassDelay = config.classScanning?.runtimeClassLoaderScanning?.delay
@@ -168,9 +168,10 @@ internal fun AgentConfiguration.mapClassScanningProperties(
     }
     val appClasses =
         config.classScanning?.appClasses?.takeIf { it.isNotEmpty() }
-            ?: if (isScanArchiveGoal) {
-                archiveFile?.absolutePath?.let { listOf(it) } ?: listOf(project.build.outputDirectory)
-            } else emptyList()
+            ?: if (isScanArchiveGoal && archiveFile != null) {
+                archiveFile.absolutePath.let { listOf(it) }
+            } else
+                listOf(project.build.outputDirectory)
     val testClasses =
         config.classScanning?.testClasses?.takeIf { it.isNotEmpty() }
             ?: listOf(project.build.testOutputDirectory)

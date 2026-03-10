@@ -19,13 +19,15 @@ import com.epam.drill.integration.common.baseline.BaselineSearchStrategy
 import org.gradle.api.Action
 import org.gradle.api.file.FileCollection
 
+interface PluginExtension
+
 open class DrillPluginExtension(
     var apiUrl: String? = null,
     var apiKey: String? = null,
     var groupId: String? = null,
     var appId: String? = null,
     var buildVersion: String? = null,
-    var packagePrefixes: Array<String> = emptyArray(),
+    var packagePrefixes: Array<String>? = null,
 
     var envId: String? = null,
     var testTaskId: String? = null,
@@ -39,8 +41,8 @@ open class DrillPluginExtension(
     var gitlab: GitlabExtension = GitlabExtension(),
     var github: GithubExtension = GithubExtension(),
     var recommendedTests: RecommendedTestsExtension = RecommendedTestsExtension(),
-    var additionalParams: Map<String, String> = mutableMapOf()
-) {
+    var additionalParams: Map<String, String>? = null
+): PluginExtension {
     fun agent(action: Action<AgentExtension>) {
         action.execute(agent)
     }
@@ -55,11 +57,11 @@ open class DrillPluginExtension(
     }
 
     fun classScanning() {
-        classScanning.enabled = true
+        classScanning.beforeRun = true
     }
 
     fun classScanning(action: Action<ClassScanningExtension>) {
-        classScanning.enabled = true
+        classScanning.beforeRun = true
         action.execute(classScanning)
     }
 
@@ -100,7 +102,7 @@ open class GitlabExtension(
     var projectId: String? = null,
     var commitSha: String? = null,
     var mergeRequest: MergeRequestExtension = MergeRequestExtension()
-) {
+): PluginExtension {
     fun mergeRequest(action: Action<MergeRequestExtension>) {
         action.execute(mergeRequest)
     }
@@ -111,13 +113,13 @@ open class MergeRequestExtension(
     var sourceBranch: String? = null,
     var targetBranch: String? = null,
     var mergeBaseCommitSha: String? = null,
-)
+): PluginExtension
 
 open class GithubExtension(
     var apiUrl: String = "https://api.github.com",
     var token: String? = null,
     var eventFilePath: String? = null
-)
+): PluginExtension
 
 open class BaselineExtension(
     var searchStrategy: BaselineSearchStrategy? = null,
@@ -127,7 +129,7 @@ open class BaselineExtension(
 
 open class RecommendedTestsExtension(
     var enabled: Boolean? = null,
-)
+): PluginExtension
 
 open class AgentExtension(
     var version: String? = null,
@@ -138,42 +140,37 @@ open class AgentExtension(
 
     var logLevel: String? = null,
     var logFile: String? = null,
-)
+): PluginExtension
 
 open class CoverageExtension(
-    var enabled: Boolean = false,
-)
+    var enabled: Boolean? = null,
+): PluginExtension
 
 open class ClassScanningExtension(
-    var enabled: Boolean = false,
+    var runtime: Boolean? = null,
+    var beforeRun: Boolean? = null,
+    var afterBuild: Boolean? = null,
     var appClasses: FileCollection? = null,
     var testClasses: FileCollection? = null,
-    var afterArchiveTask: Boolean = false,
-    var beforeTestTask: Boolean = true,
-    var beforeExecTask: Boolean = true,
-    var runtime: Boolean = false,
-    var runtimeClassLoaders: ClassLoaderScanningExtension = ClassLoaderScanningExtension()
-) {
-    fun disableRuntimeClassLoaderScanning() {
-        runtimeClassLoaders.enabled = false
-    }
+    var classLoaders: ClassLoaderScanningExtension = ClassLoaderScanningExtension()
+): PluginExtension {
     fun runtimeClassLoaderScanning() {
-        runtimeClassLoaders.enabled = true
+        classLoaders.enabled = true
     }
     fun runtimeClassLoaderScanning(action: Action<ClassLoaderScanningExtension>) {
-        runtimeClassLoaders.enabled = true
-        action.execute(runtimeClassLoaders)
+        classLoaders.enabled = true
+        action.execute(classLoaders)
     }
 }
 
 open class ClassLoaderScanningExtension(
-    var enabled: Boolean = true,
+    var enabled: Boolean? = null,
     var delay: Int? = null,
-)
+): PluginExtension
 
 open class TestTracing(
-    var enabled: Boolean = false,
+    var enabled: Boolean? = null,
     var testSessionId: String? = null,
-    var perTestSession: Boolean = true,
-    var perTestLaunch: Boolean = true,
-)
+    var perTestSession: Boolean? = null,
+    var perTestLaunch: Boolean? = null,
+): PluginExtension

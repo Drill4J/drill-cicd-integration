@@ -40,55 +40,54 @@ import org.gradle.process.JavaForkOptions
 import java.io.File
 import kotlin.collections.plus
 
-fun modifyToRunDrillAgents(
-    task: Task,
+fun Task.modifyToRunDrillAgents(
     project: Project,
-    pluginConfig: DrillPluginExtension
+    config: DrillPluginExtension,
 ) {
-    val coverage = pluginConfig.coverage.enabled
-    val classScanning = pluginConfig.classScanning.enabled
-    val testTracing = pluginConfig.testTracing.enabled
-    if (!coverage && !classScanning && !testTracing) {
+    val task: Task = this
+    val coverage = config.coverage.enabled ?: false
+    val runtimeClassScanning = config.classScanning.runtime ?: false
+    val testTracing = config.testTracing.enabled ?: false
+    if (!coverage && !runtimeClassScanning && !testTracing) {
+        logger.debug("Task :${task.name} is not modified by Drill since coverage collection, class scanning and test tracing are disabled")
         return
     }
 
     val gitClient = GitClientImpl()
     val baselineFactory = BaselineFactory(gitClient)
 
-    task.doFirst {
-        logger.lifecycle("Task :${task.name} is modified by Drill")
+    logger.lifecycle("Task :${task.name} is modified by Drill")
 
-        val agentCache = AgentCacheImpl(drillAgentFilesDir)
-        val agentInstaller = AgentInstallerImpl(agentCache)
-        val distDir = File(project.buildDir, "/drill")
+    val agentCache = AgentCacheImpl(drillAgentFilesDir)
+    val agentInstaller = AgentInstallerImpl(agentCache)
+    val distDir = File(project.buildDir, "/drill")
 
-        AgentConfiguration().apply {
-            mapGeneralAgentProperties(pluginConfig)
-            mapBuildSpecificProperties(pluginConfig, task, gitClient)
-            mapCoverageProperties(pluginConfig)
-            mapClassScanningProperties(pluginConfig, task, project, false)
-            mapTestSpecificProperties(pluginConfig, task, project, gitClient, baselineFactory)
-        }.let { config ->
-            runBlocking {
-                agentInstaller.installAgent(File(distDir, config.agentName), config)
-            }.let { agentDir ->
-                when (config.agentMode) {
-                    AgentMode.NATIVE -> NativeAgentCommandLineBuilder()
-                    AgentMode.JAVA -> JavaAgentCommandLineBuilder()
-                }.build(agentDir, config)
-            }
-        }.let {
-            getJavaAddOpensOptions() + it
-        }.run {
-            (task as JavaForkOptions).jvmArgs.let { previousJvmArgs ->
-                if (previousJvmArgs != null) {
-                    (task as JavaForkOptions).jvmArgs = this + previousJvmArgs
-                } else {
-                    (task as JavaForkOptions).jvmArgs = this.toMutableList()
-                }
-            }
-            logger.info("JVM args $this have been added to :${task.name} task")
+    AgentConfiguration().apply {
+        mapGeneralAgentProperties(config)
+        mapBuildSpecificProperties(config, task, gitClient)
+        mapCoverageProperties(config)
+        mapClassScanningProperties(config, task, project, false)
+        mapTestSpecificProperties(config, task, project, gitClient, baselineFactory)
+    }.let { config ->
+        runBlocking {
+            agentInstaller.installAgent(File(distDir, config.agentName), config)
+        }.let { agentDir ->
+            when (config.agentMode) {
+                AgentMode.NATIVE -> NativeAgentCommandLineBuilder()
+                AgentMode.JAVA -> JavaAgentCommandLineBuilder()
+            }.build(agentDir, config)
         }
+    }.let {
+        getJavaAddOpensOptions() + it
+    }.run {
+        (task as JavaForkOptions).jvmArgs.let { previousJvmArgs ->
+            if (previousJvmArgs != null) {
+                (task as JavaForkOptions).jvmArgs = this + previousJvmArgs
+            } else {
+                (task as JavaForkOptions).jvmArgs = this.toMutableList()
+            }
+        }
+        logger.info("JVM args $this have been added to :${task.name} task")
     }
 }
 
@@ -134,11 +133,11 @@ internal fun AgentConfiguration.mapBuildSpecificProperties(
 internal fun AgentConfiguration.mapCoverageProperties(
     pluginExtension: DrillPluginExtension,
 ) {
-    this.coverageCollectionEnabled = pluginExtension.coverage.enabled
+    this.coverageCollectionEnabled = pluginExtension.coverage.enabled ?: false
 }
 
 internal fun AgentConfiguration.mapClassScanningProperties(
-    pluginExtension: DrillPluginExtension,
+    config: DrillPluginExtension,
     task: Task,
     project: Project,
     isScanArchiveTask: Boolean
@@ -147,35 +146,34 @@ internal fun AgentConfiguration.mapClassScanningProperties(
         this.classScanningEnabled = true
         this.enableScanClassLoaders = false
     } else {
-        this.classScanningEnabled = pluginExtension.classScanning.enabled && pluginExtension.classScanning.runtime
-        if (this.classScanningEnabled == true) {
-            this.enableScanClassLoaders = pluginExtension.classScanning.runtimeClassLoaders.enabled
+        this.classScanningEnabled = config.classScanning.runtime ?: false
+        if (this.classScanningEnabled) {
+            this.enableScanClassLoaders = config.classScanning.classLoaders.enabled
             if (this.enableScanClassLoaders == true) {
-                this.scanClassDelay = pluginExtension.classScanning.runtimeClassLoaders.delay
+                this.scanClassDelay = config.classScanning.classLoaders.delay
             }
         }
     }
-    val appClasses: FileCollection? = pluginExtension.classScanning.appClasses ?: if (isScanArchiveTask) {
+    val appClasses: FileCollection? = config.classScanning.appClasses ?: if (isScanArchiveTask) {
         when (task) {
             is Test -> {
-                task.logger.lifecycle("!!! Test task classpath")
                 task.classpath
             }
+
             is JavaExec -> {
-                task.logger.lifecycle("!!! Java Exec task classpath")
                 task.classpath
             }
+
             is AbstractArchiveTask -> {
-                task.logger.lifecycle("!!! Archive task classpath")
                 task.archiveFile.orNull?.asFile?.takeIf { it.exists() }?.let { project.files(it) }
             }
+
             else -> {
-                task.logger.lifecycle("!!! ${task::class.java} task classpath")
                 collectArchiveFiles(project)
             }
         }
     } else null
-    val testClasses: FileCollection? = pluginExtension.classScanning.testClasses ?: when (task) {
+    val testClasses: FileCollection? = config.classScanning.testClasses ?: when (task) {
         is Test -> task.testClassesDirs
         else -> null
     }
@@ -193,14 +191,14 @@ internal fun AgentConfiguration.mapTestSpecificProperties(
     baselineFactory: BaselineFactory
 ) {
     this.testTaskId = pluginExtension.testTaskId ?: task.generateTestTaskId(project)
-    this.testTracingEnabled = pluginExtension.testTracing.enabled
+    this.testTracingEnabled = pluginExtension.testTracing.enabled ?: false
     if (testTracingEnabled == true) {
         this.testSessionId = pluginExtension.testTracing.testSessionId
         this.testTracingPerTestSessionEnabled = pluginExtension.testTracing.perTestSession
         this.testTracingPerTestLaunchEnabled = pluginExtension.testTracing.perTestLaunch
     }
 
-    this.recommendedTestsEnabled = pluginExtension.recommendedTests.enabled
+    this.recommendedTestsEnabled = pluginExtension.recommendedTests.enabled ?: false
     if (this.recommendedTestsEnabled == true) {
         this.recommendedTestsTargetAppId = pluginExtension.appId
         this.recommendedTestsTargetCommitSha = runCatching {
