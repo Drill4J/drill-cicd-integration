@@ -31,35 +31,49 @@ class MarkdownReportGenerator : ReportGenerator {
         val metrics = data["data"]?.jsonObject?.get("metrics") as? JsonObject
         val newMethods = metrics?.get("changes_new_methods")?.jsonPrimitive?.intOrNull ?: 0
         val modifiedMethods = metrics?.get("changes_modified_methods")?.jsonPrimitive?.intOrNull ?: 0
-        val totalChanges = metrics?.get("total_changes")?.jsonPrimitive?.intOrNull ?: 0
+        val deletedMethods = metrics?.get("changes_deleted_methods")?.jsonPrimitive?.intOrNull ?: 0
+        val testedNewMethods = metrics?.get("tested_new_methods")?.jsonPrimitive?.intOrNull ?: 0
+        val testedModifiedMethods = metrics?.get("tested_modified_methods")?.jsonPrimitive?.intOrNull ?: 0
+        val totalChanges = newMethods + modifiedMethods + deletedMethods
+        val riskChanges = newMethods + modifiedMethods
         val testedChanges = metrics?.get("tested_changes")?.jsonPrimitive?.intOrNull ?: 0
         val coverage = metrics?.get("coverage")?.jsonPrimitive?.doubleOrNull ?: 0.0
-        val recommendedTests = metrics?.get("recommended_tests")?.jsonPrimitive?.intOrNull ?: 0
+        val impactedTests = metrics?.get("impacted_tests")?.jsonPrimitive?.intOrNull ?: 0
+        val passedImpactedTests = metrics?.get("passed_impacted_tests")?.jsonPrimitive?.intOrNull ?: 0
+        val failedImpactedTests = metrics?.get("failed_impacted_tests")?.jsonPrimitive?.intOrNull ?: 0
 
         val links = data["data"]?.jsonObject?.get("links") as? JsonObject
         val buildLink = links?.get("build")?.jsonPrimitive?.contentOrNull
         val baselineBuildLink = links?.get("baseline_build")?.jsonPrimitive?.contentOrNull
         val changesLink = links?.get("changes")?.jsonPrimitive?.contentOrNull
-        val recommendedTestsLink = links?.get("recommended_tests")?.jsonPrimitive?.contentOrNull
+        val impactedTestsLink = links?.get("impacted_tests")?.jsonPrimitive?.contentOrNull
         val fullReportLink = links?.get("full_report")?.jsonPrimitive?.contentOrNull
 
         val descriptionText = "Comparing ${commitSha?.shortSha()?.wrapToLink(buildLink)} (current) " +
                 "to ${baselineCommitSha?.shortSha()?.wrapToLink(baselineBuildLink)} (baseline)."
-        val changesText =
-            "$totalChanges method${totalChanges.pluralEnding("s")} ($newMethods new, $modifiedMethods modified)"
-                .takeIf { totalChanges > 0 }
-                ?.wrapToLink(changesLink)
-                ?: "No changes detected"
-        val testedMethodsText = "${totalChanges - testedChanges}/$totalChanges methods not tested."
-            .takeIf { totalChanges - testedChanges > 0 }
-            ?.wrapToLink(changesLink)
-            ?: "All changes tested".wrapToLink(changesLink)
-        val coverageText = "${coverage.percent()}% coverage"
-            .wrapToLink(changesLink)
-        val recommendedTestsText = "$recommendedTests test${recommendedTests.pluralEnding("s")}"
-            .takeIf { recommendedTests > 0 }
-            ?.wrapToLink(recommendedTestsLink)
+
+        val newText = "$newMethods new (${testedNewMethods}/$newMethods tested)"
+        val modifiedText =
+            "$modifiedMethods modified (${testedModifiedMethods}/$modifiedMethods tested)"
+        val deletedText = "$deletedMethods deleted"
+
+        val coverageText = "${coverage.percent()}% of changes covered".wrapToLink(changesLink)
+
+        val impactedTestsText = "$impactedTests test${impactedTests.pluralEnding("s")}"
+            .wrapToLink(impactedTestsLink)
+        val passedImpactedTestsText = "$passedImpactedTests passed"
+            .takeIf { passedImpactedTests > 0 }
+        val failedImpactedTestsText = "$failedImpactedTests failed"
+            .takeIf { failedImpactedTests > 0 }
+        val passedAndFailedTestsText = listOfNotNull(passedImpactedTestsText, failedImpactedTestsText).joinToString(
+            ", ",
+            prefix = "(",
+            postfix = ")"
+        )
+        val impactedTestsWithResultsText = "$impactedTestsText $passedAndFailedTestsText"
+            .takeIf { impactedTests > 0 }
             ?: "None"
+
         val seeDetailsText = "See details in Drill4J"
             .takeIf { fullReportLink != null }
             ?.wrapToLink(fullReportLink)
@@ -79,14 +93,20 @@ $descriptionText
 
         val changesParagraph = """
 **Changes**
-$changesText   
+$newText   
+$modifiedText
+$deletedText
+
+
+            """.trimIndent().takeIf { totalChanges > 0 } ?: """
+**Changes**
+No changes detected
 
 
             """.trimIndent()
 
-        val risksParagraph = """
-**Risks**
-$testedMethodsText
+        val coverageParagraph = """
+**Coverage**
 $coverageText
 
 
@@ -95,8 +115,8 @@ $coverageText
             ?: ""
 
         val recommendedTestsParagraph = """
-**Recommended tests**
-$recommendedTestsText
+**Impacted tests**
+$impactedTestsWithResultsText
 
 
 """.trimIndent()
@@ -109,7 +129,7 @@ $seeDetailsText
             content = reportHeader
                     + descriptionParagraph
                     + changesParagraph
-                    + risksParagraph
+                    + coverageParagraph
                     + recommendedTestsParagraph
                     + seeDetailsParagraph,
             format = ReportFormat.MARKDOWN

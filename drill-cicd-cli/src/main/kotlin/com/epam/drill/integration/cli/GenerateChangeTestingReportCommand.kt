@@ -30,6 +30,7 @@ import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import kotlinx.coroutines.runBlocking
+import java.io.File
 
 class GenerateChangeTestingReportCommand : CliktCommand(name = "generateChangeTestingReport") {
     private val apiUrl by option("-drill-u", "--apiUrl", envvar = "DRILL_API_URL").required()
