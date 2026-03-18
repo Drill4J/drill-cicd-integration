@@ -56,12 +56,7 @@ open class DrillPluginExtension(
         action.execute(coverage)
     }
 
-    fun classScanning() {
-        classScanning.beforeRun = true
-    }
-
     fun classScanning(action: Action<ClassScanningExtension>) {
-        classScanning.beforeRun = true
         action.execute(classScanning)
     }
 
