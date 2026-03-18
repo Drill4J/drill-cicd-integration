@@ -28,6 +28,7 @@ import com.epam.drill.integration.common.agent.javaExecutable
 import com.epam.drill.integration.common.baseline.BaselineFactory
 import com.epam.drill.integration.common.git.GitClient
 import com.epam.drill.integration.common.git.impl.GitClientImpl
+import com.epam.drill.integration.common.util.getCurrentJavaVersion
 import com.epam.drill.integration.common.util.getJavaAddOpensOptions
 import com.epam.drill.integration.common.util.required
 import kotlinx.coroutines.runBlocking
@@ -96,7 +97,7 @@ abstract class AbstractAgentMojo : AbstractDrillMojo() {
         }
 
         val oldArgLine = project.properties.getProperty(ARG_LINE) ?: ""
-        val javaAddOpensOptions = getJavaAddOpensOptions().joinToString(separator = " ")
+        val javaAddOpensOptions = getJavaAddOpensOptions(getCurrentJavaVersion()).joinToString(separator = " ")
         val newArgLine = "$oldArgLine ${jvmOptions.joinToString(" ")} $javaAddOpensOptions".trim()
         project.properties.setProperty(ARG_LINE, newArgLine)
         log.info("JVM args $jvmOptions have been added to the goal")

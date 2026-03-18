@@ -27,6 +27,8 @@ import com.epam.drill.integration.common.baseline.MergeBaseCriteria
 import com.epam.drill.integration.common.baseline.TagCriteria
 import com.epam.drill.integration.common.git.GitClient
 import com.epam.drill.integration.common.git.impl.GitClientImpl
+import com.epam.drill.integration.common.util.asJavaVersion
+import com.epam.drill.integration.common.util.getCurrentJavaVersion
 import com.epam.drill.integration.common.util.getJavaAddOpensOptions
 import com.epam.drill.integration.common.util.required
 import kotlinx.coroutines.runBlocking
@@ -36,6 +38,7 @@ import org.gradle.api.file.FileCollection
 import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.bundling.AbstractArchiveTask
 import org.gradle.api.tasks.testing.Test
+import org.gradle.jvm.toolchain.JavaLauncher
 import org.gradle.process.JavaForkOptions
 import java.io.File
 import kotlin.collections.plus
@@ -78,7 +81,7 @@ fun Task.modifyToRunDrillAgents(
             }.build(agentDir, config)
         }
     }.let {
-        getJavaAddOpensOptions() + it
+        getJavaAddOpensOptions(detectJavaVersion(task)) + it
     }.run {
         (task as JavaForkOptions).jvmArgs.let { previousJvmArgs ->
             if (previousJvmArgs != null) {
@@ -218,4 +221,17 @@ internal fun AgentConfiguration.mapTestSpecificProperties(
                 baselineFactory.produce(searchStrategy).findBaseline(searchCriteria)
         }
     }
+}
+
+@Suppress("UnstableApiUsage")
+fun detectJavaVersion(task: Task): Int? {
+    if (task !is Test) {
+        return getCurrentJavaVersion()
+    }
+    val launcher: JavaLauncher? = task.javaLauncher.orNull
+    if (launcher != null) {
+        val version = launcher.metadata.javaRuntimeVersion
+        return version.asJavaVersion()
+    }
+    return getCurrentJavaVersion()
 }
