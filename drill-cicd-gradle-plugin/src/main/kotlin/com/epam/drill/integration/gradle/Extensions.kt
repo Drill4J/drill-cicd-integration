@@ -15,9 +15,11 @@
  */
 package com.epam.drill.integration.gradle
 
-import com.epam.drill.integration.common.agent.config.AgentMode
 import com.epam.drill.integration.common.baseline.BaselineSearchStrategy
 import org.gradle.api.Action
+import org.gradle.api.file.FileCollection
+
+interface PluginExtension
 
 open class DrillPluginExtension(
     var apiUrl: String? = null,
@@ -25,16 +27,48 @@ open class DrillPluginExtension(
     var groupId: String? = null,
     var appId: String? = null,
     var buildVersion: String? = null,
-    var packagePrefixes: Array<String> = emptyArray(),
+    var packagePrefixes: Array<String>? = null,
+
+    var envId: String? = null,
+    var testTaskId: String? = null,
+
+    var agent: AgentExtension = AgentExtension(),
+    var coverage: CoverageExtension = CoverageExtension(),
+    var classScanning: ClassScanningExtension = ClassScanningExtension(),
+    var testTracing: TestTracing = TestTracing(),
 
     var baseline: BaselineExtension = BaselineExtension(),
     var gitlab: GitlabExtension = GitlabExtension(),
     var github: GithubExtension = GithubExtension(),
     var recommendedTests: RecommendedTestsExtension = RecommendedTestsExtension(),
+    var additionalParams: Map<String, String>? = null
+): PluginExtension {
+    fun agent(action: Action<AgentExtension>) {
+        action.execute(agent)
+    }
 
-    internal var testAgent: TestAgentExtension = TestAgentExtension(),
-    internal var appAgent: AppAgentExtension = AppAgentExtension(),
-) {
+    fun coverage() {
+        coverage.enabled = true
+    }
+
+    fun coverage(action: Action<CoverageExtension>) {
+        coverage.enabled = true
+        action.execute(coverage)
+    }
+
+    fun classScanning(action: Action<ClassScanningExtension>) {
+        action.execute(classScanning)
+    }
+
+    fun testTracing() {
+        testTracing.enabled = true
+    }
+
+    fun testTracing(action: Action<TestTracing>) {
+        testTracing.enabled = true
+        action.execute(testTracing)
+    }
+
     fun baseline(action: Action<BaselineExtension>) {
         action.execute(baseline)
     }
@@ -47,17 +81,11 @@ open class DrillPluginExtension(
         action.execute(github)
     }
 
-    fun enableTestAgent(action: Action<TestAgentExtension>) {
-        testAgent.enabled = true
-        action.execute(testAgent)
+    fun recommendedTests() {
+        recommendedTests.enabled = true
     }
 
-    fun enableAppAgent(action: Action<AppAgentExtension>) {
-        appAgent.enabled = true
-        action.execute(appAgent)
-    }
-
-    fun enableTestRecommendations(action: Action<RecommendedTestsExtension>) {
+    fun recommendedTests(action: Action<RecommendedTestsExtension>) {
         recommendedTests.enabled = true
         action.execute(recommendedTests)
     }
@@ -69,7 +97,7 @@ open class GitlabExtension(
     var projectId: String? = null,
     var commitSha: String? = null,
     var mergeRequest: MergeRequestExtension = MergeRequestExtension()
-) {
+): PluginExtension {
     fun mergeRequest(action: Action<MergeRequestExtension>) {
         action.execute(mergeRequest)
     }
@@ -80,13 +108,13 @@ open class MergeRequestExtension(
     var sourceBranch: String? = null,
     var targetBranch: String? = null,
     var mergeBaseCommitSha: String? = null,
-)
+): PluginExtension
 
 open class GithubExtension(
     var apiUrl: String = "https://api.github.com",
     var token: String? = null,
     var eventFilePath: String? = null
-)
+): PluginExtension
 
 open class BaselineExtension(
     var searchStrategy: BaselineSearchStrategy? = null,
@@ -96,46 +124,48 @@ open class BaselineExtension(
 
 open class RecommendedTestsExtension(
     var enabled: Boolean? = null,
-    var coveragePeriodDays: Int? = null,
-)
+): PluginExtension
 
 open class AgentExtension(
-    var enabled: Boolean? = null,
-
     var version: String? = null,
     var downloadUrl: String? = null,
     var zipPath: String? = null,
 
+    var agentMode: String? = null,
+
     var logLevel: String? = null,
     var logFile: String? = null,
+): PluginExtension
 
-    var additionalParams: Map<String, String> = mutableMapOf()
-)
+open class CoverageExtension(
+    var enabled: Boolean? = null,
+): PluginExtension
 
-open class TestAgentExtension(
-    var testTaskId: String? = null,
-    var testTracingEnabled: Boolean? = null,
-    var testLaunchMetadataSendingEnabled: Boolean? = null,
-) : AgentExtension()
-
-open class AppAgentExtension(
-    var envId: String? = null,
-    var classpathScannerEnabled: Boolean? = null,
-    var archiveScannerEnabled: Boolean? = null,
-    var agentMode: String? = null,
-) : AgentExtension()
-
-open class DrillTaskExtension(
-    var testAgent: TestAgentExtension = TestAgentExtension(),
-    var appAgent: AppAgentExtension = AppAgentExtension(),
-) {
-    fun testAgent(action: Action<TestAgentExtension>) {
-        testAgent.enabled = true
-        action.execute(testAgent)
+open class ClassScanningExtension(
+    var runtime: Boolean? = null,
+    var beforeRun: Boolean? = null,
+    var afterBuild: Boolean? = null,
+    var appClasses: FileCollection? = null,
+    var testClasses: FileCollection? = null,
+    var classLoaders: ClassLoaderScanningExtension = ClassLoaderScanningExtension()
+): PluginExtension {
+    fun runtimeClassLoaderScanning() {
+        classLoaders.enabled = true
     }
-
-    fun appAgent(action: Action<AppAgentExtension>) {
-        appAgent.enabled = true
-        action.execute(appAgent)
+    fun runtimeClassLoaderScanning(action: Action<ClassLoaderScanningExtension>) {
+        classLoaders.enabled = true
+        action.execute(classLoaders)
     }
 }
+
+open class ClassLoaderScanningExtension(
+    var enabled: Boolean? = null,
+    var delay: Int? = null,
+): PluginExtension
+
+open class TestTracing(
+    var enabled: Boolean? = null,
+    var testSessionId: String? = null,
+    var perTestSession: Boolean? = null,
+    var perTestLaunch: Boolean? = null,
+): PluginExtension

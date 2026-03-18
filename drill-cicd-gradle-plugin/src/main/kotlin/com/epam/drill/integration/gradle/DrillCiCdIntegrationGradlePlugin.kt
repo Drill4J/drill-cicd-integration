@@ -17,85 +17,132 @@ package com.epam.drill.integration.gradle
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.Task
 import org.gradle.api.tasks.JavaExec
+import org.gradle.api.tasks.TaskCollection
 import org.gradle.api.tasks.bundling.AbstractArchiveTask
 import org.gradle.api.tasks.testing.Test
-import org.gradle.process.JavaForkOptions
 import kotlin.reflect.KClass
+import kotlin.reflect.full.isSubclassOf
+import kotlin.reflect.full.memberProperties
+import kotlin.reflect.full.primaryConstructor
 
 private const val TASK_GROUP = "drill"
 
 class DrillCiCdIntegrationGradlePlugin : Plugin<Project> {
     override fun apply(project: Project) {
-        val config = project.extensions.create("drill", DrillPluginExtension::class.java)
+        val pluginConfig = project.extensions.create("drill", DrillPluginExtension::class.java)
 
         project.task("drillGitlabMergeRequestReport") {
-            drillGitlabMergeRequestReportTask(config)
+            drillGitlabMergeRequestReportTask(pluginConfig)
         }.also {
             it.group = TASK_GROUP
         }
 
         project.task("drillGithubPullRequestReport") {
-            drillGithubPullRequestReport(config)
+            drillGithubPullRequestReport(pluginConfig)
         }.also {
             it.group = TASK_GROUP
         }
 
         project.task("drillSendBuildInfo") {
-            drillSendBuildInfo(config)
+            drillSendBuildInfo(pluginConfig)
         }.also {
             it.group = TASK_GROUP
         }
 
         project.task("drillScanAppArchive") {
-            drillScanAppArchive(config)
+            doFirst {
+                scanAppArchive(
+                    project = project,
+                    pluginConfig = pluginConfig,
+                )
+            }
         }.also {
             it.group = TASK_GROUP
         }
 
         project.task("drillGenerateChangeTestingReport") {
-            drillGenerateChangeTestingReport(config)
+            drillGenerateChangeTestingReport(pluginConfig)
         }.also {
             it.group = TASK_GROUP
         }
 
         project.task("drillClearAgentFileCache") {
-            drillClearAgentFileCache(config)
+            drillClearAgentFileCache(pluginConfig)
         }.also {
             it.group = TASK_GROUP
         }
 
         project.task("drillDownloadAgents") {
-            drillDownloadAgents(config)
+            drillDownloadAgents(pluginConfig)
         }.also {
             it.group = TASK_GROUP
         }
 
-        project.tasks.withType(Test::class.java) {
-            extensions.create("drill", DrillTaskExtension::class.java)
+        project.tasks.withType(Test::class.java).configureEachWithDrill { taskConfig ->
+            doFirst {
+                val config = merge(pluginConfig, taskConfig)
+                modifyToRunDrillAgents(project, config)
+                if (config.classScanning.beforeRun == true)
+                    modifyToScanAppArchive(project, config)
+            }
         }
 
-        project.tasks.withType(JavaExec::class.java) {
-            extensions.create("drill", DrillTaskExtension::class.java)
+        project.tasks.withType(JavaExec::class.java).configureEachWithDrill { taskConfig ->
+            doFirst {
+                val config = merge(pluginConfig, taskConfig)
+                modifyToRunDrillAgents(project, config)
+                if (config.classScanning.beforeRun == true)
+                    modifyToScanAppArchive(project, config)
+            }
         }
 
-        project.tasks.withType(AbstractArchiveTask::class.java) {
-            extensions.create("drill", DrillTaskExtension::class.java)
-        }
-
-        project.afterEvaluate {
-            tasks
-                .filterIsInstance<Test>()
-                .forEach { task ->
-                    modifyToRunDrillAgents(task, project, config)
-                    modifyToScanClasspath(task, project, config)
-                }
-
-            tasks
-                .filterIsInstance<AbstractArchiveTask>()
-                .forEach { task ->
-                    modifyToRunAppArchiveScanner(task, project, config)
-                }
+        project.tasks.withType(AbstractArchiveTask::class.java).configureEachWithDrill { taskConfig ->
+            doLast {
+                val config = merge(pluginConfig, taskConfig)
+                if (config.classScanning.afterBuild == true)
+                    modifyToScanAppArchive(project, config)
+            }
         }
     }
+}
+
+private fun <T : Task> TaskCollection<T>.configureEachWithDrill(
+    action: T.(taskConfig: DrillPluginExtension) -> Unit
+) = configureEach {
+    val taskConfig = this.extensions.create(
+        "drill",
+        DrillPluginExtension::class.java
+    )
+    action(taskConfig)
+}
+
+
+inline fun <reified T : Any> merge(base: T, override: T): T =
+    mergeObjects(base, override, T::class) as T
+
+@Suppress("UNCHECKED_CAST")
+fun <T : Any> mergeObjects(base: T, override: T, clazz: KClass<T>): T {
+    val primaryConstructor = clazz.primaryConstructor
+        ?: error("Class ${clazz.simpleName} must have a primary constructor")
+
+    val args = primaryConstructor.parameters.associateWith { param ->
+        val property = clazz.memberProperties.first { it.name == param.name }
+        val overrideValue = property.get(override)
+        val baseValue = property.get(base)
+
+        when {
+            // Both values are classes
+            overrideValue != null && baseValue != null && overrideValue::class.isSubclassOf(PluginExtension::class) -> {
+                mergeObjects(baseValue, overrideValue, overrideValue::class as KClass<Any>)
+            }
+            // Override is not null
+            overrideValue != null -> overrideValue
+            // Fall back to base
+            else -> baseValue
+        }
+    }
+
+    return primaryConstructor.callBy(args)
 }
