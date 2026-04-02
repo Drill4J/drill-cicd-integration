@@ -41,6 +41,9 @@ class PostBuildInfoMojo : AbstractDrillMojo() {
     @Parameter(property = "buildVersion")
     var buildVersion: String? = null
 
+    @Parameter(property = "branch")
+    var branch: String? = null
+
     override fun execute() {
         val apiUrl = apiUrl.fromEnv("DRILL_API_URL").required("apiUrl")
         val apiKey = apiKey.fromEnv("DRILL_API_KEY")
@@ -54,7 +57,9 @@ class PostBuildInfoMojo : AbstractDrillMojo() {
         )
         val gitClient = GitClientImpl()
 
-        val branch = gitClient.getGitBranch()
+        val branch = branch
+            ?: System.getenv("DRILL_BUILD_BRANCH")?.takeIf { it.isNotBlank() }
+            ?: gitClient.getGitBranch()
         val commitInfo = gitClient.getGitCommitInfo()
         val payload = BuildPayload(
             groupId = groupId,
