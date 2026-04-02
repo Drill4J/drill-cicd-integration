@@ -51,11 +51,11 @@ class GitClientImpl(private val workingDir: File? = null) : GitClient {
         return executeGitCommand("git rev-list -n $n $ref").split("\n")
     }
 
-    override fun getGitBranch(): String {
+    override fun getGitBranch(): String? {
         val branch = executeGitCommand("git rev-parse --abbrev-ref HEAD")
         if (branch != "HEAD") return branch
         logger.info { "Detached HEAD detected, attempting to resolve branch from CI environment variables" }
-        return getBranchFromCiEnvironment() ?: ""
+        return getBranchFromCiEnvironment()
     }
 
     private fun getBranchFromCiEnvironment(): String? {
