@@ -37,7 +37,9 @@ fun Task.drillSendBuildInfo(config: DrillPluginExtension) {
         )
         val gitClient = GitClientImpl()
 
-        val branch = gitClient.getGitBranch()
+        val branch = config.branch
+            ?: System.getenv("DRILL_BUILD_BRANCH")?.takeIf { it.isNotBlank() }
+            ?: gitClient.getGitBranch()
         val commitInfo = gitClient.getGitCommitInfo()
         val payload = BuildPayload(
             groupId = groupId,

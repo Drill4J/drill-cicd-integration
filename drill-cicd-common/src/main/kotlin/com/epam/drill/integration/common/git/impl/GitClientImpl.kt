@@ -51,8 +51,29 @@ class GitClientImpl(private val workingDir: File? = null) : GitClient {
         return executeGitCommand("git rev-list -n $n $ref").split("\n")
     }
 
-    override fun getGitBranch(): String {
-        return executeGitCommand("git rev-parse --abbrev-ref HEAD")
+    override fun getGitBranch(): String? {
+        val branch = executeGitCommand("git rev-parse --abbrev-ref HEAD")
+        if (branch != "HEAD") return branch
+        logger.info { "Detached HEAD detected, attempting to resolve branch from CI environment variables" }
+        return getBranchFromCiEnvironment()
+    }
+
+    private fun getBranchFromCiEnvironment(): String? {
+        val envVars = listOf(
+            "CI_COMMIT_BRANCH",                     // GitLab CI
+            "CI_MERGE_REQUEST_SOURCE_BRANCH_NAME",   // GitLab CI (merge requests)
+            "GITHUB_HEAD_REF",                       // GitHub Actions (pull requests)
+            "GITHUB_REF_NAME",                       // GitHub Actions
+            "BRANCH_NAME",                           // Jenkins
+            "GIT_BRANCH",                            // Jenkins
+            "BUILD_SOURCEBRANCH",                    // Azure DevOps
+            "BITBUCKET_BRANCH",                      // Bitbucket Pipelines
+        )
+        return envVars.firstNotNullOfOrNull { envVar ->
+            System.getenv(envVar)?.takeIf { it.isNotBlank() }?.also {
+                logger.info { "Resolved branch '$it' from environment variable '$envVar'" }
+            }
+        }
     }
 
     override fun getGitCommitInfo(): GitCommitInfo {

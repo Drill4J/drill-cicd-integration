@@ -22,7 +22,7 @@ interface GitClient {
         matchPattern: String? = null, excludePattern: String? = null
     ): String
     fun revList(ref: String, n: Int = 1): List<String>
-    fun getGitBranch(): String
+    fun getGitBranch(): String?
     fun getGitCommitInfo(): GitCommitInfo
     fun getMergeBaseCommitSha(targetRef: String): String
     fun fetch(depth: Int? = null)
