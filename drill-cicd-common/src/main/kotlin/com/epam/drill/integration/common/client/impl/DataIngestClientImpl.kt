@@ -40,7 +40,7 @@ class DataIngestClientImpl(
     }
 
     override suspend fun sendBuild(payload: BuildPayload) {
-        val url = "$dataIngestUrl/builds"
+        val url = "$dataIngestUrl/builds/info"
         client.put<Any?>(url) {
             contentType(ContentType.Application.Json)
             apiKey?.let { apiKey ->
