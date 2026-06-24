@@ -29,23 +29,48 @@ class BaselineFinderByTag(
 
     override suspend fun findBaseline(groupId: String, appId: String, criteria: TagCriteria): Baseline {
         logger.info { "Looking for git tag ${criteria.tagPattern}..." }
-        val tagCommitSha = try {
-            val tag = gitClient.describe(tags = true, matchPattern = criteria.tagPattern)
-            gitClient.revList(ref = tag).first()
+        val tag = try {
+            gitClient.describe(tags = true, matchPattern = criteria.tagPattern)
         } catch (e: GitException) {
             if (e.exitCode == GIT_INVALID_ARGUMENT_ERROR)
                 throw IllegalStateException("No git tags found matching pattern ${criteria.tagPattern}", e)
             else
                 throw e
         }
-        val build = metricsClient.findBuild(groupId = groupId, appId = appId, commitSha = tagCommitSha)
-        return build?.let {
-            Baseline(
-                buildVersion = it.buildVersion,
-                commitSha = it.commitSha,
-            )
-        } ?: throw IllegalStateException("No build found for git tag ${criteria.tagPattern} with commit sha $tagCommitSha")
+        return when (criteria.matchBy) {
+            TagMatchBy.BUILD_VERSION -> {
+                val buildVersion = tag.removePrefix(criteria.tagPrefix)
+                logger.info { "Looking for build with buildVersion=$buildVersion (from tag $tag)..." }
+                val build = metricsClient.findBuild(groupId = groupId, appId = appId, buildVersion = buildVersion)
+                build?.let {
+                    Baseline(
+                        buildVersion = it.buildVersion,
+                        commitSha = it.commitSha,
+                    )
+                } ?: throw IllegalStateException("No build found for git tag $tag with buildVersion $buildVersion")
+            }
+            TagMatchBy.COMMIT_SHA -> {
+                val tagCommitSha = gitClient.revList(ref = tag).first()
+                logger.info { "Looking for build with commitSha=$tagCommitSha (from tag $tag)..." }
+                val build = metricsClient.findBuild(groupId = groupId, appId = appId, commitSha = tagCommitSha)
+                build?.let {
+                    Baseline(
+                        buildVersion = it.buildVersion,
+                        commitSha = it.commitSha,
+                    )
+                } ?: throw IllegalStateException("No build found for git tag ${criteria.tagPattern} with commit sha $tagCommitSha")
+            }
+        }
     }
 }
 
-class TagCriteria(val tagPattern: String) : BaselineSearchCriteria
+enum class TagMatchBy {
+    COMMIT_SHA,
+    BUILD_VERSION
+}
+
+class TagCriteria(
+    val tagPattern: String,
+    val matchBy: TagMatchBy = TagMatchBy.COMMIT_SHA,
+    val tagPrefix: String = "",
+) : BaselineSearchCriteria

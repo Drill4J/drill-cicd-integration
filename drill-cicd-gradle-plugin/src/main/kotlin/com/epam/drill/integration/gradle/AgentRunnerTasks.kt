@@ -25,6 +25,7 @@ import com.epam.drill.integration.common.baseline.BaselineFactory
 import com.epam.drill.integration.common.baseline.BaselineSearchStrategy
 import com.epam.drill.integration.common.baseline.MergeBaseCriteria
 import com.epam.drill.integration.common.baseline.TagCriteria
+import com.epam.drill.integration.common.baseline.TagMatchBy
 import com.epam.drill.integration.common.client.impl.MetricsClientImpl
 import com.epam.drill.integration.common.git.GitClient
 import com.epam.drill.integration.common.git.impl.GitClientImpl
@@ -221,10 +222,16 @@ internal fun AgentConfiguration.mapTestSpecificProperties(
         pluginExtension.baseline.searchStrategy?.let { searchStrategy ->
             val baselineTagPattern = pluginExtension.baseline.tagPattern ?: "*"
             val baselineTargetRef = pluginExtension.baseline.targetRef
-            val searchCriteria = when (searchStrategy) {
-                BaselineSearchStrategy.SEARCH_BY_TAG -> TagCriteria(baselineTagPattern)
-                BaselineSearchStrategy.SEARCH_BY_MERGE_BASE -> MergeBaseCriteria(baselineTargetRef.required("baselineTargetRef"))
-            }
+                val searchCriteria = when (searchStrategy) {
+                    BaselineSearchStrategy.SEARCH_BY_TAG -> TagCriteria(
+                        tagPattern = baselineTagPattern,
+                        matchBy = pluginExtension.baseline.tagMatchBy
+                            ?.let { TagMatchBy.valueOf(it) }
+                            ?: TagMatchBy.COMMIT_SHA,
+                        tagPrefix = pluginExtension.baseline.tagPrefix ?: "",
+                    )
+                    BaselineSearchStrategy.SEARCH_BY_MERGE_BASE -> MergeBaseCriteria(baselineTargetRef.required("baselineTargetRef"))
+                }
             val baseline = runBlocking {
                 baselineFactory.produce(searchStrategy).findBaseline(
                     pluginExtension.groupId ?: throw IllegalArgumentException("groupId is required for baseline search"),

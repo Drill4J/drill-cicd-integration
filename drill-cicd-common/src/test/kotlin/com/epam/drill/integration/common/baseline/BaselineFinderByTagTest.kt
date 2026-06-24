@@ -51,6 +51,25 @@ class BaselineFinderByTagTest : GitTestBase() {
     }
 
     @Test
+    fun `given existing git tag and matchBy BUILD_VERSION, findBaseline should search by buildVersion extracted from tag`(): Unit = runBlocking {
+        exec("git init")
+        exec("git commit --allow-empty -m \"Initial commit\"")
+        exec("git tag -a v1.2.3 -m \"Version 1.2.3\"")
+        exec("git commit --allow-empty -m \"Next commit\"")
+
+        whenever(metricsClient.findBuild(any(), any(), anyOrNull(), eq("1.2.3"), anyOrNull(), anyOrNull()))
+            .thenReturn(BuildView("id", "group", "app", null, "1.2.3"))
+
+        val baseline = finder.findBaseline(
+            "group", "app",
+            TagCriteria(tagPattern = "v*", matchBy = TagMatchBy.BUILD_VERSION, tagPrefix = "v")
+        )
+
+        verify(metricsClient).findBuild(eq("group"), eq("app"), isNull(), eq("1.2.3"), isNull(), isNull())
+        assertEquals("1.2.3", baseline.buildVersion)
+    }
+
+    @Test
     fun `if there are no git tags, findBaseline should throw error`(): Unit = runBlocking {
         exec("git init")
         exec("git commit --allow-empty -m \"Initial commit: add file1.txt\"")

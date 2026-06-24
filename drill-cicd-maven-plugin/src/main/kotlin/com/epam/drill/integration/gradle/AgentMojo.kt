@@ -20,6 +20,7 @@ import com.epam.drill.integration.common.baseline.BaselineFactory
 import com.epam.drill.integration.common.baseline.BaselineSearchStrategy
 import com.epam.drill.integration.common.baseline.MergeBaseCriteria
 import com.epam.drill.integration.common.baseline.TagCriteria
+import com.epam.drill.integration.common.baseline.TagMatchBy
 import com.epam.drill.integration.common.git.GitClient
 import com.epam.drill.integration.common.util.required
 import kotlinx.coroutines.runBlocking
@@ -103,7 +104,13 @@ internal fun AgentConfiguration.mapTestSpecificProperties(
             val baselineTargetRef = baseline.targetRef
             if (searchStrategy != null) {
                 val searchCriteria = when (searchStrategy) {
-                    BaselineSearchStrategy.SEARCH_BY_TAG -> TagCriteria(baselineTagPattern)
+                    BaselineSearchStrategy.SEARCH_BY_TAG -> TagCriteria(
+                        tagPattern = baselineTagPattern,
+                        matchBy = baseline.tagMatchBy
+                            ?.let { TagMatchBy.valueOf(it) }
+                            ?: TagMatchBy.COMMIT_SHA,
+                        tagPrefix = baseline.tagPrefix ?: "",
+                    )
                     BaselineSearchStrategy.SEARCH_BY_MERGE_BASE -> MergeBaseCriteria(baselineTargetRef.required("baselineTargetRef"))
                 }
                 val baseline = runBlocking {
