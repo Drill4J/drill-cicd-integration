@@ -18,6 +18,8 @@ package com.epam.drill.integration.cli
 import com.epam.drill.integration.common.baseline.BaselineSearchStrategy
 import com.epam.drill.integration.common.baseline.BaselineSearchStrategy.SEARCH_BY_MERGE_BASE
 import com.epam.drill.integration.common.baseline.BaselineSearchStrategy.SEARCH_BY_TAG
+import com.epam.drill.integration.common.baseline.BuildVersionCriteria
+import com.epam.drill.integration.common.baseline.CommitCriteria
 import com.epam.drill.integration.common.baseline.MergeBaseCriteria
 import com.epam.drill.integration.common.baseline.TagCriteria
 import com.epam.drill.integration.common.client.impl.MetricsClientImpl
@@ -41,6 +43,8 @@ class GenerateChangeTestingReportCommand : CliktCommand(name = "generateChangeTe
     private val baselineSearchStrategyName by option("-bl-s", "--baselineSearchStrategy").default(SEARCH_BY_TAG.name)
     private val baselineTagPattern by option("-bl-t", "--baselineTagPattern").default("*")
     private val baselineTargetRef by option("-bl-tr", "--baselineTargetRef")
+    private val baselineCommitSha by option("-bl-cs", "--baselineCommitSha")
+    private val baselineBuildVersion by option("-bl-bv", "--baselineBuildVersion")
 
     override fun run() {
         val reportService = ReportService(
@@ -53,8 +57,10 @@ class GenerateChangeTestingReportCommand : CliktCommand(name = "generateChangeTe
         )
         val searchStrategy = BaselineSearchStrategy.valueOf(baselineSearchStrategyName)
         val searchCriteria = when (searchStrategy) {
-            SEARCH_BY_TAG -> TagCriteria(baselineTagPattern)
+            SEARCH_BY_TAG -> TagCriteria(tagPattern = baselineTagPattern)
             SEARCH_BY_MERGE_BASE -> MergeBaseCriteria(baselineTargetRef.required("--baselineTargetRef"))
+            BaselineSearchStrategy.SEARCH_BY_COMMIT -> CommitCriteria(baselineCommitSha.required("--baselineCommitSha"))
+            BaselineSearchStrategy.SEARCH_BY_BUILD_VERSION -> BuildVersionCriteria(baselineBuildVersion.required("--baselineBuildVersion"))
         }
 
         echo("Generating Drill4J Testing Report...")

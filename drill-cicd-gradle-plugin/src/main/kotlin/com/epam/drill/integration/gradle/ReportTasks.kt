@@ -15,10 +15,14 @@
  */
 package com.epam.drill.integration.gradle
 
+import com.epam.drill.integration.common.baseline.BaselineSearchStrategy
 import com.epam.drill.integration.common.baseline.BaselineSearchStrategy.SEARCH_BY_MERGE_BASE
 import com.epam.drill.integration.common.baseline.BaselineSearchStrategy.SEARCH_BY_TAG
+import com.epam.drill.integration.common.baseline.BuildVersionCriteria
+import com.epam.drill.integration.common.baseline.CommitCriteria
 import com.epam.drill.integration.common.baseline.MergeBaseCriteria
 import com.epam.drill.integration.common.baseline.TagCriteria
+import com.epam.drill.integration.common.baseline.TagMatchBy
 import com.epam.drill.integration.common.client.impl.MetricsClientImpl
 import com.epam.drill.integration.common.git.impl.GitClientImpl
 import com.epam.drill.integration.common.report.impl.MarkdownReportGenerator
@@ -38,6 +42,8 @@ fun Task.drillGenerateChangeTestingReport(config: DrillPluginExtension) {
         val baselineSearchStrategy = config.baseline.searchStrategy ?: SEARCH_BY_TAG
         val baselineTagPattern = config.baseline.tagPattern ?: "*"
         val baselineTargetRef = config.baseline.targetRef
+        val baselineCommitSha = config.baseline.commitSha
+        val baselineBuildVersion: String? = config.baseline.buildVersion
 
         val reportService = ReportService(
             metricsClient = MetricsClientImpl(
@@ -48,8 +54,16 @@ fun Task.drillGenerateChangeTestingReport(config: DrillPluginExtension) {
             reportGenerator = MarkdownReportGenerator()
         )
         val searchCriteria = when (baselineSearchStrategy) {
-            SEARCH_BY_TAG -> TagCriteria(baselineTagPattern)
+            SEARCH_BY_TAG -> TagCriteria(
+                tagPattern = baselineTagPattern,
+                matchBy = config.baseline.tagMatchBy
+                    ?.let { TagMatchBy.valueOf(it) }
+                    ?: TagMatchBy.COMMIT_SHA,
+                tagPrefix = config.baseline.tagPrefix ?: "",
+            )
             SEARCH_BY_MERGE_BASE -> MergeBaseCriteria(baselineTargetRef.required("baseline.targetRef"))
+            BaselineSearchStrategy.SEARCH_BY_COMMIT -> CommitCriteria(baselineCommitSha.required("baseline.commitSha"))
+            BaselineSearchStrategy.SEARCH_BY_BUILD_VERSION -> BuildVersionCriteria(baselineBuildVersion.required("baseline.buildVersion"))
         }
 
         logger.lifecycle("Generating Drill4J Change Testing Report...")

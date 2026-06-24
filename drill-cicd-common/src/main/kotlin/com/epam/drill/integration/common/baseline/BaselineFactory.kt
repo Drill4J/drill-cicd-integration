@@ -27,6 +27,8 @@ class BaselineFactory(
         when (strategy) {
             BaselineSearchStrategy.SEARCH_BY_TAG -> BaselineFinderByTag(gitClient, metricsClient)
             BaselineSearchStrategy.SEARCH_BY_MERGE_BASE -> BaselineFinderByMergeBase(gitClient, metricsClient)
+            BaselineSearchStrategy.SEARCH_BY_COMMIT -> BaselineFinderByCommit(metricsClient)
+            BaselineSearchStrategy.SEARCH_BY_BUILD_VERSION -> BaselineFinderByBuildVersion(metricsClient)
         } as BaselineFinder<BaselineSearchCriteria>
     }
 

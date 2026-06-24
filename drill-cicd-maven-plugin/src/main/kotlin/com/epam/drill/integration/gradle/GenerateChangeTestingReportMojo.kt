@@ -16,6 +16,8 @@
 package com.epam.drill.integration.gradle
 
 import com.epam.drill.integration.common.baseline.BaselineSearchStrategy
+import com.epam.drill.integration.common.baseline.BuildVersionCriteria
+import com.epam.drill.integration.common.baseline.CommitCriteria
 import com.epam.drill.integration.common.baseline.MergeBaseCriteria
 import com.epam.drill.integration.common.baseline.TagCriteria
 import com.epam.drill.integration.common.client.impl.MetricsClientImpl
@@ -54,6 +56,8 @@ class GenerateChangeTestingReportMojo : AbstractDrillMojo() {
         val baselineSearchStrategy = baseline?.searchStrategy ?: BaselineSearchStrategy.SEARCH_BY_TAG
         val baselineTagPattern = baseline?.tagPattern ?: "*"
         val baselineTargetRef = baseline?.targetRef
+        val baselineCommitSha = baseline?.commitSha
+        val baselineBuildVersion: String? = baseline?.buildVersion
 
         val reportService = ReportService(
             metricsClient = MetricsClientImpl(
@@ -66,6 +70,8 @@ class GenerateChangeTestingReportMojo : AbstractDrillMojo() {
         val searchCriteria = when (baselineSearchStrategy) {
             BaselineSearchStrategy.SEARCH_BY_TAG -> TagCriteria(baselineTagPattern)
             BaselineSearchStrategy.SEARCH_BY_MERGE_BASE -> MergeBaseCriteria(baselineTargetRef.required("baseline.targetRef"))
+            BaselineSearchStrategy.SEARCH_BY_COMMIT -> CommitCriteria(baselineCommitSha.required("baseline.commitSha"))
+            BaselineSearchStrategy.SEARCH_BY_BUILD_VERSION -> BuildVersionCriteria(baselineBuildVersion.required("baseline.buildVersion"))
         }
 
         log.info("Generating Drill4J Change Testing Report...")

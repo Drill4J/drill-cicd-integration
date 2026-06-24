@@ -18,6 +18,8 @@ package com.epam.drill.integration.gradle
 import com.epam.drill.integration.common.agent.config.AgentConfiguration
 import com.epam.drill.integration.common.baseline.BaselineFactory
 import com.epam.drill.integration.common.baseline.BaselineSearchStrategy
+import com.epam.drill.integration.common.baseline.BuildVersionCriteria
+import com.epam.drill.integration.common.baseline.CommitCriteria
 import com.epam.drill.integration.common.baseline.MergeBaseCriteria
 import com.epam.drill.integration.common.baseline.TagCriteria
 import com.epam.drill.integration.common.baseline.TagMatchBy
@@ -112,6 +114,12 @@ internal fun AgentConfiguration.mapTestSpecificProperties(
                         tagPrefix = baseline.tagPrefix ?: "",
                     )
                     BaselineSearchStrategy.SEARCH_BY_MERGE_BASE -> MergeBaseCriteria(baselineTargetRef.required("baselineTargetRef"))
+                    BaselineSearchStrategy.SEARCH_BY_COMMIT -> CommitCriteria(
+                        baseline.commitSha.required("baseline.commitSha")
+                    )
+                    BaselineSearchStrategy.SEARCH_BY_BUILD_VERSION -> BuildVersionCriteria(
+                        baseline.buildVersion.required("baseline.buildVersion")
+                    )
                 }
                 val baseline = runBlocking {
                     baselineFactory.produce(searchStrategy).findBaseline(

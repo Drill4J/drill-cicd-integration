@@ -44,6 +44,8 @@ open class BaselineConfiguration(
     var targetRef: String? = null,
     var tagMatchBy: String? = null,   // BUILD_VERSION | COMMIT_SHA (default)
     var tagPrefix: String? = null,    // prefix to strip from tag name to get build version
+    var commitSha: String? = null,    // used by SEARCH_BY_COMMIT
+    var buildVersion: String? = null, // used by SEARCH_BY_BUILD_VERSION
 )
 
 open class RecommendedTestsConfiguration(
