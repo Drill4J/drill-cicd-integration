@@ -29,7 +29,7 @@ class ReportService(
     private val metricsClient: MetricsClient,
     private val gitClient: GitClient,
     private val reportGenerator: ReportGenerator,
-    private val baselineFactory: BaselineFactory = BaselineFactory(gitClient)
+    private val baselineFactory: BaselineFactory = BaselineFactory(gitClient, metricsClient)
 ) {
     private val logger = KotlinLogging.logger {}
 
@@ -41,14 +41,15 @@ class ReportService(
         reportPath: String = "",
     ) {
         val commitSha = gitClient.getCurrentCommitSha()
-        val baselineCommitSha = baselineFactory.produce(baselineSearchStrategy).findBaseline(baselineSearchCriteria)
+        val baseline = baselineFactory.produce(baselineSearchStrategy).findBaseline(groupId, appId, baselineSearchCriteria)
 
-        logger.info { "Requesting metrics for $groupId/$appId to compare $commitSha with $baselineCommitSha..." }
+        logger.info { "Requesting metrics for $groupId/$appId to compare $commitSha with $baseline..." }
         val data = metricsClient.getBuildComparison(
             groupId = groupId,
             appId = appId,
             commitSha = commitSha,
-            baselineCommitSha = baselineCommitSha,
+            baselineCommitSha = baseline.commitSha,
+            baselineBuildVersion = baseline.buildVersion,
         )
         val report = reportGenerator.getBuildComparisonReport(data)
         val fileExt = when (report.format) {

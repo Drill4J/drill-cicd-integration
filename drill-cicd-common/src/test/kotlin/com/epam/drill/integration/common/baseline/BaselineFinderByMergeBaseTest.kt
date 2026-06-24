@@ -16,19 +16,25 @@
 package com.epam.drill.integration.common.baseline
 
 import com.epam.drill.integration.common.GitTestBase
+import com.epam.drill.integration.common.client.BuildView
+import com.epam.drill.integration.common.client.MetricsClient
 import com.epam.drill.integration.common.git.impl.GitClientImpl
+import kotlinx.coroutines.runBlocking
+import org.mockito.kotlin.*
 import kotlin.test.*
 
-class BaselineFinderByMergeBaseTest: GitTestBase() {
+class BaselineFinderByMergeBaseTest : GitTestBase() {
+    private lateinit var metricsClient: MetricsClient
     private lateinit var finder: BaselineFinderByMergeBase
 
     @BeforeTest
     fun init() {
-        finder = BaselineFinderByMergeBase(GitClientImpl(workingDir))
+        metricsClient = mock()
+        finder = BaselineFinderByMergeBase(GitClientImpl(workingDir), metricsClient)
     }
 
     @Test
-    fun `if there were no merges, findBaseline should return first commit before branching`() {
+    fun `if there were no merges, findBaseline should return first commit before branching`(): Unit = runBlocking {
         exec("git init -b main")
         exec("git commit --allow-empty -m \"Initial commit in the main branch\"")
         val commitInMainBeforeBranching = exec("git rev-parse HEAD")
@@ -39,13 +45,17 @@ class BaselineFinderByMergeBaseTest: GitTestBase() {
         exec("git checkout test-branch")
         exec("git commit --allow-empty -m \"Add the second commit in the test branch\"")
 
-        val baselineCommit = finder.findBaseline(MergeBaseCriteria("main"))
+        whenever(metricsClient.findBuild(any(), any(), anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull()))
+            .thenReturn(BuildView("id", "group", "app", commitInMainBeforeBranching, "1.0"))
 
-        assertEquals(commitInMainBeforeBranching, baselineCommit)
+        val baseline = finder.findBaseline("group", "app", MergeBaseCriteria("main"))
+
+        verify(metricsClient).findBuild(eq("group"), eq("app"), eq(commitInMainBeforeBranching), isNull(), isNull(), isNull())
+        assertEquals(commitInMainBeforeBranching, baseline.commitSha)
     }
 
     @Test
-    fun `if there was a merge, findBaseline should return commit that was merged`() {
+    fun `if there was a merge, findBaseline should return commit that was merged`(): Unit = runBlocking {
         exec("git init -b main")
         exec("git commit --allow-empty -m \"Initial commit in the main branch\"")
         exec("git checkout -b test-branch")
@@ -57,9 +67,12 @@ class BaselineFinderByMergeBaseTest: GitTestBase() {
         exec("git commit --allow-empty -m \"Add the second commit in the test branch\"")
         exec("git merge main")
 
-        val baselineCommit = finder.findBaseline(MergeBaseCriteria("main"))
+        whenever(metricsClient.findBuild(any(), any(), anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull()))
+            .thenReturn(BuildView("id", "group", "app", commitInMainBeforeMerging, "1.0"))
 
-        assertEquals(commitInMainBeforeMerging, baselineCommit)
+        val baseline = finder.findBaseline("group", "app", MergeBaseCriteria("main"))
+
+        verify(metricsClient).findBuild(eq("group"), eq("app"), eq(commitInMainBeforeMerging), isNull(), isNull(), isNull())
+        assertEquals(commitInMainBeforeMerging, baseline.commitSha)
     }
-
 }

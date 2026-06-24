@@ -16,5 +16,10 @@
 package com.epam.drill.integration.common.baseline
 
 sealed interface BaselineFinder<in T: BaselineSearchCriteria> {
-    fun findBaseline(criteria: T): String
+    suspend fun findBaseline(groupId: String, appId: String, criteria: T): Baseline
 }
+
+data class Baseline(
+    val commitSha: String?,
+    val buildVersion: String?,
+)

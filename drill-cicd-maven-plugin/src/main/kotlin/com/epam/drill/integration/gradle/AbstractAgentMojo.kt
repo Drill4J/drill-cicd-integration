@@ -26,8 +26,10 @@ import com.epam.drill.integration.common.agent.impl.JavaAgentCommandLineBuilder
 import com.epam.drill.integration.common.agent.impl.NativeAgentCommandLineBuilder
 import com.epam.drill.integration.common.agent.javaExecutable
 import com.epam.drill.integration.common.baseline.BaselineFactory
+import com.epam.drill.integration.common.client.impl.MetricsClientImpl
 import com.epam.drill.integration.common.git.GitClient
 import com.epam.drill.integration.common.git.impl.GitClientImpl
+import com.epam.drill.integration.common.util.fromEnv
 import com.epam.drill.integration.common.util.getCurrentJavaVersion
 import com.epam.drill.integration.common.util.getJavaAddOpensOptions
 import com.epam.drill.integration.common.util.required
@@ -74,10 +76,14 @@ abstract class AbstractAgentMojo : AbstractDrillMojo() {
     protected val agentCache = AgentCacheImpl(drillAgentFilesDir)
     protected val agentInstaller = AgentInstallerImpl(agentCache)
     protected val gitClient = GitClientImpl()
+    protected val metricsClient = MetricsClientImpl(
+        apiUrl = apiUrl.fromEnv("DRILL_API_URL").required("apiUrl"),
+        apiKey = apiKey.fromEnv("DRILL_API_KEY"),
+    )
     protected val argumentsBuilder = JarCommandLineBuilder()
     protected val commandExecutor = CommandExecutor(javaExecutable.absolutePath)
     protected val executableRunner = ExecutableRunner(agentInstaller, argumentsBuilder, commandExecutor)
-    protected val baselineFactory = BaselineFactory(gitClient)
+    protected val baselineFactory = BaselineFactory(gitClient, metricsClient)
 
     abstract fun getAgentConfig(): AgentConfiguration
 

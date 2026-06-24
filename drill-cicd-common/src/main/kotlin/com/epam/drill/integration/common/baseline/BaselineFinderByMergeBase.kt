@@ -15,17 +15,26 @@
  */
 package com.epam.drill.integration.common.baseline
 
+import com.epam.drill.integration.common.client.MetricsClient
 import com.epam.drill.integration.common.git.GitClient
 import mu.KotlinLogging
 
 class BaselineFinderByMergeBase(
-    private val gitClient: GitClient
+    private val gitClient: GitClient,
+    private val metricsClient: MetricsClient,
 ) : BaselineFinder<MergeBaseCriteria> {
     private val logger = KotlinLogging.logger {}
 
-    override fun findBaseline(criteria: MergeBaseCriteria): String {
+    override suspend fun findBaseline(groupId: String, appId: String, criteria: MergeBaseCriteria): Baseline {
         logger.info { "Looking for merge base for ${criteria.targetRef}..." }
-        return gitClient.getMergeBaseCommitSha(criteria.targetRef)
+        val mergeBaseCommitSha = gitClient.getMergeBaseCommitSha(criteria.targetRef)
+        val build = metricsClient.findBuild(groupId = groupId, appId = appId, commitSha = mergeBaseCommitSha)
+        return build?.let {
+            Baseline(
+                buildVersion = it.buildVersion,
+                commitSha = it.commitSha,
+            )
+        } ?: throw IllegalStateException("No build found for merge base commit $mergeBaseCommitSha")
     }
 }
 

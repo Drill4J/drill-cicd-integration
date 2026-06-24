@@ -15,9 +15,19 @@
  */
 package com.epam.drill.integration.common.client
 
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonObject
 
 interface MetricsClient {
+
+    suspend fun findBuild(
+        groupId: String,
+        appId: String,
+        commitSha: String? = null,
+        buildVersion: String? = null,
+        sortBy: String? = null,
+        sortOrder: String? = null,
+    ): BuildView?
 
     suspend fun getBuildComparison(
         groupId: String,
@@ -31,3 +41,12 @@ interface MetricsClient {
         coverageThreshold: Double? = null,
     ): JsonObject
 }
+
+@Serializable
+class BuildView (
+    val id: String,
+    val groupId: String,
+    val appId: String,
+    val commitSha: String?,
+    val buildVersion: String?,
+)

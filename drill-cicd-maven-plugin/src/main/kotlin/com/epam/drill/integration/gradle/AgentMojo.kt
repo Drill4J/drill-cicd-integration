@@ -22,6 +22,7 @@ import com.epam.drill.integration.common.baseline.MergeBaseCriteria
 import com.epam.drill.integration.common.baseline.TagCriteria
 import com.epam.drill.integration.common.git.GitClient
 import com.epam.drill.integration.common.util.required
+import kotlinx.coroutines.runBlocking
 import org.apache.maven.execution.MavenSession
 import org.apache.maven.plugin.logging.Log
 import org.apache.maven.plugins.annotations.LifecyclePhase
@@ -105,8 +106,15 @@ internal fun AgentConfiguration.mapTestSpecificProperties(
                     BaselineSearchStrategy.SEARCH_BY_TAG -> TagCriteria(baselineTagPattern)
                     BaselineSearchStrategy.SEARCH_BY_MERGE_BASE -> MergeBaseCriteria(baselineTargetRef.required("baselineTargetRef"))
                 }
-                this.recommendedTestsBaselineCommitSha =
-                    baselineFactory.produce(searchStrategy).findBaseline(searchCriteria)
+                val baseline = runBlocking {
+                    baselineFactory.produce(searchStrategy).findBaseline(
+                        config.groupId ?: throw IllegalArgumentException("groupId is required for baseline search"),
+                        config.appId ?: throw IllegalArgumentException("appId is required for baseline search"),
+                        searchCriteria
+                    )
+                }
+                baseline.buildVersion?.let { this.recommendedTestsBaselineBuildVersion = it }
+                baseline.commitSha?.let { this.recommendedTestsBaselineCommitSha = it }
             }
         }
     }

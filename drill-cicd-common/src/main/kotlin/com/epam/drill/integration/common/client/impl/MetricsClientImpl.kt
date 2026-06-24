@@ -15,6 +15,7 @@
  */
 package com.epam.drill.integration.common.client.impl
 
+import com.epam.drill.integration.common.client.BuildView
 import com.epam.drill.integration.common.client.MetricsClient
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
@@ -23,6 +24,8 @@ import io.ktor.client.features.logging.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
 import mu.KotlinLogging
 
 private const val API_KEY_HEADER = "X-Api-Key"
@@ -38,6 +41,41 @@ class MetricsClientImpl(
         install(Logging) {
             level = LogLevel.BODY
         }
+    }
+
+    override suspend fun findBuild(
+        groupId: String,
+        appId: String,
+        commitSha: String?,
+        buildVersion: String?,
+        sortBy: String?,
+        sortOrder: String?
+    ): BuildView? {
+        val url = "$metricsUrl/builds"
+        val response = client.request<JsonObject>(url) {
+            parameter("groupId", groupId)
+            parameter("appId", appId)
+            commitSha?.let { parameter("commitSha", it) }
+            buildVersion?.let { parameter("buildVersion", it) }
+            parameter("sortBy", "COMMIT_DATE")
+            parameter("sortOrder", "DESC")
+
+            contentType(ContentType.Application.Json)
+            apiKey?.let { apiKey ->
+                headers {
+                    append(API_KEY_HEADER, apiKey)
+                }
+            }
+        }.getValue("data").jsonArray.firstOrNull()?.jsonObject?.let { buildJson ->
+            BuildView(
+                id = buildJson.getValue("id").toString(),
+                groupId = buildJson.getValue("groupId").toString(),
+                appId = buildJson.getValue("appId").toString(),
+                commitSha = buildJson.getValue("commitSha").toString(),
+                buildVersion = buildJson.getValue("buildVersion").toString(),
+            )
+        }
+        return response
     }
 
     override suspend fun getBuildComparison(

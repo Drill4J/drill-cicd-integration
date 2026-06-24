@@ -15,25 +15,36 @@
  */
 package com.epam.drill.integration.common.baseline
 
+import com.epam.drill.integration.common.client.MetricsClient
 import com.epam.drill.integration.common.git.GIT_INVALID_ARGUMENT_ERROR
 import com.epam.drill.integration.common.git.GitClient
 import com.epam.drill.integration.common.git.GitException
 import mu.KotlinLogging
 
 class BaselineFinderByTag(
-    private val gitClient: GitClient
+    private val gitClient: GitClient,
+    private val metricsClient: MetricsClient,
 ) : BaselineFinder<TagCriteria> {
     private val logger = KotlinLogging.logger {}
 
-    override fun findBaseline(criteria: TagCriteria): String = try {
+    override suspend fun findBaseline(groupId: String, appId: String, criteria: TagCriteria): Baseline {
         logger.info { "Looking for git tag ${criteria.tagPattern}..." }
-        val tag = gitClient.describe(tags = true, matchPattern = criteria.tagPattern)
-        gitClient.revList(ref = tag).first()
-    } catch (e: GitException) {
-        if (e.exitCode == GIT_INVALID_ARGUMENT_ERROR)
-            throw IllegalStateException("No git tags found matching pattern ${criteria.tagPattern}", e)
-        else
-            throw e
+        val tagCommitSha = try {
+            val tag = gitClient.describe(tags = true, matchPattern = criteria.tagPattern)
+            gitClient.revList(ref = tag).first()
+        } catch (e: GitException) {
+            if (e.exitCode == GIT_INVALID_ARGUMENT_ERROR)
+                throw IllegalStateException("No git tags found matching pattern ${criteria.tagPattern}", e)
+            else
+                throw e
+        }
+        val build = metricsClient.findBuild(groupId = groupId, appId = appId, commitSha = tagCommitSha)
+        return build?.let {
+            Baseline(
+                buildVersion = it.buildVersion,
+                commitSha = it.commitSha,
+            )
+        } ?: throw IllegalStateException("No build found for git tag ${criteria.tagPattern} with commit sha $tagCommitSha")
     }
 }
 
