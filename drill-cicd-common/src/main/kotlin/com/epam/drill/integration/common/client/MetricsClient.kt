@@ -40,6 +40,17 @@ interface MetricsClient {
         baselineBuildVersion: String? = null,
         coverageThreshold: Double? = null,
     ): JsonObject
+
+    suspend fun getImpactedTests(
+        groupId: String,
+        appId: String,
+        commitSha: String? = null,
+        buildVersion: String? = null,
+        baselineCommitSha: String? = null,
+        baselineBuildVersion: String? = null,
+        testsToSkip: Boolean = true,
+        limit: Int? = null,
+    ): List<TestView>
 }
 
 @Serializable
@@ -49,4 +60,12 @@ class BuildView (
     val appId: String,
     val commitSha: String?,
     val buildVersion: String?,
+)
+
+@Serializable
+class TestView(
+    val testDefinitionId: String,
+    val testRunner: String? = null,
+    val testPath: String,
+    val testName: String,
 )

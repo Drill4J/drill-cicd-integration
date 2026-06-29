@@ -29,6 +29,7 @@ import com.epam.drill.integration.common.baseline.BaselineFactory
 import com.epam.drill.integration.common.client.impl.MetricsClientImpl
 import com.epam.drill.integration.common.git.GitClient
 import com.epam.drill.integration.common.git.impl.GitClientImpl
+import com.epam.drill.integration.common.service.TestRecommendationService
 import com.epam.drill.integration.common.util.fromEnv
 import com.epam.drill.integration.common.util.getCurrentJavaVersion
 import com.epam.drill.integration.common.util.getJavaAddOpensOptions
@@ -44,30 +45,13 @@ import kotlin.collections.joinToString
 val drillAgentFilesDir = File(System.getProperty("user.home"), ".drill/agents")
 private const val ARG_LINE = "argLine"
 
-abstract class AbstractAgentMojo : AbstractDrillMojo() {
-    @Parameter(property = "appId", required = true)
-    var appId: String? = null
-
-    @Parameter(property = "packagePrefixes", required = true)
-    var packagePrefixes: String? = null
-
-    @Parameter(property = "buildVersion", required = false)
-    var buildVersion: String? = null
-
-    @Parameter(property = "envId", required = false)
-    var envId: String? = null
-
-    @Parameter(property = "testTaskId", required = false)
-    var testTaskId: String? = null
+abstract class AbstractAgentMojo : AbstractAppDrillMojo() {
 
     @Parameter(property = "agent", required = true)
     var agent: AgentMavenConfiguration? = null
 
     @Parameter(property = "classScanning", required = false)
     var classScanning: ClassScanningConfiguration? = null
-
-    @Parameter(property = "baseline", required = true)
-    var baseline: BaselineConfiguration? = null
 
     @Parameter(property = "additionalParams", required = false)
     var additionalParams: Map<String, String>? = null

@@ -32,12 +32,12 @@ abstract class AbstractDrillMojo : AbstractMojo() {
     @Component
     protected var session: MavenSession? = null
 
-    @Parameter(property = "apiUrl", required = true)
+    @Parameter(property = "apiUrl", required = false)
     var apiUrl: String? = null
 
-    @Parameter(property = "apiKey")
+    @Parameter(property = "apiKey", required = false)
     var apiKey: String? = null
 
-    @Parameter(property = "groupId", required = true)
+    @Parameter(property = "groupId", required = false)
     var groupId: String? = null
 }

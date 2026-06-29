@@ -17,6 +17,7 @@ package com.epam.drill.integration.common.client.impl
 
 import com.epam.drill.integration.common.client.BuildView
 import com.epam.drill.integration.common.client.MetricsClient
+import com.epam.drill.integration.common.client.TestView
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.features.json.*
@@ -26,6 +27,7 @@ import io.ktor.http.*
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import mu.KotlinLogging
 
 private const val API_KEY_HEADER = "X-Api-Key"
@@ -59,6 +61,7 @@ class MetricsClientImpl(
             buildVersion?.let { parameter("buildVersion", it) }
             parameter("sortBy", "COMMIT_DATE")
             parameter("sortOrder", "DESC")
+            parameter("pageSize", 1)
 
             contentType(ContentType.Application.Json)
             apiKey?.let { apiKey ->
@@ -68,11 +71,11 @@ class MetricsClientImpl(
             }
         }.getValue("data").jsonArray.firstOrNull()?.jsonObject?.let { buildJson ->
             BuildView(
-                id = buildJson.getValue("id").toString(),
-                groupId = buildJson.getValue("groupId").toString(),
-                appId = buildJson.getValue("appId").toString(),
-                commitSha = buildJson.getValue("commitSha").toString(),
-                buildVersion = buildJson.getValue("buildVersion").toString(),
+                id = buildJson.getValue("id").jsonPrimitive.content,
+                groupId = buildJson.getValue("groupId").jsonPrimitive.content,
+                appId = buildJson.getValue("appId").jsonPrimitive.content,
+                commitSha = buildJson["commitSha"]?.jsonPrimitive?.content,
+                buildVersion = buildJson["buildVersion"]?.jsonPrimitive?.content,
             )
         }
         return response
@@ -108,6 +111,44 @@ class MetricsClientImpl(
                     append(API_KEY_HEADER, apiKey)
                 }
             }
+        }
+        return response
+    }
+
+    override suspend fun getImpactedTests(
+        groupId: String,
+        appId: String,
+        commitSha: String?,
+        buildVersion: String?,
+        baselineCommitSha: String?,
+        baselineBuildVersion: String?,
+        testsToSkip: Boolean,
+        limit: Int?
+    ): List<TestView> {
+        val url = "$metricsUrl/impacted-tests"
+        val response = client.request<JsonObject>(url) {
+            parameter("groupId", groupId)
+            parameter("appId", appId)
+            commitSha?.let { parameter("commitSha", it) }
+            buildVersion?.let { parameter("buildVersion", it) }
+            baselineCommitSha?.let { parameter("baselineCommitSha", it) }
+            baselineBuildVersion?.let { parameter("baselineBuildVersion", it) }
+            takeIf { testsToSkip }?.let { parameter("impactStatuses", "NOT_IMPACTED") }
+            limit?.let { parameter("pageSize", it) }
+
+            contentType(ContentType.Application.Json)
+            apiKey?.let { apiKey ->
+                headers {
+                    append(API_KEY_HEADER, apiKey)
+                }
+            }
+        }.getValue("data").jsonArray.map { it.jsonObject }.map { testJson ->
+            TestView(
+                testDefinitionId = testJson.getValue("testDefinitionId").jsonPrimitive.content,
+                testRunner = testJson["testRunner"]?.jsonPrimitive?.content,
+                testPath = testJson.getValue("testPath").jsonPrimitive.content,
+                testName = testJson.getValue("testName").jsonPrimitive.content,
+            )
         }
         return response
     }

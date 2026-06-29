@@ -27,6 +27,7 @@ import com.epam.drill.integration.common.client.impl.MetricsClientImpl
 import com.epam.drill.integration.common.git.impl.GitClientImpl
 import com.epam.drill.integration.common.report.impl.MarkdownReportGenerator
 import com.epam.drill.integration.common.service.ReportService
+import com.epam.drill.integration.common.service.TestRecommendationService
 import com.epam.drill.integration.common.util.fromEnv
 import com.epam.drill.integration.common.util.required
 import kotlinx.coroutines.runBlocking
@@ -37,8 +38,9 @@ fun Task.drillGenerateChangeTestingReport(config: DrillPluginExtension) {
     doFirst {
         val apiUrl = config.apiUrl.fromEnv("DRILL_API_URL").required("apiUrl")
         val apiKey = config.apiKey.fromEnv("DRILL_API_KEY")
-        val groupId = config.groupId.required("groupId")
-        val appId = config.appId.required("appId")
+        val groupId = config.groupId.fromEnv("DRILL_GROUP_ID").required("groupId")
+        val appId = config.appId.fromEnv("DRILL_APP_ID").required("appId")
+        val buildVersion = config.buildVersion.fromEnv("DRILL_BUILD_VERSION")
         val baselineSearchStrategy = config.baseline.searchStrategy ?: SEARCH_BY_TAG
         val baselineTagPattern = config.baseline.tagPattern ?: "*"
         val baselineTargetRef = config.baseline.targetRef
@@ -72,11 +74,63 @@ fun Task.drillGenerateChangeTestingReport(config: DrillPluginExtension) {
             reportService.generateChangeTestingReport(
                 groupId = groupId,
                 appId = appId,
+                buildVersion = buildVersion,
                 baselineSearchStrategy = baselineSearchStrategy,
                 baselineSearchCriteria = searchCriteria,
                 reportPath = reportPath,
             )
         }
         logger.lifecycle("Drill4J Change Testing Report generated at: $reportPath")
+    }
+}
+
+fun Task.drillGetRecommendedTests(config: DrillPluginExtension) {
+    doFirst {
+        val apiUrl = config.apiUrl.fromEnv("DRILL_API_URL").required("apiUrl")
+        val apiKey = config.apiKey.fromEnv("DRILL_API_KEY")
+        val groupId = config.groupId.required("groupId")
+        val appId = config.appId.required("appId")
+        val buildVersion = config.buildVersion
+        val baselineSearchStrategy = config.baseline.searchStrategy ?: SEARCH_BY_TAG
+        val baselineTagPattern = config.baseline.tagPattern ?: "*"
+        val baselineTargetRef = config.baseline.targetRef
+        val baselineCommitSha = config.baseline.commitSha
+        val baselineBuildVersion: String? = config.baseline.buildVersion
+
+        val gitClient = GitClientImpl()
+        val testRecommendationService = TestRecommendationService(
+            metricsClient = MetricsClientImpl(
+                apiUrl = apiUrl,
+                apiKey = apiKey
+            ),
+            gitClient = gitClient,
+        )
+        val searchCriteria = when (baselineSearchStrategy) {
+            SEARCH_BY_TAG -> TagCriteria(
+                tagPattern = baselineTagPattern,
+                matchBy = config.baseline.tagMatchBy
+                    ?.let { TagMatchBy.valueOf(it) }
+                    ?: TagMatchBy.COMMIT_SHA,
+                tagPrefix = config.baseline.tagPrefix ?: "",
+            )
+            SEARCH_BY_MERGE_BASE -> MergeBaseCriteria(baselineTargetRef.required("baseline.targetRef"))
+            BaselineSearchStrategy.SEARCH_BY_COMMIT -> CommitCriteria(baselineCommitSha.required("baseline.commitSha"))
+            BaselineSearchStrategy.SEARCH_BY_BUILD_VERSION -> BuildVersionCriteria(baselineBuildVersion.required("baseline.buildVersion"))
+        }
+
+        logger.lifecycle("Getting Drill4J Recommended Tests to skip...")
+        val outputPath = File(project.buildDir, "drill").absolutePath
+        runBlocking {
+            testRecommendationService.getRecommendedTests(
+                groupId = groupId,
+                appId = appId,
+                buildVersion = buildVersion,
+                baselineSearchStrategy = baselineSearchStrategy,
+                baselineSearchCriteria = searchCriteria,
+                outputPath = outputPath,
+            )
+        }
+        val outputFile = File(outputPath, "recommendedTests.json")
+        logger.lifecycle("Drill4J Recommended Tests saved to: ${outputFile.absolutePath}")
     }
 }

@@ -46,9 +46,6 @@ class AgentMojo : AbstractAgentMojo() {
     @Parameter(property = "testTracking", required = false)
     var testTracing: TestTracingConfiguration? = null
 
-    @Parameter(property = "recommendedTests", required = false)
-    var recommendedTests: RecommendedTestsConfiguration? = null
-
     override fun getAgentConfig() = AgentConfiguration().apply {
         val config = this@AgentMojo
         mapGeneralAgentProperties(config)

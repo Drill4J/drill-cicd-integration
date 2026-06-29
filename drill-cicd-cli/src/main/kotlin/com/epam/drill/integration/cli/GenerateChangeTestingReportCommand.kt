@@ -39,6 +39,7 @@ class GenerateChangeTestingReportCommand : CliktCommand(name = "generateChangeTe
     private val apiKey by option("-drill-k", "--apiKey", envvar = "DRILL_API_KEY")
     private val groupId by option("-g", "--groupId", envvar = "DRILL_GROUP_ID").required()
     private val appId by option("-a", "--appId", envvar = "DRILL_APP_ID").required()
+    private val buildVersion by option("-bv", "--buildVersion", envvar = "DRILL_BUILD_VERSION")
 
     private val baselineSearchStrategyName by option("-bl-s", "--baselineSearchStrategy").default(SEARCH_BY_TAG.name)
     private val baselineTagPattern by option("-bl-t", "--baselineTagPattern").default("*")
@@ -68,6 +69,7 @@ class GenerateChangeTestingReportCommand : CliktCommand(name = "generateChangeTe
             reportService.generateChangeTestingReport(
                 groupId = groupId,
                 appId = appId,
+                buildVersion = buildVersion,
                 baselineSearchStrategy = searchStrategy,
                 baselineSearchCriteria = searchCriteria
             )
