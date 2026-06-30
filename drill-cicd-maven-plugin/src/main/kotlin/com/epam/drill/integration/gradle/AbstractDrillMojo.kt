@@ -40,4 +40,7 @@ abstract class AbstractDrillMojo : AbstractMojo() {
 
     @Parameter(property = "groupId", required = false)
     var groupId: String? = null
+
+    @Parameter(property = "httpTimeoutMs", required = false)
+    var httpTimeoutMs: Long? = null
 }

@@ -62,7 +62,8 @@ class GithubPullRequestReportMojo : AbstractDrillMojo() {
             ),
             MetricsClientImpl(
                 apiUrl,
-                apiKey
+                apiKey,
+                httpTimeoutMs,
             ),
             MarkdownReportGenerator(),
             GitClientImpl()

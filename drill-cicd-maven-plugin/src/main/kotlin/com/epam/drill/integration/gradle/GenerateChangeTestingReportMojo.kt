@@ -66,7 +66,8 @@ class GenerateChangeTestingReportMojo : AbstractDrillMojo() {
         val reportService = ReportService(
             metricsClient = MetricsClientImpl(
                 apiUrl = apiUrl,
-                apiKey = apiKey
+                apiKey = apiKey,
+                timeoutMs = httpTimeoutMs,
             ),
             gitClient = GitClientImpl(),
             reportGenerator = MarkdownReportGenerator()

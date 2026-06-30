@@ -35,10 +35,14 @@ private const val API_KEY_HEADER = "X-Api-Key"
 class MetricsClientImpl(
     private val apiUrl: String,
     private val apiKey: String? = null,
+    private val timeoutMs: Long?,
 ) : MetricsClient {
     private val metricsUrl = "${apiUrl.removeSuffix("/")}/metrics"
 
     private val client = HttpClient(CIO) {
+        engine {
+            requestTimeout = timeoutMs ?: 60000
+        }
         install(JsonFeature)
         install(Logging) {
             level = LogLevel.BODY

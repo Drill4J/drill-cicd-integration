@@ -31,6 +31,7 @@ import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
+import com.github.ajalt.clikt.parameters.types.long
 import kotlinx.coroutines.runBlocking
 import java.io.File
 
@@ -46,12 +47,14 @@ class GenerateChangeTestingReportCommand : CliktCommand(name = "generateChangeTe
     private val baselineTargetRef by option("-bl-tr", "--baselineTargetRef")
     private val baselineCommitSha by option("-bl-cs", "--baselineCommitSha")
     private val baselineBuildVersion by option("-bl-bv", "--baselineBuildVersion")
+    private val httpTimeoutMs by option("--httpTimeoutMs", envvar = "DRILL_HTTP_TIMEOUT_MS").long()
 
     override fun run() {
         val reportService = ReportService(
             metricsClient = MetricsClientImpl(
                 apiUrl = apiUrl,
-                apiKey = apiKey
+                apiKey = apiKey,
+                timeoutMs = httpTimeoutMs,
             ),
             gitClient = GitClientImpl(),
             reportGenerator = MarkdownReportGenerator()

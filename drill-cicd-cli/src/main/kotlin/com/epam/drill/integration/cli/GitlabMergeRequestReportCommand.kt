@@ -22,6 +22,7 @@ import com.epam.drill.integration.gitlab.service.GitlabCiCdService
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
+import com.github.ajalt.clikt.parameters.types.long
 import kotlinx.coroutines.runBlocking
 
 class GitlabMergeRequestReportCommand : CliktCommand(name = "gitlabMergeRequestReport") {
@@ -35,12 +36,13 @@ class GitlabMergeRequestReportCommand : CliktCommand(name = "gitlabMergeRequestR
     private val gitlabPrivateToken by option("-gl-t", "--gitlabPrivateToken", envvar = "GITLAB_PRIVATE_TOKEN").required()
     private val gitlabProjectId by option("-p", "--gitlabProjectId", envvar = "CI_PROJECT_ID").required()
     private val gitlabMergeRequestId by option("-mr", "--gitlabMergeRequestId", envvar = "CI_MERGE_REQUEST_IID").required()
+    private val httpTimeoutMs by option("--httpTimeoutMs", envvar = "DRILL_HTTP_TIMEOUT_MS").long()
 
     override fun run() {
         echo("Posting Drill4J Merge Request Report to Gitlab...")
         val gitlabCiCdService = GitlabCiCdService(
             GitlabApiClientV4Impl(gitlabApiUrl, gitlabPrivateToken),
-            MetricsClientImpl(apiUrl, apiKey),
+            MetricsClientImpl(apiUrl, apiKey, httpTimeoutMs),
             MarkdownReportGenerator()
         )
         runBlocking {

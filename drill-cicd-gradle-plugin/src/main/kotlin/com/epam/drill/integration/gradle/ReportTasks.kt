@@ -50,7 +50,8 @@ fun Task.drillGenerateChangeTestingReport(config: DrillPluginExtension) {
         val reportService = ReportService(
             metricsClient = MetricsClientImpl(
                 apiUrl = apiUrl,
-                apiKey = apiKey
+                apiKey = apiKey,
+                timeoutMs = config.httpTimeoutMs
             ),
             gitClient = GitClientImpl(),
             reportGenerator = MarkdownReportGenerator()
@@ -101,7 +102,8 @@ fun Task.drillGetRecommendedTests(config: DrillPluginExtension) {
         val testRecommendationService = TestRecommendationService(
             metricsClient = MetricsClientImpl(
                 apiUrl = apiUrl,
-                apiKey = apiKey
+                apiKey = apiKey,
+                timeoutMs = config.httpTimeoutMs
             ),
             gitClient = gitClient,
         )

@@ -66,7 +66,8 @@ fun Task.modifyToRunDrillAgents(
     val gitClient = GitClientImpl()
     val metricsClient = MetricsClientImpl(
         apiUrl = apiUrl,
-        apiKey = apiKey
+        apiKey = apiKey,
+        timeoutMs = config.httpTimeoutMs
     )
     val baselineFactory = BaselineFactory(gitClient, metricsClient)
 

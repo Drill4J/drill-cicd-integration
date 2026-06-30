@@ -45,6 +45,7 @@ class GetRecommendedTestsMojo : AbstractAppDrillMojo() {
         val metricsClient = MetricsClientImpl(
             apiUrl = apiUrl.fromEnv("DRILL_API_URL").required("apiUrl"),
             apiKey = apiKey.fromEnv("DRILL_API_KEY"),
+            timeoutMs = httpTimeoutMs,
         )
         val testRecommendationService = TestRecommendationService(
             metricsClient = metricsClient,

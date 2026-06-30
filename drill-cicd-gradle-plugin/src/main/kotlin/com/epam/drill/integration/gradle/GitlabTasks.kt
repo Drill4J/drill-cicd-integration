@@ -51,7 +51,8 @@ fun Task.drillGitlabMergeRequestReportTask(config: DrillPluginExtension) {
             ),
             MetricsClientImpl(
                 apiUrl,
-                apiKey
+                apiKey,
+                config.httpTimeoutMs
             ),
             MarkdownReportGenerator()
         )

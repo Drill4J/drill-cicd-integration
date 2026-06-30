@@ -31,6 +31,7 @@ open class DrillPluginExtension(
 
     var envId: String? = null,
     var testTaskId: String? = null,
+    var httpTimeoutMs: Long? = null,
 
     var agent: AgentExtension = AgentExtension(),
     var coverage: CoverageExtension = CoverageExtension(),

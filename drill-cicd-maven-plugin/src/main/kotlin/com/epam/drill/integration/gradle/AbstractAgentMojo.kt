@@ -63,6 +63,7 @@ abstract class AbstractAgentMojo : AbstractAppDrillMojo() {
     protected val metricsClient = MetricsClientImpl(
         apiUrl = apiUrl.fromEnv("DRILL_API_URL").required("apiUrl"),
         apiKey = apiKey.fromEnv("DRILL_API_KEY"),
+        timeoutMs = httpTimeoutMs,
     )
     protected val argumentsBuilder = JarCommandLineBuilder()
     protected val commandExecutor = CommandExecutor(javaExecutable.absolutePath)
