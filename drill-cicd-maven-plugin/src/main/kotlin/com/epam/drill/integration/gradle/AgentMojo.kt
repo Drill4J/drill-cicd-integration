@@ -25,7 +25,9 @@ import com.epam.drill.integration.common.baseline.TagCriteria
 import com.epam.drill.integration.common.baseline.TagMatchBy
 import com.epam.drill.integration.common.git.GitClient
 import com.epam.drill.integration.common.util.required
+import com.epam.drill.integration.common.service.TestRecommendationService
 import kotlinx.coroutines.runBlocking
+import java.io.File
 import org.apache.maven.execution.MavenSession
 import org.apache.maven.plugin.logging.Log
 import org.apache.maven.plugins.annotations.LifecyclePhase
@@ -97,6 +99,10 @@ internal fun AgentConfiguration.mapTestSpecificProperties(
             log.warn("Unable to retrieve the current commit SHA. The 'recommendedTestsTargetCommitSha' parameter will not be set. Error: ${it.message}")
         }.getOrNull()
         this.recommendedTestsTargetBuildVersion = config.buildVersion
+        val recommendedTestsFile = File(project.build?.directory, "drill/${TestRecommendationService.RECOMMENDED_TESTS_FILE_NAME}")
+        if (recommendedTestsFile.exists()) {
+            this.recommendedTestsFile = recommendedTestsFile
+        }
         config.baseline?.let { baseline ->
             val searchStrategy = baseline.searchStrategy
             val baselineTagPattern = baseline.tagPattern ?: "*"

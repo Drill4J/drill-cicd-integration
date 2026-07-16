@@ -60,15 +60,19 @@ abstract class AbstractAgentMojo : AbstractAppDrillMojo() {
     protected val agentCache = AgentCacheImpl(drillAgentFilesDir)
     protected val agentInstaller = AgentInstallerImpl(agentCache)
     protected val gitClient = GitClientImpl()
-    protected val metricsClient = MetricsClientImpl(
-        apiUrl = apiUrl.fromEnv("DRILL_API_URL").required("apiUrl"),
-        apiKey = apiKey.fromEnv("DRILL_API_KEY"),
-        timeoutMs = httpTimeoutMs,
-    )
+    protected val metricsClient by lazy {
+        // Maven injects @Parameter fields (e.g. apiUrl) after the Mojo is constructed,
+        // so this must be initialized lazily to read the values only once they are set.
+        MetricsClientImpl(
+            apiUrl = apiUrl.fromEnv("DRILL_API_URL").required("apiUrl"),
+            apiKey = apiKey.fromEnv("DRILL_API_KEY"),
+            timeoutMs = httpTimeoutMs,
+        )
+    }
     protected val argumentsBuilder = JarCommandLineBuilder()
     protected val commandExecutor = CommandExecutor(javaExecutable.absolutePath)
     protected val executableRunner = ExecutableRunner(agentInstaller, argumentsBuilder, commandExecutor)
-    protected val baselineFactory = BaselineFactory(gitClient, metricsClient)
+    protected val baselineFactory by lazy { BaselineFactory(gitClient, metricsClient) }
 
     abstract fun getAgentConfig(): AgentConfiguration
 

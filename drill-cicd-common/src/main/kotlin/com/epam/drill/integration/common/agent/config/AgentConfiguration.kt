@@ -71,6 +71,7 @@ open class AgentConfiguration {
     var recommendedTestsTargetBuildVersion: String? = null
     var recommendedTestsBaselineCommitSha: String? = null
     var recommendedTestsBaselineBuildVersion: String? = null
+    var recommendedTestsFile: File? = null
 
     open fun toAgentArguments() = mutableMapOf<String, String?>().apply {
         this[AgentConfiguration::apiUrl.name] = apiUrl
@@ -129,6 +130,9 @@ open class AgentConfiguration {
                 }
                 recommendedTestsBaselineBuildVersion?.let {
                     this[AgentConfiguration::recommendedTestsBaselineBuildVersion.name] = it
+                }
+                recommendedTestsFile?.let {
+                    this[AgentConfiguration::recommendedTestsFile.name] = it.absolutePath
                 }
             }
         }

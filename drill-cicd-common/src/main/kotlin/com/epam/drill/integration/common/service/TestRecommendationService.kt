@@ -23,18 +23,8 @@ import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import mu.KotlinLogging
 import java.io.File
-import java.util.concurrent.ConcurrentHashMap
 
 private const val RECOMMENDED_TESTS_LIMIT = 1000
-
-internal data class ImpactedTestsCacheKey(
-    val groupId: String,
-    val appId: String,
-    val commitSha: String?,
-    val buildVersion: String?,
-    val baselineCommitSha: String?,
-    val baselineBuildVersion: String?,
-)
 
 class TestRecommendationService(
     private val metricsClient: MetricsClient,
@@ -55,38 +45,23 @@ class TestRecommendationService(
         val commitSha = takeIf { buildVersion == null }?.let { gitClient.getCurrentCommitSha() }
         val baseline = baselineFactory.produce(baselineSearchStrategy).findBaseline(groupId, appId, baselineSearchCriteria)
 
-        val cacheKey = ImpactedTestsCacheKey(
+        logger.info { "Requesting recommended tests to skip for $groupId/$appId, comparing ${buildVersion ?: commitSha} with $baseline..." }
+        val tests: List<TestView> = metricsClient.getImpactedTests(
             groupId = groupId,
             appId = appId,
-            commitSha = commitSha,
             buildVersion = buildVersion,
+            commitSha = commitSha,
             baselineCommitSha = baseline.commitSha,
             baselineBuildVersion = baseline.buildVersion,
+            testsToSkip = true,
+            limit = RECOMMENDED_TESTS_LIMIT,
         )
-
-        val tests: List<TestView> = impactedTestsCache[cacheKey]?.also {
-            logger.info { "Using cached /impacted-tests response for $groupId/$appId (${it.size} test(s)). Skipping HTTP request." }
-        } ?: run {
-            logger.info { "Requesting recommended tests to skip for $groupId/$appId, comparing ${buildVersion ?: commitSha} with $baseline..." }
-            metricsClient.getImpactedTests(
-                groupId = groupId,
-                appId = appId,
-                buildVersion = buildVersion,
-                commitSha = commitSha,
-                baselineCommitSha = baseline.commitSha,
-                baselineBuildVersion = baseline.buildVersion,
-                testsToSkip = true,
-                limit = RECOMMENDED_TESTS_LIMIT,
-            ).also { fetched ->
-                impactedTestsCache[cacheKey] = fetched
-            }
-        }
 
         val directory = File(outputPath)
         if (!directory.exists()) {
             directory.mkdirs()
         }
-        val outputFile = File(directory, "recommendedTests.json")
+        val outputFile = File(directory, RECOMMENDED_TESTS_FILE_NAME)
         val content = json.encodeToString(ListSerializer(TestView.serializer()), tests)
         outputFile.writeText(content)
 
@@ -94,7 +69,7 @@ class TestRecommendationService(
     }
 
     companion object {
-        internal val impactedTestsCache: ConcurrentHashMap<ImpactedTestsCacheKey, List<TestView>> = ConcurrentHashMap()
+        const val RECOMMENDED_TESTS_FILE_NAME = "recommendedTests.json"
     }
 }
 

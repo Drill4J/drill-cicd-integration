@@ -132,7 +132,7 @@ fun Task.drillGetRecommendedTests(config: DrillPluginExtension) {
                 outputPath = outputPath,
             )
         }
-        val outputFile = File(outputPath, "recommendedTests.json")
+        val outputFile = File(outputPath, TestRecommendationService.RECOMMENDED_TESTS_FILE_NAME)
         logger.lifecycle("Drill4J Recommended Tests saved to: ${outputFile.absolutePath}")
     }
 }

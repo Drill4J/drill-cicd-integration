@@ -29,17 +29,19 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import mu.KotlinLogging
+import java.util.concurrent.ConcurrentHashMap
 
 private const val API_KEY_HEADER = "X-Api-Key"
+
 
 class MetricsClientImpl(
     private val apiUrl: String,
     private val apiKey: String? = null,
     private val timeoutMs: Long?,
 ) : MetricsClient {
+    private val logger = KotlinLogging.logger {}
     private val metricsUrl = "${apiUrl.removeSuffix("/")}/metrics"
-
-    private val client = HttpClient(CIO) {
+    private val client: HttpClient = HttpClient(CIO) {
         engine {
             requestTimeout = timeoutMs ?: 60000
         }
@@ -57,32 +59,45 @@ class MetricsClientImpl(
         sortBy: String?,
         sortOrder: String?
     ): BuildView? {
-        val url = "$metricsUrl/builds"
-        val response = client.request<JsonObject>(url) {
-            parameter("groupId", groupId)
-            parameter("appId", appId)
-            commitSha?.let { parameter("commitSha", it) }
-            buildVersion?.let { parameter("buildVersion", it) }
-            parameter("sortBy", "COMMIT_DATE")
-            parameter("sortOrder", "DESC")
-            parameter("pageSize", 1)
+        val cacheKey = FindBuildCacheKey(
+            groupId = groupId,
+            appId = appId,
+            commitSha = commitSha,
+            buildVersion = buildVersion,
+            sortBy = sortBy,
+            sortOrder = sortOrder,
+        )
+        return findBuildCache[cacheKey]?.also {
+            logger.info { "Using cached /builds response for $groupId/$appId. Skipping HTTP request." }
+        }?.build ?: run {
+            val url = "$metricsUrl/builds"
+            val response = client.request<JsonObject>(url) {
+                parameter("groupId", groupId)
+                parameter("appId", appId)
+                commitSha?.let { parameter("commitSha", it) }
+                buildVersion?.let { parameter("buildVersion", it) }
+                parameter("sortBy", "COMMIT_DATE")
+                parameter("sortOrder", "DESC")
+                parameter("pageSize", 1)
 
-            contentType(ContentType.Application.Json)
-            apiKey?.let { apiKey ->
-                headers {
-                    append(API_KEY_HEADER, apiKey)
+                contentType(ContentType.Application.Json)
+                apiKey?.let { apiKey ->
+                    headers {
+                        append(API_KEY_HEADER, apiKey)
+                    }
                 }
+            }.getValue("data").jsonArray.firstOrNull()?.jsonObject?.let { buildJson ->
+                BuildView(
+                    id = buildJson.getValue("id").jsonPrimitive.content,
+                    groupId = buildJson.getValue("groupId").jsonPrimitive.content,
+                    appId = buildJson.getValue("appId").jsonPrimitive.content,
+                    commitSha = buildJson["commitSha"]?.jsonPrimitive?.content,
+                    buildVersion = buildJson["buildVersion"]?.jsonPrimitive?.content,
+                )
             }
-        }.getValue("data").jsonArray.firstOrNull()?.jsonObject?.let { buildJson ->
-            BuildView(
-                id = buildJson.getValue("id").jsonPrimitive.content,
-                groupId = buildJson.getValue("groupId").jsonPrimitive.content,
-                appId = buildJson.getValue("appId").jsonPrimitive.content,
-                commitSha = buildJson["commitSha"]?.jsonPrimitive?.content,
-                buildVersion = buildJson["buildVersion"]?.jsonPrimitive?.content,
-            )
+            findBuildCache[cacheKey] = FindBuildCacheValue(response)
+            response
         }
-        return response
     }
 
     override suspend fun getBuildComparison(
@@ -129,32 +144,74 @@ class MetricsClientImpl(
         testsToSkip: Boolean,
         limit: Int?
     ): List<TestView> {
-        val url = "$metricsUrl/impacted-tests"
-        val response = client.request<JsonObject>(url) {
-            parameter("groupId", groupId)
-            parameter("appId", appId)
-            commitSha?.let { parameter("commitSha", it) }
-            buildVersion?.let { parameter("buildVersion", it) }
-            baselineCommitSha?.let { parameter("baselineCommitSha", it) }
-            baselineBuildVersion?.let { parameter("baselineBuildVersion", it) }
-            takeIf { testsToSkip }?.let { parameter("impactStatuses", "NOT_IMPACTED") }
-            limit?.let { parameter("pageSize", it) }
+        val cacheKey = ImpactedTestsCacheKey(
+            groupId = groupId,
+            appId = appId,
+            commitSha = commitSha,
+            buildVersion = buildVersion,
+            baselineCommitSha = baselineCommitSha,
+            baselineBuildVersion = baselineBuildVersion,
+        )
+        return impactedTestsCache[cacheKey]?.also {
+            logger.info { "Using cached /impacted-tests response for $groupId/$appId (${it.size} test(s)). Skipping HTTP request." }
+        } ?: run {
+            val url = "$metricsUrl/impacted-tests"
+            val response = client.request<JsonObject>(url) {
+                parameter("groupId", groupId)
+                parameter("appId", appId)
+                commitSha?.let { parameter("commitSha", it) }
+                buildVersion?.let { parameter("buildVersion", it) }
+                baselineCommitSha?.let { parameter("baselineCommitSha", it) }
+                baselineBuildVersion?.let { parameter("baselineBuildVersion", it) }
+                takeIf { testsToSkip }?.let { parameter("impactStatuses", "NOT_IMPACTED") }
+                limit?.let { parameter("pageSize", it) }
 
-            contentType(ContentType.Application.Json)
-            apiKey?.let { apiKey ->
-                headers {
-                    append(API_KEY_HEADER, apiKey)
+                contentType(ContentType.Application.Json)
+                apiKey?.let { apiKey ->
+                    headers {
+                        append(API_KEY_HEADER, apiKey)
+                    }
                 }
+            }.getValue("data").jsonArray.map { it.jsonObject }.map { testJson ->
+                TestView(
+                    testDefinitionId = testJson.getValue("testDefinitionId").jsonPrimitive.content,
+                    testRunner = testJson["testRunner"]?.jsonPrimitive?.content,
+                    testPath = testJson.getValue("testPath").jsonPrimitive.content,
+                    testName = testJson.getValue("testName").jsonPrimitive.content,
+                    tags = testJson["tags"]?.jsonArray?.map { it.jsonPrimitive.content },
+                    metadata = testJson["metadata"]?.jsonObject?.mapValues { it.value.jsonPrimitive.content },
+                    impactStatus = testJson["impactStatus"]?.jsonPrimitive?.content
+                )
             }
-        }.getValue("data").jsonArray.map { it.jsonObject }.map { testJson ->
-            TestView(
-                testDefinitionId = testJson.getValue("testDefinitionId").jsonPrimitive.content,
-                testRunner = testJson["testRunner"]?.jsonPrimitive?.content,
-                testPath = testJson.getValue("testPath").jsonPrimitive.content,
-                testName = testJson.getValue("testName").jsonPrimitive.content,
-            )
+            impactedTestsCache[cacheKey] = response
+            response
         }
-        return response
+    }
+
+
+    internal data class ImpactedTestsCacheKey(
+        val groupId: String,
+        val appId: String,
+        val commitSha: String?,
+        val buildVersion: String?,
+        val baselineCommitSha: String?,
+        val baselineBuildVersion: String?,
+    )
+
+    internal data class FindBuildCacheKey(
+        val groupId: String,
+        val appId: String,
+        val commitSha: String?,
+        val buildVersion: String?,
+        val sortBy: String?,
+        val sortOrder: String?,
+    )
+
+    internal data class FindBuildCacheValue(val build: BuildView?)
+
+    companion object {
+        internal val impactedTestsCache: ConcurrentHashMap<ImpactedTestsCacheKey, List<TestView>> = ConcurrentHashMap()
+        internal val findBuildCache: ConcurrentHashMap<FindBuildCacheKey, FindBuildCacheValue> = ConcurrentHashMap()
     }
 }
 

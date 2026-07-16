@@ -81,7 +81,7 @@ class GetRecommendedTestsMojo : AbstractAppDrillMojo() {
                 outputPath = outputPath,
             )
         }
-        val outputFile = File(outputPath, "recommendedTests.json")
+        val outputFile = File(outputPath, TestRecommendationService.RECOMMENDED_TESTS_FILE_NAME)
         log.info("Drill4J Recommended Tests saved to: ${outputFile.absolutePath}")
     }
 }

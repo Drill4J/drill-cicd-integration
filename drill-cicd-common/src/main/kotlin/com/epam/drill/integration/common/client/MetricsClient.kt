@@ -68,4 +68,7 @@ class TestView(
     val testRunner: String? = null,
     val testPath: String,
     val testName: String,
+    val tags: List<String>? = null,
+    val metadata: Map<String, String>? = null,
+    val impactStatus: String? = null,
 )
