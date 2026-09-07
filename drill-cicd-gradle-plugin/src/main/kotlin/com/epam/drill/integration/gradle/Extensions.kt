@@ -32,6 +32,7 @@ open class DrillPluginExtension(
 
     var envId: String? = null,
     var testTaskId: String? = null,
+    var httpTimeoutMs: Long? = null,
 
     var agent: AgentExtension = AgentExtension(),
     var coverage: CoverageExtension = CoverageExtension(),
@@ -121,6 +122,10 @@ open class BaselineExtension(
     var searchStrategy: BaselineSearchStrategy? = null,
     var tagPattern: String? = null,
     var targetRef: String? = null,
+    var tagMatchBy: String? = null,   // BUILD_VERSION | COMMIT_SHA (default)
+    var tagPrefix: String? = null,    // prefix to strip from tag name to get build version
+    var commitSha: String? = null,    // used by SEARCH_BY_COMMIT
+    var buildVersion: String? = null, // used by SEARCH_BY_BUILD_VERSION
 )
 
 open class RecommendedTestsExtension(

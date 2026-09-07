@@ -16,26 +16,24 @@
 package com.epam.drill.integration.common.baseline
 
 import com.epam.drill.integration.common.client.MetricsClient
-import com.epam.drill.integration.common.git.GitClient
 import mu.KotlinLogging
 
-class BaselineFinderByMergeBase(
-    private val gitClient: GitClient,
+class BaselineFinderByBuildVersion(
     private val metricsClient: MetricsClient,
-) : BaselineFinder<MergeBaseCriteria> {
+) : BaselineFinder<BuildVersionCriteria> {
     private val logger = KotlinLogging.logger {}
 
-    override suspend fun findBaseline(groupId: String, appId: String, criteria: MergeBaseCriteria): Baseline {
-        logger.info { "Looking for merge base for ${criteria.targetRef}..." }
-        val mergeBaseCommitSha = gitClient.getMergeBaseCommitSha(criteria.targetRef)
-        val build = metricsClient.findBuild(groupId = groupId, appId = appId, commitSha = mergeBaseCommitSha)
+    override suspend fun findBaseline(groupId: String, appId: String, criteria: BuildVersionCriteria): Baseline {
+        logger.info { "Looking for build with buildVersion=${criteria.buildVersion}..." }
+        val build = metricsClient.findBuild(groupId = groupId, appId = appId, buildVersion = criteria.buildVersion)
         return build?.let {
             Baseline(
                 buildVersion = it.buildVersion,
                 commitSha = it.commitSha,
             )
-        } ?: throw IllegalStateException("No build found for merge base commit $mergeBaseCommitSha")
+        } ?: throw IllegalStateException("No build found for buildVersion ${criteria.buildVersion}")
     }
 }
 
-class MergeBaseCriteria(val targetRef: String): BaselineSearchCriteria
+class BuildVersionCriteria(val buildVersion: String) : BaselineSearchCriteria
+

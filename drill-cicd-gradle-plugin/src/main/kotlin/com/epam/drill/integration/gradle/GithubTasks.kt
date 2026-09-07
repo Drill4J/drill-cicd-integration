@@ -47,7 +47,8 @@ fun Task.drillGithubPullRequestReport(config: DrillPluginExtension) {
             ),
             MetricsClientImpl(
                 apiUrl,
-                apiKey
+                apiKey,
+                config.httpTimeoutMs
             ),
             MarkdownReportGenerator(),
             GitClientImpl()

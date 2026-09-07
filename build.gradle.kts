@@ -30,6 +30,7 @@ if(version == Project.DEFAULT_VERSION) {
     }
     version = fromEnv() ?: fromGit() ?: version
 }
+version = "0.10.2-it.15"
 
 val kotlinVersion: String by extra
 val kotlinxCollectionsVersion: String by extra

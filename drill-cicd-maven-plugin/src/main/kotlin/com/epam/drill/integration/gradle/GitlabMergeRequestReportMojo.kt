@@ -67,7 +67,8 @@ class GitlabMergeRequestReportMojo : AbstractDrillMojo() {
             ),
             MetricsClientImpl(
                 apiUrl,
-                apiKey
+                apiKey,
+                httpTimeoutMs,
             ),
             MarkdownReportGenerator()
         )

@@ -18,6 +18,8 @@ package com.epam.drill.integration.cli
 import com.epam.drill.integration.common.baseline.BaselineSearchStrategy
 import com.epam.drill.integration.common.baseline.BaselineSearchStrategy.SEARCH_BY_MERGE_BASE
 import com.epam.drill.integration.common.baseline.BaselineSearchStrategy.SEARCH_BY_TAG
+import com.epam.drill.integration.common.baseline.BuildVersionCriteria
+import com.epam.drill.integration.common.baseline.CommitCriteria
 import com.epam.drill.integration.common.baseline.MergeBaseCriteria
 import com.epam.drill.integration.common.baseline.TagCriteria
 import com.epam.drill.integration.common.client.impl.MetricsClientImpl
@@ -29,6 +31,7 @@ import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
+import com.github.ajalt.clikt.parameters.types.long
 import kotlinx.coroutines.runBlocking
 import java.io.File
 
@@ -37,24 +40,31 @@ class GenerateChangeTestingReportCommand : CliktCommand(name = "generateChangeTe
     private val apiKey by option("-drill-k", "--apiKey", envvar = "DRILL_API_KEY")
     private val groupId by option("-g", "--groupId", envvar = "DRILL_GROUP_ID").required()
     private val appId by option("-a", "--appId", envvar = "DRILL_APP_ID").required()
+    private val buildVersion by option("-bv", "--buildVersion", envvar = "DRILL_BUILD_VERSION")
 
     private val baselineSearchStrategyName by option("-bl-s", "--baselineSearchStrategy").default(SEARCH_BY_TAG.name)
     private val baselineTagPattern by option("-bl-t", "--baselineTagPattern").default("*")
     private val baselineTargetRef by option("-bl-tr", "--baselineTargetRef")
+    private val baselineCommitSha by option("-bl-cs", "--baselineCommitSha")
+    private val baselineBuildVersion by option("-bl-bv", "--baselineBuildVersion")
+    private val httpTimeoutMs by option("--httpTimeoutMs", envvar = "DRILL_HTTP_TIMEOUT_MS").long()
 
     override fun run() {
         val reportService = ReportService(
             metricsClient = MetricsClientImpl(
                 apiUrl = apiUrl,
-                apiKey = apiKey
+                apiKey = apiKey,
+                timeoutMs = httpTimeoutMs,
             ),
             gitClient = GitClientImpl(),
             reportGenerator = MarkdownReportGenerator()
         )
         val searchStrategy = BaselineSearchStrategy.valueOf(baselineSearchStrategyName)
         val searchCriteria = when (searchStrategy) {
-            SEARCH_BY_TAG -> TagCriteria(baselineTagPattern)
+            SEARCH_BY_TAG -> TagCriteria(tagPattern = baselineTagPattern)
             SEARCH_BY_MERGE_BASE -> MergeBaseCriteria(baselineTargetRef.required("--baselineTargetRef"))
+            BaselineSearchStrategy.SEARCH_BY_COMMIT -> CommitCriteria(baselineCommitSha.required("--baselineCommitSha"))
+            BaselineSearchStrategy.SEARCH_BY_BUILD_VERSION -> BuildVersionCriteria(baselineBuildVersion.required("--baselineBuildVersion"))
         }
 
         echo("Generating Drill4J Testing Report...")
@@ -62,6 +72,7 @@ class GenerateChangeTestingReportCommand : CliktCommand(name = "generateChangeTe
             reportService.generateChangeTestingReport(
                 groupId = groupId,
                 appId = appId,
+                buildVersion = buildVersion,
                 baselineSearchStrategy = searchStrategy,
                 baselineSearchCriteria = searchCriteria
             )

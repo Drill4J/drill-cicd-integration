@@ -17,5 +17,7 @@ package com.epam.drill.integration.common.baseline
 
 enum class BaselineSearchStrategy {
     SEARCH_BY_TAG,
-    SEARCH_BY_MERGE_BASE
+    SEARCH_BY_MERGE_BASE,
+    SEARCH_BY_COMMIT,
+    SEARCH_BY_BUILD_VERSION,
 }

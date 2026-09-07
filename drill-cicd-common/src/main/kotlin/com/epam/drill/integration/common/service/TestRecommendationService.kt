@@ -16,59 +16,60 @@
 package com.epam.drill.integration.common.service
 
 import com.epam.drill.integration.common.baseline.*
-import com.epam.drill.integration.common.baseline.BaselineSearchStrategy.SEARCH_BY_MERGE_BASE
-import com.epam.drill.integration.common.baseline.BaselineSearchStrategy.SEARCH_BY_TAG
 import com.epam.drill.integration.common.client.MetricsClient
+import com.epam.drill.integration.common.client.TestView
 import com.epam.drill.integration.common.git.GitClient
-import com.epam.drill.integration.common.report.ReportFormat
-import com.epam.drill.integration.common.report.ReportGenerator
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.json.Json
 import mu.KotlinLogging
 import java.io.File
 
-class ReportService(
+private const val RECOMMENDED_TESTS_LIMIT = 1000
+
+class TestRecommendationService(
     private val metricsClient: MetricsClient,
     private val gitClient: GitClient,
-    private val reportGenerator: ReportGenerator,
     private val baselineFactory: BaselineFactory = BaselineFactory(gitClient, metricsClient)
 ) {
     private val logger = KotlinLogging.logger {}
+    private val json = Json { prettyPrint = true }
 
-    suspend fun generateChangeTestingReport(
+    suspend fun getRecommendedTests(
         groupId: String,
         appId: String,
-        buildVersion: String?,
+        buildVersion: String? = null,
         baselineSearchStrategy: BaselineSearchStrategy,
         baselineSearchCriteria: BaselineSearchCriteria,
-        reportPath: String = "",
+        outputPath: String,
     ) {
         val commitSha = takeIf { buildVersion == null }?.let { gitClient.getCurrentCommitSha() }
         val baseline = baselineFactory.produce(baselineSearchStrategy).findBaseline(groupId, appId, baselineSearchCriteria)
 
-        logger.info { "Requesting metrics for $groupId/$appId to compare $commitSha with $baseline..." }
-        val data = metricsClient.getBuildComparison(
+        logger.info { "Requesting recommended tests to skip for $groupId/$appId, comparing ${buildVersion ?: commitSha} with $baseline..." }
+        val tests: List<TestView> = metricsClient.getImpactedTests(
             groupId = groupId,
             appId = appId,
             buildVersion = buildVersion,
             commitSha = commitSha,
             baselineCommitSha = baseline.commitSha,
             baselineBuildVersion = baseline.buildVersion,
+            testsToSkip = true,
+            limit = RECOMMENDED_TESTS_LIMIT,
         )
-        val report = reportGenerator.getBuildComparisonReport(data)
-        val fileExt = when (report.format) {
-            ReportFormat.MARKDOWN -> "md"
-            ReportFormat.PLAINTEXT -> "txt"
-        }
 
-        val fileName = "drillReport.$fileExt"
-        val file = if (reportPath.isNotEmpty()) {
-            val directory = File(reportPath)
-            if (!directory.exists()) {
-                directory.mkdirs()
-            }
-            File(directory, fileName)
-        } else
-            File(fileName)
-        logger.info { "Saving a report to the file ${file.absolutePath} ..." }
-        file.writeText(report.content)
+        val directory = File(outputPath)
+        if (!directory.exists()) {
+            directory.mkdirs()
+        }
+        val outputFile = File(directory, RECOMMENDED_TESTS_FILE_NAME)
+        val content = json.encodeToString(ListSerializer(TestView.serializer()), tests)
+        outputFile.writeText(content)
+
+        logger.info { "Found ${tests.size} test(s) that can be skipped." }
+    }
+
+    companion object {
+        const val RECOMMENDED_TESTS_FILE_NAME = "recommendedTests.json"
     }
 }
+

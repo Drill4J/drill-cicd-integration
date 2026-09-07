@@ -26,8 +26,11 @@ import com.epam.drill.integration.common.agent.impl.JavaAgentCommandLineBuilder
 import com.epam.drill.integration.common.agent.impl.NativeAgentCommandLineBuilder
 import com.epam.drill.integration.common.agent.javaExecutable
 import com.epam.drill.integration.common.baseline.BaselineFactory
+import com.epam.drill.integration.common.client.impl.MetricsClientImpl
 import com.epam.drill.integration.common.git.GitClient
 import com.epam.drill.integration.common.git.impl.GitClientImpl
+import com.epam.drill.integration.common.service.TestRecommendationService
+import com.epam.drill.integration.common.util.fromEnv
 import com.epam.drill.integration.common.util.getCurrentJavaVersion
 import com.epam.drill.integration.common.util.getJavaAddOpensOptions
 import com.epam.drill.integration.common.util.required
@@ -42,30 +45,13 @@ import kotlin.collections.joinToString
 val drillAgentFilesDir = File(System.getProperty("user.home"), ".drill/agents")
 private const val ARG_LINE = "argLine"
 
-abstract class AbstractAgentMojo : AbstractDrillMojo() {
-    @Parameter(property = "appId", required = true)
-    var appId: String? = null
-
-    @Parameter(property = "packagePrefixes", required = true)
-    var packagePrefixes: String? = null
-
-    @Parameter(property = "buildVersion", required = false)
-    var buildVersion: String? = null
-
-    @Parameter(property = "envId", required = false)
-    var envId: String? = null
-
-    @Parameter(property = "testTaskId", required = false)
-    var testTaskId: String? = null
+abstract class AbstractAgentMojo : AbstractAppDrillMojo() {
 
     @Parameter(property = "agent", required = true)
     var agent: AgentMavenConfiguration? = null
 
     @Parameter(property = "classScanning", required = false)
     var classScanning: ClassScanningConfiguration? = null
-
-    @Parameter(property = "baseline", required = true)
-    var baseline: BaselineConfiguration? = null
 
     @Parameter(property = "additionalParams", required = false)
     var additionalParams: Map<String, String>? = null
@@ -74,10 +60,19 @@ abstract class AbstractAgentMojo : AbstractDrillMojo() {
     protected val agentCache = AgentCacheImpl(drillAgentFilesDir)
     protected val agentInstaller = AgentInstallerImpl(agentCache)
     protected val gitClient = GitClientImpl()
+    protected val metricsClient by lazy {
+        // Maven injects @Parameter fields (e.g. apiUrl) after the Mojo is constructed,
+        // so this must be initialized lazily to read the values only once they are set.
+        MetricsClientImpl(
+            apiUrl = apiUrl.fromEnv("DRILL_API_URL").required("apiUrl"),
+            apiKey = apiKey.fromEnv("DRILL_API_KEY"),
+            timeoutMs = httpTimeoutMs,
+        )
+    }
     protected val argumentsBuilder = JarCommandLineBuilder()
     protected val commandExecutor = CommandExecutor(javaExecutable.absolutePath)
     protected val executableRunner = ExecutableRunner(agentInstaller, argumentsBuilder, commandExecutor)
-    protected val baselineFactory = BaselineFactory(gitClient)
+    protected val baselineFactory by lazy { BaselineFactory(gitClient, metricsClient) }
 
     abstract fun getAgentConfig(): AgentConfiguration
 

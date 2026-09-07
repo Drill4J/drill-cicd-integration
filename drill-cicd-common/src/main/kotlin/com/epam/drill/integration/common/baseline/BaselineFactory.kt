@@ -15,16 +15,20 @@
  */
 package com.epam.drill.integration.common.baseline
 
+import com.epam.drill.integration.common.client.MetricsClient
 import com.epam.drill.integration.common.git.GitClient
 
 class BaselineFactory(
-    private val gitClient: GitClient
+    private val gitClient: GitClient,
+    private val metricsClient: MetricsClient,
 ) {
     private val baselineFinders: (BaselineSearchStrategy) -> BaselineFinder<BaselineSearchCriteria> = { strategy ->
         @Suppress("UNCHECKED_CAST")
         when (strategy) {
-            BaselineSearchStrategy.SEARCH_BY_TAG -> BaselineFinderByTag(gitClient)
-            BaselineSearchStrategy.SEARCH_BY_MERGE_BASE -> BaselineFinderByMergeBase(gitClient)
+            BaselineSearchStrategy.SEARCH_BY_TAG -> BaselineFinderByTag(gitClient, metricsClient)
+            BaselineSearchStrategy.SEARCH_BY_MERGE_BASE -> BaselineFinderByMergeBase(gitClient, metricsClient)
+            BaselineSearchStrategy.SEARCH_BY_COMMIT -> BaselineFinderByCommit(metricsClient)
+            BaselineSearchStrategy.SEARCH_BY_BUILD_VERSION -> BaselineFinderByBuildVersion(metricsClient)
         } as BaselineFinder<BaselineSearchCriteria>
     }
 

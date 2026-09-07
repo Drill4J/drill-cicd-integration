@@ -23,11 +23,17 @@ import com.epam.drill.integration.common.agent.impl.JavaAgentCommandLineBuilder
 import com.epam.drill.integration.common.agent.impl.NativeAgentCommandLineBuilder
 import com.epam.drill.integration.common.baseline.BaselineFactory
 import com.epam.drill.integration.common.baseline.BaselineSearchStrategy
+import com.epam.drill.integration.common.baseline.BuildVersionCriteria
+import com.epam.drill.integration.common.baseline.CommitCriteria
 import com.epam.drill.integration.common.baseline.MergeBaseCriteria
 import com.epam.drill.integration.common.baseline.TagCriteria
+import com.epam.drill.integration.common.baseline.TagMatchBy
+import com.epam.drill.integration.common.client.impl.MetricsClientImpl
 import com.epam.drill.integration.common.git.GitClient
 import com.epam.drill.integration.common.git.impl.GitClientImpl
+import com.epam.drill.integration.common.service.TestRecommendationService
 import com.epam.drill.integration.common.util.asJavaVersion
+import com.epam.drill.integration.common.util.fromEnv
 import com.epam.drill.integration.common.util.getCurrentJavaVersion
 import com.epam.drill.integration.common.util.getJavaAddOpensOptions
 import com.epam.drill.integration.common.util.required
@@ -55,9 +61,16 @@ fun Task.modifyToRunDrillAgents(
         logger.debug("Task :${task.name} is not modified by Drill since coverage collection, class scanning and test tracing are disabled")
         return
     }
+    val apiUrl = config.apiUrl.fromEnv("DRILL_API_URL").required("apiUrl")
+    val apiKey = config.apiKey.fromEnv("DRILL_API_KEY")
 
     val gitClient = GitClientImpl()
-    val baselineFactory = BaselineFactory(gitClient)
+    val metricsClient = MetricsClientImpl(
+        apiUrl = apiUrl,
+        apiKey = apiKey,
+        timeoutMs = config.httpTimeoutMs
+    )
+    val baselineFactory = BaselineFactory(gitClient, metricsClient)
 
     logger.lifecycle("Task :${task.name} is modified by Drill")
 
@@ -195,14 +208,14 @@ internal fun AgentConfiguration.mapTestSpecificProperties(
 ) {
     this.testTaskId = pluginExtension.testTaskId ?: task.generateTestTaskId(project)
     this.testTracingEnabled = pluginExtension.testTracing.enabled ?: false
-    if (testTracingEnabled == true) {
+    if (testTracingEnabled) {
         this.testSessionId = pluginExtension.testTracing.testSessionId
         this.testTracingPerTestSessionEnabled = pluginExtension.testTracing.perTestSession
         this.testTracingPerTestLaunchEnabled = pluginExtension.testTracing.perTestLaunch
     }
 
     this.recommendedTestsEnabled = pluginExtension.recommendedTests.enabled ?: false
-    if (this.recommendedTestsEnabled == true) {
+    if (this.recommendedTestsEnabled) {
         this.recommendedTestsTargetAppId = pluginExtension.appId
         this.recommendedTestsTargetCommitSha = runCatching {
             gitClient.getCurrentCommitSha()
@@ -210,15 +223,38 @@ internal fun AgentConfiguration.mapTestSpecificProperties(
             task.logger.warn("Unable to retrieve the current commit SHA. The 'recommendedTestsTargetCommitSha' parameter will not be set. Error: ${it.message}")
         }.getOrNull()
         this.recommendedTestsTargetBuildVersion = pluginExtension.buildVersion
+        val recommendedTestsFile = File(project.buildDir, "drill/${TestRecommendationService.RECOMMENDED_TESTS_FILE_NAME}")
+        if (recommendedTestsFile.exists()) {
+            this.recommendedTestsFile = recommendedTestsFile
+        }
         pluginExtension.baseline.searchStrategy?.let { searchStrategy ->
             val baselineTagPattern = pluginExtension.baseline.tagPattern ?: "*"
             val baselineTargetRef = pluginExtension.baseline.targetRef
-            val searchCriteria = when (searchStrategy) {
-                BaselineSearchStrategy.SEARCH_BY_TAG -> TagCriteria(baselineTagPattern)
-                BaselineSearchStrategy.SEARCH_BY_MERGE_BASE -> MergeBaseCriteria(baselineTargetRef.required("baselineTargetRef"))
+                val searchCriteria = when (searchStrategy) {
+                    BaselineSearchStrategy.SEARCH_BY_TAG -> TagCriteria(
+                        tagPattern = baselineTagPattern,
+                        matchBy = pluginExtension.baseline.tagMatchBy
+                            ?.let { TagMatchBy.valueOf(it) }
+                            ?: TagMatchBy.COMMIT_SHA,
+                        tagPrefix = pluginExtension.baseline.tagPrefix ?: "",
+                    )
+                    BaselineSearchStrategy.SEARCH_BY_MERGE_BASE -> MergeBaseCriteria(baselineTargetRef.required("baselineTargetRef"))
+                    BaselineSearchStrategy.SEARCH_BY_COMMIT -> CommitCriteria(
+                        pluginExtension.baseline.commitSha.required("baseline.commitSha")
+                    )
+                    BaselineSearchStrategy.SEARCH_BY_BUILD_VERSION -> BuildVersionCriteria(
+                        pluginExtension.baseline.buildVersion.required("baseline.buildVersion")
+                    )
+                }
+            val baseline = runBlocking {
+                baselineFactory.produce(searchStrategy).findBaseline(
+                    pluginExtension.groupId ?: throw IllegalArgumentException("groupId is required for baseline search"),
+                    pluginExtension.appId ?: throw IllegalArgumentException("appId is required for baseline search"),
+                    searchCriteria
+                )
             }
-            this.recommendedTestsBaselineCommitSha =
-                baselineFactory.produce(searchStrategy).findBaseline(searchCriteria)
+            baseline.buildVersion?.let { this.recommendedTestsBaselineBuildVersion = it }
+            baseline.commitSha?.let { this.recommendedTestsBaselineCommitSha = it }
         }
     }
 }
