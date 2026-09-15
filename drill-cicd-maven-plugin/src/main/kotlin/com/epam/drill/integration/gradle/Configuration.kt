@@ -81,6 +81,7 @@ open class ClassLoaderScanningConfiguration(
 
 open class TestTracingConfiguration(
     var enabled: Boolean = false,
+    var testProjectId: String? = null,
     var testSessionId: String? = null,
     var perTestSession: Boolean = true,
     var perTestLaunch: Boolean = true,
