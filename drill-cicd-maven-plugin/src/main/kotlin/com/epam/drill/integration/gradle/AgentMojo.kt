@@ -86,6 +86,7 @@ internal fun AgentConfiguration.mapTestSpecificProperties(
     this.testTaskId = config.testTaskId ?: generateTestTaskId(project, session)
     this.testTracingEnabled = config.testTracing?.enabled ?: false
     if (testTracingEnabled) {
+        this.testProjectId = config.testTracing?.testProjectId
         this.testSessionId = config.testTracing?.testSessionId
         this.testTracingPerTestSessionEnabled = config.testTracing?.perTestSession ?: false
         this.testTracingPerTestLaunchEnabled = config.testTracing?.perTestLaunch ?: false

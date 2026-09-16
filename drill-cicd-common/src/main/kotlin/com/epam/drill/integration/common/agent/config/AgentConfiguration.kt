@@ -25,6 +25,7 @@ open class AgentConfiguration {
     var packagePrefixes: Array<String>? = null
     var buildVersion: String? = null
     var commitSha: String? = null
+    var testProjectId: String? = null
 
     var logLevel: String? = null
     var logFile: File? = null
@@ -111,6 +112,7 @@ open class AgentConfiguration {
                 testTracingPerTestLaunchEnabled?.let {
                     this[AgentConfiguration::testTracingPerTestLaunchEnabled.name] = it.toString().lowercase()
                 }
+                this[AgentConfiguration::testProjectId.name] = testProjectId
                 testSessionId?.let { this[AgentConfiguration::testSessionId.name] = it }
             }
         }

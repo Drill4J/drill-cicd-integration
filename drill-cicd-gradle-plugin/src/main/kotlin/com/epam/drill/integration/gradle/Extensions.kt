@@ -171,6 +171,7 @@ open class ClassLoaderScanningExtension(
 
 open class TestTracing(
     var enabled: Boolean? = null,
+    var testProjectId: String? = null,
     var testSessionId: String? = null,
     var perTestSession: Boolean? = null,
     var perTestLaunch: Boolean? = null,
