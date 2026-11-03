@@ -209,7 +209,7 @@ internal fun AgentConfiguration.mapTestSpecificProperties(
     this.testTaskId = pluginExtension.testTaskId ?: task.generateTestTaskId(project)
     this.testTracingEnabled = pluginExtension.testTracing.enabled ?: false
     if (testTracingEnabled) {
-        this.testProjectId = pluginExtension.testTracing.testProjectId
+        this.testProjectId = pluginExtension.testProjectId
         this.testSessionId = pluginExtension.testTracing.testSessionId
         this.testTracingPerTestSessionEnabled = pluginExtension.testTracing.perTestSession
         this.testTracingPerTestLaunchEnabled = pluginExtension.testTracing.perTestLaunch

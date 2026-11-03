@@ -21,6 +21,9 @@ abstract class AbstractAppDrillMojo: AbstractDrillMojo() {
     @Parameter(property = "appId", required = false)
     var appId: String? = null
 
+    @Parameter(property = "testProjectId", required = false)
+    var testProjectId: String? = null
+
     @Parameter(property = "packagePrefixes", required = false)
     var packagePrefixes: String? = null
 

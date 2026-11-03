@@ -34,7 +34,7 @@ class AppArchiveScannerMojo : AbstractAgentMojo() {
         val config = this@AppArchiveScannerMojo
         mapGeneralAgentProperties(config)
         mapBuildSpecificProperties(config, log, gitClient)
-        mapClassScanningProperties(config, project, mojoExecution.lifecyclePhase, log, archiveFile, true)
+        mapClassScanningProperties(config, project, log, true)
         this.messageSendingMode = "DIRECT"
         if (this.scanClassPath?.isEmpty() ?: true) {
             throw IllegalStateException("No classes or archives to scan for Drill4J Agent.")
@@ -59,15 +59,4 @@ class AppArchiveScannerMojo : AbstractAgentMojo() {
             }
         }
     }
-
-    private val archiveFile: File?
-        get() {
-            val archiveFile = project.artifact.file ?: File(project.build.directory, project.build.finalName + "." + project.packaging)
-            if (!archiveFile.exists()) {
-                log.error("The archive file '${archiveFile.absolutePath}' does not exist. " +
-                        "Please ensure the project is built before running Drill4J Class Scanner.")
-                return null
-            }
-            return archiveFile
-        }
 }

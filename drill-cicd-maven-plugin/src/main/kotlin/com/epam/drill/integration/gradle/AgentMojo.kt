@@ -52,7 +52,7 @@ class AgentMojo : AbstractAgentMojo() {
         val config = this@AgentMojo
         mapGeneralAgentProperties(config)
         mapBuildSpecificProperties(config, log, gitClient)
-        mapClassScanningProperties(config, project, mojoExecution.lifecyclePhase, log, null, false)
+        mapClassScanningProperties(config, project, log, false)
         mapCoverageProperties(config)
         mapTestSpecificProperties(config, project, session, log, gitClient, baselineFactory)
     }
@@ -86,7 +86,7 @@ internal fun AgentConfiguration.mapTestSpecificProperties(
     this.testTaskId = config.testTaskId ?: generateTestTaskId(project, session)
     this.testTracingEnabled = config.testTracing?.enabled ?: false
     if (testTracingEnabled) {
-        this.testProjectId = config.testTracing?.testProjectId
+        this.testProjectId = config.testProjectId
         this.testSessionId = config.testTracing?.testSessionId
         this.testTracingPerTestSessionEnabled = config.testTracing?.perTestSession ?: false
         this.testTracingPerTestLaunchEnabled = config.testTracing?.perTestLaunch ?: false
