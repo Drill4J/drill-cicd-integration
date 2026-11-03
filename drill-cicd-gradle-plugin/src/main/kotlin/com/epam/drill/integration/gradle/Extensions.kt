@@ -26,6 +26,7 @@ open class DrillPluginExtension(
     var apiKey: String? = null,
     var groupId: String? = null,
     var appId: String? = null,
+    var testProjectId: String? = null,
     var buildVersion: String? = null,
     var branch: String? = null,
     var packagePrefixes: Array<String>? = null,
@@ -171,7 +172,6 @@ open class ClassLoaderScanningExtension(
 
 open class TestTracing(
     var enabled: Boolean? = null,
-    var testProjectId: String? = null,
     var testSessionId: String? = null,
     var perTestSession: Boolean? = null,
     var perTestLaunch: Boolean? = null,

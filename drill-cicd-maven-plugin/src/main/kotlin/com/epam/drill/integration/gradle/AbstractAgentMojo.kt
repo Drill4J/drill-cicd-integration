@@ -145,9 +145,7 @@ internal fun AgentConfiguration.mapBuildSpecificProperties(
 internal fun AgentConfiguration.mapClassScanningProperties(
     config: AbstractAgentMojo,
     project: MavenProject,
-    lifecyclePhase: String,
     log: Log,
-    archiveFile: File?,
     isScanArchiveGoal: Boolean
 ) {
     if (isScanArchiveGoal) {
@@ -164,27 +162,21 @@ internal fun AgentConfiguration.mapClassScanningProperties(
     }
     val appClasses =
         config.classScanning?.appClasses?.takeIf { it.isNotEmpty() }
-            ?: if (isScanArchiveGoal && archiveFile != null) {
-                archiveFile.absolutePath.let { listOf(it) }
-            } else
+            ?: if (isScanArchiveGoal)
+                listOf(File(project.build.directory, "${project.build.finalName}.${project.packaging}").absolutePath)
+            else
                 listOf(project.build.outputDirectory)
     val testClasses =
         config.classScanning?.testClasses?.takeIf { it.isNotEmpty() }
             ?: listOf(project.build.testOutputDirectory)
     if (isScanArchiveGoal) {
-        when (lifecyclePhase) {
-            "package",
-            "test-compile" -> log.info(
-                "Using the compiled classes from ${appClasses.joinToString(", ")} " +
-                        "and ${testClasses.joinToString(", ")} for class scanning."
-            )
-
-            else -> log.warn(
-                "Unexpected lifecycle phase '$lifecyclePhase' for class scanning. " +
-                        "Defaulting to using compiled classes from ${appClasses.joinToString(", ")} " +
-                        "and ${testClasses.joinToString(", ")} for class scanning."
+        appClasses.map(::File).filterNot { it.exists() }.forEach {
+            log.warn(
+                "The path '${it.absolutePath}' does not exist. " +
+                        "Please ensure the project is built or configure 'classScanning.appClasses'."
             )
         }
+        log.info("Using ${appClasses.joinToString(", ")} for class scanning.")
     }
 
     this.scanClassPath = (appClasses + testClasses.map { "!$it" }).joinToString(separator = ";")
